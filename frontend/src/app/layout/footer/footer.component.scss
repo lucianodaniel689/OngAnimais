@@ -1,0 +1,28 @@
+.rodape {
+  margin-top: var(--esp-8);
+  background-color: var(--cor-superficie-alt);
+  border-top: 1px solid var(--cor-borda);
+}
+
+.rodape__interno {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+  align-items: center;
+  text-align: center;
+  padding-block: var(--esp-5);
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}
+
+.rodape__nota {
+  font-size: var(--texto-xs);
+}
+
+@media (min-width: 768px) {
+  .rodape__interno {
+    flex-direction: row;
+    justify-content: space-between;
+    text-align: left;
+  }
+}

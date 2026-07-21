@@ -1,0 +1,96 @@
+.animal-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  // `.etiqueta` cuida da animação de hover, mas não do cursor — ela também é usada em
+  // cards não-clicáveis (ex.: "Formas de ajudar" na home), então o pointer fica aqui,
+  // específico do card que realmente é um botão (`role="button"` no template).
+  cursor: pointer;
+}
+
+.animal-card__midia {
+  position: relative;
+}
+
+.animal-card__midia img {
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  width: 100%;
+}
+
+.animal-card__status {
+  position: absolute;
+  top: var(--esp-2);
+  left: var(--esp-2);
+}
+
+.animal-card__conteudo {
+  flex: 1 0 auto;
+  padding-top: var(--esp-3);
+}
+
+.animal-card__cabecalho {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--esp-2);
+}
+
+.animal-card__nome {
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-semibold);
+}
+
+// Único ponto do card que usa a fonte mono — reforça o motivo de "carimbo"
+// sem aplicar em texto corrido (ver seção "Sistema de design" no CLAUDE.md).
+.animal-card__idade {
+  flex-shrink: 0;
+  font-family: var(--fonte-mono);
+  font-size: var(--texto-xs);
+  padding: 2px var(--esp-2);
+  border-radius: var(--raio-full);
+  background-color: var(--cor-primaria-clara);
+  color: var(--cor-primaria-escura);
+  white-space: nowrap;
+}
+
+.animal-card__meta {
+  margin: var(--esp-1) 0 0;
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}
+
+.animal-card__descricao {
+  margin: var(--esp-2) 0 0;
+  font-size: var(--texto-sm);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// Só um indicativo visual de que o card é clicável — não é um elemento
+// interativo próprio (o `mat-card` inteiro já é o botão/link).
+.animal-card__acao {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-1);
+  color: var(--cor-primaria-escura);
+  font-weight: var(--peso-medio);
+  font-size: var(--texto-sm);
+}
+
+.animal-card__acao mat-icon {
+  font-size: 1.1rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  transition: transform var(--transicao-rapida);
+}
+
+.animal-card:hover .animal-card__acao mat-icon {
+  transform: translateX(3px);
+}

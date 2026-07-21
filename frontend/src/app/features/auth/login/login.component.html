@@ -1,0 +1,75 @@
+<div class="login">
+  <mat-card class="login__card" appearance="outlined">
+    <div class="login__marca">
+      <span class="login__logo" aria-hidden="true">🐾</span>
+      <h1>Entrar</h1>
+      <p>Acesse a área administrativa do OngAnimais.</p>
+    </div>
+
+    @if (erro(); as msg) {
+      <p class="login__erro" role="alert">{{ msg }}</p>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="enviar()" class="login__form">
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input
+          matInput
+          type="email"
+          formControlName="email"
+          autocomplete="username"
+          placeholder="voce@exemplo.com"
+        />
+        <mat-icon matSuffix>mail</mat-icon>
+        @if (form.controls.email.hasError('required')) {
+          <mat-error>Informe o email.</mat-error>
+        } @else if (form.controls.email.hasError('email')) {
+          <mat-error>Email inválido.</mat-error>
+        } @else if (form.controls.email.hasError('maxlength')) {
+          <mat-error>Máximo de 255 caracteres.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Senha</mat-label>
+        <input
+          matInput
+          [type]="esconderSenha() ? 'password' : 'text'"
+          formControlName="senha"
+          autocomplete="current-password"
+        />
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          (click)="alternarSenha()"
+          [attr.aria-label]="esconderSenha() ? 'Mostrar senha' : 'Ocultar senha'"
+          [attr.aria-pressed]="!esconderSenha()"
+        >
+          <mat-icon>{{ esconderSenha() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        @if (form.controls.senha.hasError('required')) {
+          <mat-error>Informe a senha.</mat-error>
+        } @else if (form.controls.senha.hasError('minlength')) {
+          <mat-error>Mínimo de 6 caracteres.</mat-error>
+        } @else if (form.controls.senha.hasError('maxlength')) {
+          <mat-error>Máximo de 100 caracteres.</mat-error>
+        }
+      </mat-form-field>
+
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        class="login__enviar"
+        [disabled]="carregando()"
+      >
+        @if (carregando()) {
+          <mat-progress-spinner mode="indeterminate" diameter="20" />
+        } @else {
+          Entrar
+        }
+      </button>
+    </form>
+  </mat-card>
+</div>

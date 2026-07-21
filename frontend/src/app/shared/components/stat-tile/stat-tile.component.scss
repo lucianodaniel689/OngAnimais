@@ -1,0 +1,56 @@
+.stat-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--esp-2);
+  padding: var(--esp-4);
+}
+
+.stat-tile__icone {
+  flex-shrink: 0;
+  font-size: 2rem;
+  width: 2rem;
+  height: 2rem;
+}
+
+.stat-tile__conteudo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--esp-1);
+  min-width: 0;
+}
+
+.stat-tile__titulo {
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}
+
+.stat-tile__valor {
+  font-size: var(--texto-3xl);
+  font-weight: var(--peso-bold);
+  line-height: 1;
+  color: var(--cor-texto);
+  // Números grandes usam algarismos proporcionais (padrão da fonte) — tabular-nums
+  // é só para colunas de tabela, não para um valor de destaque isolado.
+}
+
+.stat-tile mat-progress-spinner {
+  margin-top: var(--esp-1);
+}
+
+// Variantes de cor do ícone (mesmos tokens de status usados nos badges).
+// A classe "stat-tile--{cor}" vai no host (ver `host: { '[class]': ... }` no componente).
+:host(.stat-tile--primaria) .stat-tile__icone {
+  color: var(--cor-primaria);
+}
+:host(.stat-tile--secundaria) .stat-tile__icone {
+  color: var(--cor-secundaria);
+}
+:host(.stat-tile--alerta) .stat-tile__icone {
+  color: var(--cor-alerta);
+}
+:host(.stat-tile--info) .stat-tile__icone {
+  color: var(--cor-info);
+}

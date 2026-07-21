@@ -1,0 +1,83 @@
+<header class="dash__cabecalho">
+  <h1>Olá{{ usuario() ? ', ' + usuario()!.nome : '' }}! 👋</h1>
+  <p>Resumo do painel do OngAnimais.</p>
+</header>
+
+<section class="dash__kpis">
+  <app-stat-tile
+    titulo="Animais disponíveis"
+    [valor]="animaisDisponiveis()"
+    icone="pets"
+    cor="secundaria"
+    rota="/admin/animais"
+    [queryParams]="filtroAnimaisDisponiveis"
+  />
+  <app-stat-tile
+    titulo="Adoções pendentes"
+    [valor]="adocoesPendentesTotal()"
+    icone="volunteer_activism"
+    cor="alerta"
+    rota="/admin/adocoes"
+    [queryParams]="filtroAdocoesPendentes"
+  />
+  <app-stat-tile
+    titulo="Doses de vacina atrasadas"
+    [valor]="vacinasAtrasadas()"
+    icone="event_busy"
+    cor="alerta"
+    rota="/admin/vacinas"
+    [queryParams]="filtroVacinasAtrasadas"
+  />
+  <app-stat-tile
+    titulo="Doses nos próximos 30 dias"
+    [valor]="vacinasProximas()"
+    icone="vaccines"
+    cor="info"
+    rota="/admin/vacinas"
+    [queryParams]="filtroVacinasProximas"
+  />
+  @if (ehAdmin()) {
+    <app-stat-tile
+      titulo="Funcionários ativos"
+      [valor]="funcionariosAtivos()"
+      icone="badge"
+      cor="primaria"
+      rota="/admin/usuarios"
+      [queryParams]="filtroFuncionariosAtivos"
+    />
+  }
+</section>
+
+<mat-card appearance="outlined" class="dash__pendentes">
+  <div class="dash__pendentes-cabecalho">
+    <h2>Solicitações de adoção pendentes</h2>
+    <a mat-stroked-button color="primary" routerLink="/admin/adocoes">
+      Ver todas
+      <mat-icon>arrow_forward</mat-icon>
+    </a>
+  </div>
+
+  @if (carregandoPendentes()) {
+    <app-loading [tamanho]="32" />
+  } @else if (adocoesPendentesPreview().length === 0) {
+    <p class="dash__pendentes-vazio">Nenhuma solicitação pendente no momento. 🎉</p>
+  } @else {
+    <ul class="dash__pendentes-lista">
+      @for (a of adocoesPendentesPreview(); track a.id) {
+        <li class="dash__pendentes-item">
+          <mat-icon class="dash__pendentes-icone">pets</mat-icon>
+          <div class="dash__pendentes-info">
+            <a
+              class="dash__pendentes-link"
+              [routerLink]="['/admin/animais', a.animalId]"
+              [queryParams]="{ aba: 'candidaturas' }"
+            >
+              <strong>{{ a.nomeAnimal }}</strong>
+            </a>
+            <span>{{ a.nomeAdotante }} · {{ a.dataSolicitacao | date: 'dd/MM/yyyy' }}</span>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</mat-card>

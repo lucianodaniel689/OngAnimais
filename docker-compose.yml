@@ -1,0 +1,60 @@
+# =============================================================
+# Docker Compose — Backend OngAnimais (API + PostgreSQL)
+# Uso:
+#   docker compose up --build
+# A API sobe em http://localhost:8080 (Swagger em /swagger).
+# =============================================================
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: onganimais-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-onganimais_dev}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      # Persiste os dados entre execuções.
+      - onganimais_pgdata:/var/lib/postgresql/data
+      # Cria as tabelas na PRIMEIRA inicialização do banco (ordem das FKs).
+      # São os scripts de DDL individuais (sem meta-comandos do psql).
+      - ./OngAnimais/Scripts/001_criar_tabela_usuarios.sql:/docker-entrypoint-initdb.d/001_criar_tabela_usuarios.sql:ro
+      - ./OngAnimais/Scripts/002_criar_tabela_animais.sql:/docker-entrypoint-initdb.d/002_criar_tabela_animais.sql:ro
+      - ./OngAnimais/Scripts/003_criar_tabela_adotantes.sql:/docker-entrypoint-initdb.d/003_criar_tabela_adotantes.sql:ro
+      - ./OngAnimais/Scripts/004_criar_tabela_adocoes.sql:/docker-entrypoint-initdb.d/004_criar_tabela_adocoes.sql:ro
+      - ./OngAnimais/Scripts/005_criar_tabela_vacinas.sql:/docker-entrypoint-initdb.d/005_criar_tabela_vacinas.sql:ro
+      - ./OngAnimais/Scripts/006_criar_tabela_fotos.sql:/docker-entrypoint-initdb.d/006_criar_tabela_fotos.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-onganimais_dev}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ./OngAnimais
+      dockerfile: Dockerfile
+    container_name: onganimais-api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Development habilita Swagger + seed (junto com a flag SeedDatabase).
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
+      ASPNETCORE_URLS: http://+:8080
+      # Aponta a connection string para o serviço 'db' (sobrescreve o appsettings).
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=${POSTGRES_DB:-onganimais_dev};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}"
+      SeedDatabase: "true"
+    ports:
+      - "${API_PORT:-8080}:8080"
+    volumes:
+      # Persiste as fotos enviadas por upload entre rebuilds do container.
+      - onganimais_uploads:/app/wwwroot/uploads
+    restart: unless-stopped
+
+volumes:
+  onganimais_pgdata:
+  onganimais_uploads:

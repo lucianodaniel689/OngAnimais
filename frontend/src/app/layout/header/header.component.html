@@ -1,0 +1,82 @@
+<mat-toolbar class="cabecalho">
+  <div class="container cabecalho__interno">
+    <a routerLink="/" class="cabecalho__marca">
+      <span class="cabecalho__logo" aria-hidden="true">🐾</span>
+      <span class="cabecalho__nome">OngAnimais</span>
+    </a>
+
+    <!-- Desktop: links inline -->
+    <nav class="cabecalho__nav">
+      <a
+        mat-button
+        routerLink="/"
+        routerLinkActive="ativo"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        Início
+      </a>
+      <a mat-button routerLink="/quiz" routerLinkActive="ativo">Encontre seu match</a>
+      <a mat-button routerLink="/styleguide" routerLinkActive="ativo">Styleguide</a>
+
+      @if (usuario(); as u) {
+        <a mat-button routerLink="/admin" routerLinkActive="ativo">Painel</a>
+        <button mat-button [matMenuTriggerFor]="userMenu" class="cabecalho__usuario">
+          <mat-icon>account_circle</mat-icon>
+          {{ u.nome }}
+        </button>
+        <mat-menu #userMenu="matMenu">
+          <a mat-menu-item routerLink="/admin/perfil" routerLinkActive="ativo">
+            <mat-icon>person</mat-icon>
+            Meu perfil
+          </a>
+          <button mat-menu-item (click)="sair()">
+            <mat-icon>logout</mat-icon>
+            Sair
+          </button>
+        </mat-menu>
+      } @else {
+        <a mat-flat-button color="primary" routerLink="/login">Entrar</a>
+      }
+    </nav>
+
+    <!-- Mobile: menu -->
+    <button
+      mat-icon-button
+      class="cabecalho__menu-botao"
+      [matMenuTriggerFor]="menu"
+      aria-label="Abrir menu"
+    >
+      <mat-icon>menu</mat-icon>
+    </button>
+    <mat-menu #menu="matMenu">
+      <a mat-menu-item routerLink="/" routerLinkActive="ativo" [routerLinkActiveOptions]="{ exact: true }">
+        Início
+      </a>
+      <a mat-menu-item routerLink="/quiz" routerLinkActive="ativo">
+        <mat-icon>favorite</mat-icon>
+        Encontre seu match
+      </a>
+      <a mat-menu-item routerLink="/styleguide" routerLinkActive="ativo">Styleguide</a>
+      @if (usuario(); as u) {
+        <a mat-menu-item routerLink="/admin" routerLinkActive="ativo">
+          <mat-icon>dashboard</mat-icon>
+          Painel
+        </a>
+        <div class="cabecalho__usuario-info">{{ u.nome }}</div>
+        <a mat-menu-item routerLink="/admin/perfil" routerLinkActive="ativo">
+          <mat-icon>person</mat-icon>
+          Meu perfil
+        </a>
+        <button mat-menu-item (click)="sair()">
+          <mat-icon>logout</mat-icon>
+          Sair
+        </button>
+      } @else {
+        <a mat-menu-item routerLink="/login">
+          <mat-icon>login</mat-icon>
+          Entrar
+        </a>
+      }
+    </mat-menu>
+  </div>
+</mat-toolbar>

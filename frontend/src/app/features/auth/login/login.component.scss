@@ -1,0 +1,68 @@
+.login {
+  display: flex;
+  justify-content: center;
+  padding: var(--esp-5) var(--esp-4) var(--esp-7);
+}
+
+.login__card {
+  width: 100%;
+  max-width: 420px;
+  padding: var(--esp-5);
+}
+
+.login__marca {
+  text-align: center;
+  margin-bottom: var(--esp-4);
+}
+
+.login__logo {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.login__marca h1 {
+  margin: var(--esp-2) 0 var(--esp-1);
+}
+
+.login__marca p {
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+}
+
+.login__erro {
+  margin: 0 0 var(--esp-3);
+  padding: var(--esp-2) var(--esp-3);
+  border-radius: var(--raio-sm);
+  background-color: var(--cor-perigo-bg);
+  color: var(--cor-perigo);
+  font-size: var(--texto-sm);
+}
+
+.login__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.login__form mat-form-field {
+  width: 100%;
+}
+
+.login__enviar {
+  height: 44px;
+  margin-top: var(--esp-2);
+}
+
+// Centraliza o spinner dentro do botão e usa a cor do texto (branco) para
+// aparecer sobre o fundo primário.
+.login__enviar mat-progress-spinner {
+  margin-inline: auto;
+  --mdc-circular-progress-active-indicator-color: currentColor;
+}
+
+.login__rodape {
+  margin: var(--esp-4) 0 0;
+  text-align: center;
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}

@@ -1,0 +1,44 @@
+<mat-card
+  class="animal-card etiqueta"
+  appearance="outlined"
+  role="button"
+  tabindex="0"
+  [attr.aria-label]="'Ver detalhes de ' + animal().nome"
+  (click)="abrirModal()"
+  (keydown.enter)="abrirModal()"
+  (keydown.space)="$event.preventDefault(); abrirModal()"
+>
+  <div class="animal-card__midia">
+    <img
+      mat-card-image
+      [src]="imagem()"
+      [alt]="'Foto de ' + animal().nome"
+      loading="lazy"
+    />
+    @if (animal().status; as status) {
+      <div class="animal-card__status">
+        <app-status-animal-badge [status]="status" />
+      </div>
+    }
+  </div>
+
+  <hr class="etiqueta__separador" />
+
+  <mat-card-content class="animal-card__conteudo">
+    <div class="animal-card__cabecalho">
+      <h3 class="animal-card__nome">{{ animal().nome }}</h3>
+      @if (animal().idadeAproximada; as idade) {
+        <span class="animal-card__idade">{{ idade }}</span>
+      }
+    </div>
+    <p class="animal-card__meta">{{ especieRotulo() }} · {{ animal().porte }}</p>
+    @if (animal().descricao) {
+      <p class="animal-card__descricao">{{ animal().descricao }}</p>
+    }
+  </mat-card-content>
+
+  <mat-card-actions class="animal-card__acao">
+    <span>Ver detalhes</span>
+    <mat-icon aria-hidden="true">arrow_forward</mat-icon>
+  </mat-card-actions>
+</mat-card>

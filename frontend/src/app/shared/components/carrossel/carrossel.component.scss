@@ -1,0 +1,93 @@
+:host {
+  display: block;
+}
+
+.carrossel {
+  position: relative;
+}
+
+.carrossel__janela {
+  overflow: hidden;
+  border-radius: var(--raio-lg);
+  touch-action: pan-y; // permite scroll vertical da página, swipe horizontal aqui
+}
+
+.carrossel__trilha {
+  display: flex;
+  transition: transform var(--transicao-media);
+  will-change: transform;
+}
+
+.carrossel__slide {
+  flex: 0 0 100%;
+  min-width: 0;
+}
+
+// --- Setas ------------------------------------------------------------------
+.carrossel__seta {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--cor-texto);
+  background-color: rgba(255, 255, 255, 0.85);
+  border-radius: var(--raio-full);
+  box-shadow: var(--sombra-md);
+  transition: background-color var(--transicao-rapida);
+}
+
+.carrossel__seta:hover {
+  background-color: #ffffff;
+}
+
+.carrossel__seta--anterior {
+  left: var(--esp-2);
+}
+.carrossel__seta--proximo {
+  right: var(--esp-2);
+}
+
+// --- Indicadores ------------------------------------------------------------
+.carrossel__indicadores {
+  display: flex;
+  justify-content: center;
+  gap: var(--esp-2);
+  margin-top: var(--esp-3);
+}
+
+.carrossel__ponto {
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  border-radius: var(--raio-full);
+  background-color: var(--cor-borda);
+  transition:
+    background-color var(--transicao-rapida),
+    width var(--transicao-rapida);
+}
+
+.carrossel__ponto--ativo {
+  width: 24px;
+  background-color: var(--cor-primaria);
+}
+
+// Em telas maiores as setas ficam um pouco maiores e mais afastadas.
+@media (min-width: 768px) {
+  .carrossel__seta {
+    width: 44px;
+    height: 44px;
+    font-size: 2rem;
+  }
+  .carrossel__seta--anterior {
+    left: var(--esp-4);
+  }
+  .carrossel__seta--proximo {
+    right: var(--esp-4);
+  }
+}

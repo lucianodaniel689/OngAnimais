@@ -1,0 +1,60 @@
+# =============================================================
+# .gitignore — raiz do repositório (backend .NET + solução)
+# O frontend Angular tem o próprio .gitignore em frontend/.
+# =============================================================
+
+# --- Build do .NET ---
+bin/
+obj/
+publish/
+*.dll.config
+
+# --- Visual Studio / IDEs ---
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.Backup.tmp
+*.vspscc
+.idea/
+*.swp
+
+# --- Documentos internos (não publicar no repositório) ---
+SEGURANCA.md
+docs/
+
+# --- Segredos e configuração local (NUNCA commitar) ---
+# Os appsettings.json versionados devem conter apenas valores de exemplo/dev.
+# Segredos reais: dotnet user-secrets (dev) ou variáveis de ambiente (prod).
+.env
+.env.*
+!.env.example
+appsettings.Production.json
+appsettings.Staging.json
+appsettings.Development.json
+appsettings.*.Local.json
+secrets.json
+*.pfx
+*.pem
+*.key
+
+# --- Conteúdo enviado por usuários (uploads de fotos) ---
+OngAnimais/wwwroot/uploads/
+
+# --- Logs e temporários ---
+*.log
+logs/
+[Tt]emp/
+
+# --- Cobertura/testes (futuro) ---
+TestResults/
+coverage/
+*.coverage
+
+# --- Claude Code (configuração local, por desenvolvedor) ---
+**/.claude/settings.local.json
+
+# --- Sistema operacional ---
+Thumbs.db
+.DS_Store

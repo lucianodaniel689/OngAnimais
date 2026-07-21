@@ -1,0 +1,103 @@
+<div class="perfil">
+  <header class="perfil__cabecalho">
+    <h1>Meu perfil</h1>
+    <p>Atualize seus dados pessoais ou troque sua senha.</p>
+  </header>
+
+  <mat-card appearance="outlined" class="perfil__card">
+    <h2>Dados pessoais</h2>
+
+    @if (carregandoDados()) {
+      <app-loading [tamanho]="36" />
+    } @else {
+      @if (erroDados(); as msg) {
+        <p class="perfil__erro" role="alert">{{ msg }}</p>
+      }
+
+      <form [formGroup]="formDados" (ngSubmit)="salvarDados()" class="perfil__form">
+        <mat-form-field appearance="outline">
+          <mat-label>Nome</mat-label>
+          <input matInput formControlName="nome" maxlength="150" />
+          @if (formDados.controls.nome.hasError('required')) {
+            <mat-error>Informe o nome.</mat-error>
+          } @else if (formDados.controls.nome.hasError('maxlength')) {
+            <mat-error>Máximo de 150 caracteres.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" maxlength="255" />
+          @if (formDados.controls.email.hasError('required')) {
+            <mat-error>Informe o email.</mat-error>
+          } @else if (formDados.controls.email.hasError('email')) {
+            <mat-error>Email inválido.</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="perfil__acoes">
+          <button mat-flat-button color="primary" type="submit" [disabled]="salvandoDados()">
+            @if (salvandoDados()) {
+              <mat-progress-spinner mode="indeterminate" diameter="20" />
+            } @else {
+              Salvar dados
+            }
+          </button>
+        </div>
+      </form>
+    }
+  </mat-card>
+
+  <mat-card appearance="outlined" class="perfil__card">
+    <h2>Alterar senha</h2>
+
+    @if (erroSenha(); as msg) {
+      <p class="perfil__erro" role="alert">{{ msg }}</p>
+    }
+
+    <form
+      [formGroup]="formSenha"
+      #formSenhaDirective="ngForm"
+      (ngSubmit)="alterarSenha()"
+      class="perfil__form"
+    >
+      <mat-form-field appearance="outline">
+        <mat-label>Senha atual</mat-label>
+        <input matInput type="password" formControlName="senhaAtual" />
+        @if (formSenha.controls.senhaAtual.hasError('required')) {
+          <mat-error>Informe a senha atual.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Nova senha</mat-label>
+        <input matInput type="password" formControlName="novaSenha" />
+        @if (formSenha.controls.novaSenha.hasError('required')) {
+          <mat-error>Informe a nova senha.</mat-error>
+        } @else if (formSenha.controls.novaSenha.hasError('minlength')) {
+          <mat-error>Mínimo de 6 caracteres.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Confirmar nova senha</mat-label>
+        <input matInput type="password" formControlName="confirmarSenha" />
+        @if (formSenha.controls.confirmarSenha.hasError('required')) {
+          <mat-error>Confirme a nova senha.</mat-error>
+        } @else if (formSenha.hasError('senhasDiferentes') && formSenha.controls.confirmarSenha.touched) {
+          <mat-error>As senhas não coincidem.</mat-error>
+        }
+      </mat-form-field>
+
+      <div class="perfil__acoes">
+        <button mat-flat-button color="primary" type="submit" [disabled]="alterandoSenha()">
+          @if (alterandoSenha()) {
+            <mat-progress-spinner mode="indeterminate" diameter="20" />
+          } @else {
+            Alterar senha
+          }
+        </button>
+      </div>
+    </form>
+  </mat-card>
+</div>

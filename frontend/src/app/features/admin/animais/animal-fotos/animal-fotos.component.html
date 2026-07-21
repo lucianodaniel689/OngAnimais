@@ -1,0 +1,59 @@
+<section class="animal-fotos">
+  <h2 class="animal-fotos__titulo">Fotos</h2>
+
+  <app-upload-imagens
+    [multiplo]="true"
+    (arquivosSelecionados)="aoSelecionarArquivos($event)"
+    (arquivosRejeitados)="aoRejeitarArquivos($event)"
+  />
+
+  @if (progresso(); as p) {
+    <p class="animal-fotos__progresso">
+      <mat-progress-spinner mode="indeterminate" diameter="20" />
+      Enviando {{ p.atual }} de {{ p.total }}...
+    </p>
+  }
+
+  @if (carregando()) {
+    <app-loading [tamanho]="36" />
+  } @else if (fotos().length === 0) {
+    <p class="animal-fotos__vazio">Nenhuma foto cadastrada ainda.</p>
+  } @else {
+    <div class="animal-fotos__grade">
+      @for (foto of fotos(); track foto.id) {
+        <div class="animal-fotos__item">
+          <img class="animal-fotos__imagem" [src]="urlFoto(foto.url)" [alt]="foto.descricao || 'Foto do animal'" />
+
+          @if (foto.principal) {
+            <mat-chip-set class="animal-fotos__chip">
+              <mat-chip color="primary" highlighted>Principal</mat-chip>
+            </mat-chip-set>
+          }
+
+          <div class="animal-fotos__acoes">
+            @if (!foto.principal) {
+              <button
+                mat-icon-button
+                type="button"
+                aria-label="Tornar principal"
+                matTooltip="Tornar principal"
+                (click)="tornarPrincipal(foto)"
+              >
+                <mat-icon>star_outline</mat-icon>
+              </button>
+            }
+            <button
+              mat-icon-button
+              type="button"
+              aria-label="Excluir foto"
+              matTooltip="Excluir"
+              (click)="confirmarExclusao(foto)"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</section>

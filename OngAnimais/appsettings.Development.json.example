@@ -1,0 +1,18 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "SeedDatabase": true,
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Port=5432;Database=onganimais_dev;Username=postgres;Password=SuaSenhaLocalAqui"
+  },
+  "JwtSettings": {
+    "SecretKey": "SuaChaveSecretaDeDesenvolvimentoAquiMinimoDe32Caracteres!",
+    "Issuer": "OngAnimais",
+    "Audience": "OngAnimaisApp",
+    "ExpirationInMinutes": 120
+  }
+}

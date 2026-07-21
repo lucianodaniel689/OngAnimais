@@ -1,0 +1,59 @@
+.cabecalho {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding: 0;
+  background-color: var(--cor-superficie);
+  border-bottom: 1px solid var(--cor-borda);
+  box-shadow: var(--sombra-sm);
+}
+
+.cabecalho__interno {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: var(--esp-4);
+}
+
+.cabecalho__marca {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-2);
+  font-weight: var(--peso-bold);
+  font-size: var(--texto-lg);
+  color: var(--cor-texto);
+  text-decoration: none;
+}
+
+.cabecalho__logo {
+  font-size: 1.5rem;
+}
+
+.cabecalho__nav {
+  display: none;
+  gap: var(--esp-1);
+}
+
+.cabecalho__nav .ativo {
+  color: var(--cor-primaria-escura);
+  font-weight: var(--peso-semibold);
+}
+
+// Rótulo não-clicável com o nome do usuário no menu mobile.
+.cabecalho__usuario-info {
+  padding: var(--esp-2) var(--esp-4);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-semibold);
+  color: var(--cor-texto-suave);
+}
+
+// --- Desktop ----------------------------------------------------------------
+@media (min-width: 768px) {
+  .cabecalho__menu-botao {
+    display: none;
+  }
+  .cabecalho__nav {
+    display: inline-flex;
+  }
+}

@@ -1,0 +1,100 @@
+// =============================================================================
+// Design Tokens — OngAnimais
+// Fonte única de verdade para cores, tipografia, espaçamento, raios e sombras.
+// Expostos como CSS Custom Properties para uso em qualquer componente.
+// Abordagem mobile-first: os valores base servem ao mobile; ajustes maiores
+// ficam dentro de media queries `min-width`.
+// =============================================================================
+
+:root {
+  // --- Cores de marca ---------------------------------------------------------
+  // Paleta "etiqueta de canil": tons de papel kraft, carimbo e barbante — ver
+  // seção "Sistema de design" no CLAUDE.md do frontend para o racional completo.
+  --cor-primaria: #e2a33b;        // mostarda-selo (carimbo/selo, não laranja de app)
+  --cor-primaria-escura: #b97d1f;
+  --cor-primaria-clara: #f7e4c1;
+  --cor-secundaria: #c1425a;      // framboesa-carimbo (usar com moderação: CTA/"adotado")
+  --cor-secundaria-escura: #8f2c41;
+  --cor-secundaria-clara: #f3d8dd;
+
+  // --- Neutros ----------------------------------------------------------------
+  --cor-fundo: #faf1e4;           // marfim-kraft
+  --cor-superficie: #fffcf6;      // papel
+  --cor-superficie-alt: #f3e7d3;  // kraft mais escuro (seções alternadas)
+  --cor-borda: #d6c4a0;           // barbante
+  --cor-texto: #2a2018;           // tinta-carvão
+  --cor-texto-suave: #7a6a57;
+  --cor-texto-inverso: #fffcf6;
+
+  // --- Estados (status) -------------------------------------------------------
+  --cor-sucesso: #5b7a4f;         // musgo
+  --cor-sucesso-bg: #e1e9d9;
+  --cor-alerta: #c17d1e;
+  --cor-alerta-bg: #f6e9d3;
+  --cor-perigo: #b23a3a;
+  --cor-perigo-bg: #f5dbda;
+  --cor-info: #3a7bd5;
+  --cor-info-bg: #e0ebfb;
+
+  // --- Tipografia ---------------------------------------------------------
+  // 3 papéis, carregados via Google Fonts no `index.html`:
+  // - display: só em H1 de hero, números grandes de destaque (stat-tile, selo do
+  //   hero) — usar com moderação, nunca em blocos de texto corrido.
+  // - base/título: fonte de trabalho do resto do site (parágrafos e h1-h6 padrão
+  //   em `_base.scss`).
+  // - mono: dado "carimbado" — idade/porte do animal, badges de status, números
+  //   de estatística — reforça o motivo de etiqueta/ticket.
+  --fonte-display: 'Fredoka', 'Segoe UI', system-ui, sans-serif;
+  --fonte-base: 'Karla', 'Segoe UI', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+  --fonte-titulo: 'Karla', 'Segoe UI', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+  --fonte-mono: 'Space Mono', ui-monospace, 'Courier New', monospace;
+
+  --texto-xs: 0.75rem;   // 12px
+  --texto-sm: 0.875rem;  // 14px
+  --texto-md: 1rem;      // 16px
+  --texto-lg: 1.125rem;  // 18px
+  --texto-xl: 1.375rem;  // 22px
+  --texto-2xl: 1.75rem;  // 28px
+  --texto-3xl: 2.25rem;  // 36px
+
+  --peso-normal: 400;
+  --peso-medio: 500;
+  --peso-semibold: 600;
+  --peso-bold: 700;
+
+  --altura-linha: 1.5;
+
+  // --- Assinatura visual: "etiqueta de canil" ----------------------------------
+  // Usada pelo padrão `.etiqueta` em `_base.scss` (cards de animal, destaques).
+  // Isolado em token para não repetir valor mágico nos componentes.
+  --etiqueta-furo: 14px;
+
+  // --- Espaçamento (escala de 4px) -----------------------------------------
+  --esp-1: 0.25rem;  // 4px
+  --esp-2: 0.5rem;   // 8px
+  --esp-3: 0.75rem;  // 12px
+  --esp-4: 1rem;     // 16px
+  --esp-5: 1.5rem;   // 24px
+  --esp-6: 2rem;     // 32px
+  --esp-7: 3rem;     // 48px
+  --esp-8: 4rem;     // 64px
+
+  // --- Raios ----------------------------------------------------------------
+  --raio-sm: 6px;
+  --raio-md: 12px;
+  --raio-lg: 20px;
+  --raio-full: 999px;
+
+  // --- Sombras --------------------------------------------------------------
+  --sombra-sm: 0 1px 2px rgba(43, 38, 34, 0.08);
+  --sombra-md: 0 4px 12px rgba(43, 38, 34, 0.10);
+  --sombra-lg: 0 12px 28px rgba(43, 38, 34, 0.14);
+
+  // --- Layout ---------------------------------------------------------------
+  --largura-conteudo: 1120px;
+  --altura-header: 64px;
+
+  // --- Transições -----------------------------------------------------------
+  --transicao-rapida: 120ms ease;
+  --transicao-media: 220ms ease;
+}

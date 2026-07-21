@@ -1,0 +1,78 @@
+.animal-fotos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+  margin-top: var(--esp-6);
+}
+
+.animal-fotos__titulo {
+  margin: 0;
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-semibold);
+  color: var(--cor-texto);
+}
+
+.animal-fotos__progresso {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  margin: 0;
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}
+
+.animal-fotos__vazio {
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+}
+
+.animal-fotos__grade {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--esp-3);
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (min-width: 960px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.animal-fotos__item {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--raio-md);
+  overflow: hidden;
+  background: var(--cor-superficie-alt);
+  border: 1px solid var(--cor-borda);
+}
+
+.animal-fotos__imagem {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.animal-fotos__chip {
+  position: absolute;
+  top: var(--esp-2);
+  left: var(--esp-2);
+}
+
+.animal-fotos__acoes {
+  position: absolute;
+  bottom: var(--esp-1);
+  right: var(--esp-1);
+  display: flex;
+  gap: var(--esp-1);
+  background: rgba(43, 38, 34, 0.55);
+  border-radius: var(--raio-full);
+  padding: 0 var(--esp-1);
+
+  ::ng-deep .mat-mdc-icon-button {
+    color: var(--cor-texto-inverso);
+  }
+}

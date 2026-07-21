@@ -1,0 +1,566 @@
+<div class="animal-ficha">
+  <header class="animal-ficha__topo">
+    <a mat-icon-button routerLink="/admin/animais" aria-label="Voltar">
+      <mat-icon>arrow_back</mat-icon>
+    </a>
+    <h1>{{ criando() ? 'Cadastrar animal' : 'Ficha do animal' }}</h1>
+  </header>
+
+  @if (carregando()) {
+    <app-loading />
+  } @else if (erro()) {
+    <p class="animal-ficha__erro" role="alert">{{ erro() }}</p>
+  } @else if (criando()) {
+    <!-- Criação: só o formulário — as abas precisam de um animal salvo. -->
+    <mat-card appearance="outlined" class="animal-ficha__card animal-ficha__card--form">
+      @if (erroForm(); as msg) {
+        <p class="animal-ficha__erro" role="alert">{{ msg }}</p>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="enviar()" class="animal-ficha__form">
+        <mat-form-field appearance="outline" class="animal-ficha__span-2">
+          <mat-label>Nome</mat-label>
+          <input matInput formControlName="nome" maxlength="150" />
+          @if (form.controls.nome.hasError('required')) {
+            <mat-error>Informe o nome.</mat-error>
+          } @else if (form.controls.nome.hasError('maxlength')) {
+            <mat-error>Máximo de 150 caracteres.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Espécie</mat-label>
+          <mat-select formControlName="especie">
+            @for (e of especies; track e) {
+              <mat-option [value]="e">{{ rotuloEspecie[e] }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.especie.hasError('required')) {
+            <mat-error>Selecione a espécie.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Sexo</mat-label>
+          <mat-select formControlName="sexo">
+            @for (s of sexos; track s) {
+              <mat-option [value]="s">{{ rotuloSexo[s] }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.sexo.hasError('required')) {
+            <mat-error>Selecione o sexo.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Porte</mat-label>
+          <mat-select formControlName="porte">
+            @for (p of portes; track p) {
+              <mat-option [value]="p">{{ rotuloPorte[p] }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.porte.hasError('required')) {
+            <mat-error>Selecione o porte.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Idade aproximada</mat-label>
+          <input matInput formControlName="idadeAproximada" placeholder="Ex: 2 anos" maxlength="50" />
+          @if (form.controls.idadeAproximada.hasError('maxlength')) {
+            <mat-error>Máximo de 50 caracteres.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Status</mat-label>
+          <mat-select formControlName="status">
+            @for (st of statusOpcoes; track st) {
+              <mat-option [value]="st">{{ rotuloStatus[st] }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="animal-ficha__span-2">
+          <mat-label>Descrição</mat-label>
+          <textarea
+            matInput
+            formControlName="descricao"
+            rows="4"
+            placeholder="Temperamento, cuidados, histórico..."
+          ></textarea>
+        </mat-form-field>
+
+        <div class="animal-ficha__span-2 animal-ficha__saude">
+          <mat-checkbox formControlName="castrado">Castrado</mat-checkbox>
+          <mat-checkbox formControlName="vermifugado">Vermifugado</mat-checkbox>
+        </div>
+
+        <p class="animal-ficha__dica animal-ficha__span-2">
+          <mat-icon>photo_camera</mat-icon>
+          As fotos são adicionadas logo depois de salvar, aqui mesmo na ficha.
+        </p>
+
+        <div class="animal-ficha__form-acoes">
+          <a mat-stroked-button routerLink="/admin/animais" type="button">Cancelar</a>
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="salvando()"
+          >
+            @if (salvando()) {
+              <mat-progress-spinner mode="indeterminate" diameter="20" />
+            } @else {
+              Cadastrar e adicionar fotos
+            }
+          </button>
+        </div>
+      </form>
+    </mat-card>
+  } @else {
+    @if (animal(); as a) {
+    <!-- Leitura e edição in-place: os campos habilitam no próprio layout da ficha. -->
+    <form [formGroup]="form" (ngSubmit)="enviar()">
+      @if (editando() && erroForm(); as msg) {
+        <p class="animal-ficha__erro animal-ficha__erro--form" role="alert">{{ msg }}</p>
+      }
+
+      <!-- Cabeçalho de identidade: sempre visível, fora das abas. -->
+      <mat-card appearance="outlined" class="animal-ficha__cabecalho etiqueta">
+        @if (urlFoto(a.fotoPrincipalUrl)) {
+          <img
+            class="animal-ficha__foto"
+            [src]="urlFoto(a.fotoPrincipalUrl)"
+            [alt]="'Foto de ' + a.nome"
+          />
+        } @else {
+          <div class="animal-ficha__foto animal-ficha__foto--vazia" aria-hidden="true">
+            <mat-icon>pets</mat-icon>
+          </div>
+        }
+
+        <div class="animal-ficha__identidade">
+          @if (!editando()) {
+            <div class="animal-ficha__nome-linha">
+              <h2>{{ a.nome }}</h2>
+              @if (a.status) {
+                <app-status-animal-badge [status]="a.status" />
+              }
+            </div>
+            <p class="animal-ficha__meta">
+              {{ a.especie ? rotuloEspecie[a.especie] : '—' }}
+              · {{ a.sexo ? rotuloSexo[a.sexo] : '—' }}
+              · {{ a.porte ? rotuloPorte[a.porte] : '—' }}
+              @if (a.idadeAproximada) {
+                · {{ a.idadeAproximada }}
+              }
+            </p>
+            <div class="animal-ficha__selos">
+              @if (a.castrado) {
+                <span class="animal-ficha__selo"><mat-icon>check</mat-icon> Castrado</span>
+              }
+              @if (a.vermifugado) {
+                <span class="animal-ficha__selo"><mat-icon>check</mat-icon> Vermifugado</span>
+              }
+              @if (!a.ativo) {
+                <span class="animal-ficha__selo animal-ficha__selo--inativo">
+                  <mat-icon>visibility_off</mat-icon> Inativo
+                </span>
+              }
+              @if (dosesAtrasadas() > 0) {
+                <span class="animal-ficha__selo animal-ficha__selo--atrasada">
+                  <mat-icon>event_busy</mat-icon>
+                  {{ dosesAtrasadas() === 1 ? 'Dose de vacina atrasada' : dosesAtrasadas() + ' doses de vacina atrasadas' }}
+                </span>
+              }
+            </div>
+          } @else {
+            <div class="animal-ficha__campos-identidade">
+              <mat-form-field appearance="outline" class="animal-ficha__campo-nome">
+                <mat-label>Nome</mat-label>
+                <input matInput formControlName="nome" maxlength="150" />
+                @if (form.controls.nome.hasError('required')) {
+                  <mat-error>Informe o nome.</mat-error>
+                } @else if (form.controls.nome.hasError('maxlength')) {
+                  <mat-error>Máximo de 150 caracteres.</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Status</mat-label>
+                <mat-select formControlName="status">
+                  @for (st of statusOpcoes; track st) {
+                    <mat-option [value]="st">{{ rotuloStatus[st] }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Espécie</mat-label>
+                <mat-select formControlName="especie">
+                  @for (e of especies; track e) {
+                    <mat-option [value]="e">{{ rotuloEspecie[e] }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Sexo</mat-label>
+                <mat-select formControlName="sexo">
+                  @for (s of sexos; track s) {
+                    <mat-option [value]="s">{{ rotuloSexo[s] }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Porte</mat-label>
+                <mat-select formControlName="porte">
+                  @for (p of portes; track p) {
+                    <mat-option [value]="p">{{ rotuloPorte[p] }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Idade aproximada</mat-label>
+                <input
+                  matInput
+                  formControlName="idadeAproximada"
+                  placeholder="Ex: 2 anos"
+                  maxlength="50"
+                />
+              </mat-form-field>
+            </div>
+          }
+        </div>
+
+        <div class="animal-ficha__acoes">
+          @if (!editando()) {
+            <button mat-flat-button color="primary" type="button" (click)="iniciarEdicao()">
+              <mat-icon>edit</mat-icon>
+              Editar
+            </button>
+            <a mat-stroked-button [routerLink]="['/animais', a.id]">
+              <mat-icon>public</mat-icon>
+              Página pública
+            </a>
+          } @else {
+            <button
+              mat-flat-button
+              color="primary"
+              type="submit"
+              [disabled]="salvando() || excluindo()"
+            >
+              @if (salvando()) {
+                <mat-progress-spinner mode="indeterminate" diameter="20" />
+              } @else {
+                Salvar
+              }
+            </button>
+            <button
+              mat-stroked-button
+              type="button"
+              [disabled]="salvando() || excluindo()"
+              (click)="cancelarEdicao()"
+            >
+              Cancelar
+            </button>
+            <button
+              mat-flat-button
+              type="button"
+              class="botao-perigo"
+              [disabled]="salvando() || excluindo()"
+              (click)="confirmarExclusao()"
+            >
+              <mat-icon>delete</mat-icon>
+              Excluir
+            </button>
+          }
+        </div>
+      </mat-card>
+
+      <mat-card appearance="outlined" class="animal-ficha__card">
+        <mat-tab-group
+          [selectedIndex]="abaSelecionada()"
+          (selectedIndexChange)="aoTrocarAba($event)"
+          [mat-stretch-tabs]="false"
+        >
+          <mat-tab label="Resumo">
+            <div class="animal-ficha__aba">
+              <h3>Descrição</h3>
+              @if (!editando()) {
+                @if (a.descricao) {
+                  <p class="animal-ficha__descricao">{{ a.descricao }}</p>
+                } @else {
+                  <p class="animal-ficha__vazio">
+                    Sem descrição cadastrada — ela aparece na página pública do animal.
+                  </p>
+                }
+              } @else {
+                <mat-form-field appearance="outline" class="animal-ficha__campo-descricao">
+                  <mat-label>Descrição</mat-label>
+                  <textarea
+                    matInput
+                    formControlName="descricao"
+                    rows="4"
+                    placeholder="Temperamento, cuidados, histórico..."
+                  ></textarea>
+                </mat-form-field>
+              }
+
+              <hr class="etiqueta__separador" />
+
+              @if (!editando()) {
+                <dl class="animal-ficha__detalhes">
+                  <div>
+                    <dt>Cadastrado em</dt>
+                    <dd>{{ a.dataCadastro | date: 'dd/MM/yyyy' }}</dd>
+                  </div>
+                  <div>
+                    <dt>Situação</dt>
+                    <dd>{{ a.ativo ? 'Ativo no sistema' : 'Inativo (fora da vitrine)' }}</dd>
+                  </div>
+                  <div>
+                    <dt>Castrado</dt>
+                    <dd>{{ a.castrado ? 'Sim' : 'Não' }}</dd>
+                  </div>
+                  <div>
+                    <dt>Vermifugado</dt>
+                    <dd>{{ a.vermifugado ? 'Sim' : 'Não' }}</dd>
+                  </div>
+                </dl>
+              } @else {
+                <div class="animal-ficha__saude animal-ficha__saude--edicao">
+                  <mat-checkbox formControlName="castrado">Castrado</mat-checkbox>
+                  <mat-checkbox formControlName="vermifugado">Vermifugado</mat-checkbox>
+                  <mat-checkbox formControlName="ativo">Animal ativo no sistema</mat-checkbox>
+                </div>
+              }
+            </div>
+          </mat-tab>
+
+          <mat-tab label="Fotos">
+            <div class="animal-ficha__aba">
+              <app-animal-fotos [animalId]="animalId()" />
+            </div>
+          </mat-tab>
+
+          <mat-tab>
+            <ng-template mat-tab-label>
+              Vacinas ({{ vacinas().length }})
+              @if (dosesAtrasadas() > 0) {
+                <span
+                  class="animal-ficha__aba-alerta"
+                  [matTooltip]="
+                    dosesAtrasadas() === 1
+                      ? '1 dose atrasada'
+                      : dosesAtrasadas() + ' doses atrasadas'
+                  "
+                ></span>
+              }
+            </ng-template>
+            <div class="animal-ficha__aba">
+              <div class="animal-ficha__aba-cabecalho">
+                <h3>Carteira de vacinação</h3>
+                <a
+                  mat-flat-button
+                  color="primary"
+                  routerLink="/admin/vacinas/nova"
+                  [queryParams]="{ animalId: a.id, origem: 'ficha' }"
+                >
+                  <mat-icon>add</mat-icon>
+                  Registrar vacina
+                </a>
+              </div>
+
+              @if (vacinas().length === 0) {
+                <p class="animal-ficha__vazio">Nenhuma vacina registrada para este animal.</p>
+              } @else {
+                <div class="animal-ficha__tabela-wrapper">
+                  <table mat-table [dataSource]="vacinas()" class="animal-ficha__tabela">
+                    <ng-container matColumnDef="nome">
+                      <th mat-header-cell *matHeaderCellDef>Vacina</th>
+                      <td mat-cell *matCellDef="let v">{{ v.nome }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="dataAplicacao">
+                      <th mat-header-cell *matHeaderCellDef>Aplicada em</th>
+                      <td mat-cell *matCellDef="let v">
+                        {{ v.dataAplicacao | date: 'dd/MM/yyyy' }}
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="proximaDose">
+                      <th mat-header-cell *matHeaderCellDef>Próxima dose</th>
+                      <td
+                        mat-cell
+                        *matCellDef="let v"
+                        [class.animal-ficha__dose--vencida]="doseVencida(v)"
+                        [class.animal-ficha__dose--proxima]="doseProxima(v)"
+                      >
+                        @if (v.proximaDose) {
+                          {{ v.proximaDose | date: 'dd/MM/yyyy' }}
+                          @if (doseVencida(v)) {
+                            <mat-icon matTooltip="Dose atrasada">event_busy</mat-icon>
+                          } @else if (doseProxima(v)) {
+                            <mat-icon matTooltip="Dose nos próximos 30 dias">
+                              event_upcoming
+                            </mat-icon>
+                          }
+                        } @else {
+                          —
+                        }
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="veterinario">
+                      <th mat-header-cell *matHeaderCellDef>Veterinário</th>
+                      <td mat-cell *matCellDef="let v">{{ v.veterinario || '—' }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="acoes" stickyEnd>
+                      <th mat-header-cell *matHeaderCellDef aria-label="Ações"></th>
+                      <td mat-cell *matCellDef="let v">
+                        <a
+                          mat-icon-button
+                          routerLink="/admin/vacinas/nova"
+                          [queryParams]="{
+                            animalId: a.id,
+                            nome: v.nome,
+                            veterinario: v.veterinario || null,
+                            origem: 'ficha',
+                          }"
+                          aria-label="Reaplicar"
+                          matTooltip="Reaplicar (nova dose hoje)"
+                        >
+                          <mat-icon>autorenew</mat-icon>
+                        </a>
+                        <a
+                          mat-icon-button
+                          [routerLink]="['/admin/vacinas', v.id, 'editar']"
+                          [queryParams]="{ origem: 'ficha' }"
+                          aria-label="Editar"
+                          matTooltip="Editar"
+                        >
+                          <mat-icon>edit</mat-icon>
+                        </a>
+                      </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="colunasVacinas()"></tr>
+                    <tr mat-row *matRowDef="let row; columns: colunasVacinas()"></tr>
+                  </table>
+                </div>
+              }
+            </div>
+          </mat-tab>
+
+          <mat-tab [label]="'Candidaturas (' + candidaturas().length + ')'">
+            <div class="animal-ficha__aba">
+              <div class="animal-ficha__aba-cabecalho">
+                <h3>
+                  Candidaturas de adoção
+                  @if (candidaturasPendentes() > 0) {
+                    <span class="animal-ficha__pendentes">
+                      {{ candidaturasPendentes() }} pendente{{
+                        candidaturasPendentes() > 1 ? 's' : ''
+                      }}
+                    </span>
+                  }
+                </h3>
+                @if (a.status === statusDisponivel) {
+                  <a
+                    mat-flat-button
+                    color="primary"
+                    routerLink="/admin/adocoes/nova"
+                    [queryParams]="{ animalId: a.id, origem: 'ficha' }"
+                  >
+                    <mat-icon>add</mat-icon>
+                    Registrar candidatura
+                  </a>
+                }
+              </div>
+
+              @if (candidaturas().length === 0) {
+                <p class="animal-ficha__vazio">
+                  Nenhuma candidatura de adoção para este animal até agora.
+                </p>
+              } @else {
+                <div class="animal-ficha__tabela-wrapper">
+                  <table mat-table [dataSource]="candidaturas()" class="animal-ficha__tabela">
+                    <ng-container matColumnDef="nomeAdotante">
+                      <th mat-header-cell *matHeaderCellDef>Adotante</th>
+                      <td mat-cell *matCellDef="let c">
+                        <div class="animal-ficha__adotante">
+                          <button
+                            type="button"
+                            class="animal-ficha__link-adotante"
+                            (click)="abrirHistoricoAdotante(c)"
+                            matTooltip="Ver histórico do adotante"
+                          >
+                            {{ c.nomeAdotante }}
+                          </button>
+                          @if (!mobile()) {
+                            <span>{{ c.emailAdotante }} · {{ c.telefoneAdotante }}</span>
+                          }
+                        </div>
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="status">
+                      <th mat-header-cell *matHeaderCellDef>Status</th>
+                      <td mat-cell *matCellDef="let c">
+                        @if (c.status) {
+                          <app-status-adocao-badge [status]="c.status" />
+                        }
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="dataSolicitacao">
+                      <th mat-header-cell *matHeaderCellDef>Solicitado em</th>
+                      <td mat-cell *matCellDef="let c">
+                        {{ c.dataSolicitacao | date: 'dd/MM/yyyy' }}
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="observacoes">
+                      <th mat-header-cell *matHeaderCellDef>Observações</th>
+                      <td
+                        mat-cell
+                        *matCellDef="let c"
+                        class="animal-ficha__observacoes"
+                        [matTooltip]="c.observacoes ?? ''"
+                      >
+                        {{ c.observacoes || '—' }}
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="acoes" stickyEnd>
+                      <th mat-header-cell *matHeaderCellDef aria-label="Ações"></th>
+                      <td mat-cell *matCellDef="let c">
+                        <button
+                          mat-icon-button
+                          (click)="alterarStatus(c)"
+                          aria-label="Alterar status"
+                          matTooltip="Alterar status"
+                        >
+                          <mat-icon>sync_alt</mat-icon>
+                        </button>
+                      </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="colunasCandidaturas()"></tr>
+                    <tr mat-row *matRowDef="let row; columns: colunasCandidaturas()"></tr>
+                  </table>
+                </div>
+              }
+            </div>
+          </mat-tab>
+        </mat-tab-group>
+      </mat-card>
+    </form>
+    }
+  }
+</div>

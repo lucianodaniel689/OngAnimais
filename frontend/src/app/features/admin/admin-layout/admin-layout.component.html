@@ -1,0 +1,56 @@
+<mat-sidenav-container class="admin">
+  <mat-sidenav
+    class="admin__sidenav"
+    [mode]="modo()"
+    [opened]="aberto()"
+    (closedStart)="aberto.set(false)"
+    [fixedInViewport]="modo() === 'over'"
+  >
+    <div class="admin__marca">
+      <span class="admin__logo" aria-hidden="true">🐾</span>
+      <span>OngAnimais</span>
+    </div>
+
+    <mat-nav-list>
+      @for (item of menu(); track item.rota) {
+        <a
+          mat-list-item
+          [routerLink]="item.rota"
+          routerLinkActive="ativo"
+          [routerLinkActiveOptions]="{ exact: !!item.exato }"
+          (click)="aoNavegar()"
+        >
+          <mat-icon matListItemIcon>{{ item.icone }}</mat-icon>
+          <span matListItemTitle>{{ item.rotulo }}</span>
+        </a>
+      }
+    </mat-nav-list>
+
+    <div class="admin__sidenav-rodape">
+      <a mat-list-item routerLink="/" (click)="aoNavegar()">
+        <mat-icon matListItemIcon>public</mat-icon>
+        <span matListItemTitle>Ver site</span>
+      </a>
+    </div>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="admin__conteudo">
+    <mat-toolbar class="admin__toolbar">
+      <button mat-icon-button (click)="alternar()" aria-label="Alternar menu">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span class="admin__titulo">Painel administrativo</span>
+      <span class="admin__spacer"></span>
+      @if (usuario(); as u) {
+        <span class="admin__usuario">{{ u.nome }}</span>
+      }
+      <button mat-icon-button (click)="sair()" aria-label="Sair">
+        <mat-icon>logout</mat-icon>
+      </button>
+    </mat-toolbar>
+
+    <main class="admin__main">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

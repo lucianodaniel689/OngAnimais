@@ -1,0 +1,85 @@
+<div class="adocao-form">
+  <header class="adocao-form__cabecalho">
+    <a mat-icon-button [routerLink]="linkVoltar()" [queryParams]="queryParamsVoltar()" aria-label="Voltar">
+      <mat-icon>arrow_back</mat-icon>
+    </a>
+    <h1>Nova solicitação de adoção</h1>
+  </header>
+
+  <mat-card appearance="outlined" class="adocao-form__card">
+    @if (carregandoOpcoes()) {
+      <app-loading [tamanho]="36" />
+    } @else {
+      @if (erro(); as msg) {
+        <p class="adocao-form__erro" role="alert">{{ msg }}</p>
+      }
+
+      @if (animaisDisponiveis().length === 0) {
+        <p class="adocao-form__vazio">
+          Não há animais disponíveis para adoção no momento.
+        </p>
+      } @else {
+        <form [formGroup]="form" (ngSubmit)="enviar()" class="adocao-form__form">
+          <mat-form-field appearance="outline">
+            <mat-label>Animal</mat-label>
+            <mat-select formControlName="animalId">
+              @for (a of animaisDisponiveis(); track a.id) {
+                <mat-option [value]="a.id">{{ a.nome }} ({{ a.especie }})</mat-option>
+              }
+            </mat-select>
+            @if (form.controls.animalId.hasError('required')) {
+              <mat-error>Selecione o animal.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Nome do adotante</mat-label>
+            <input matInput formControlName="nome" maxlength="150" />
+            @if (form.controls.nome.hasError('required')) {
+              <mat-error>Informe o nome.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
+            <input matInput type="email" formControlName="email" />
+            @if (form.controls.email.hasError('required')) {
+              <mat-error>Informe o email.</mat-error>
+            } @else if (form.controls.email.hasError('email')) {
+              <mat-error>Email inválido.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Telefone</mat-label>
+            <input matInput formControlName="telefone" placeholder="(11) 91234-5678" maxlength="20" />
+            @if (form.controls.telefone.hasError('required')) {
+              <mat-error>Informe o telefone.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Observações</mat-label>
+            <textarea
+              matInput
+              formControlName="observacoes"
+              rows="4"
+              placeholder="Informações adicionais sobre a solicitação..."
+            ></textarea>
+          </mat-form-field>
+
+          <div class="adocao-form__acoes">
+            <a mat-stroked-button [routerLink]="linkVoltar()" [queryParams]="queryParamsVoltar()" type="button">Cancelar</a>
+            <button mat-flat-button color="primary" type="submit" [disabled]="carregando()">
+              @if (carregando()) {
+                <mat-progress-spinner mode="indeterminate" diameter="20" />
+              } @else {
+                Abrir solicitação
+              }
+            </button>
+          </div>
+        </form>
+      }
+    }
+  </mat-card>
+</div>

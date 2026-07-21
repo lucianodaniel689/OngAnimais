@@ -1,0 +1,59 @@
+<h2 mat-dialog-title>Histórico de {{ data.nome }}</h2>
+
+<mat-dialog-content>
+  @if (data.email || data.telefone) {
+    <p class="historico__contato">
+      @if (data.email) { <span>{{ data.email }}</span> }
+      @if (data.email && data.telefone) { <span> · </span> }
+      @if (data.telefone) { <span>{{ data.telefone }}</span> }
+    </p>
+  }
+
+  @if (carregando()) {
+    <app-loading />
+  } @else if (erro()) {
+    <p class="historico__erro" role="alert">{{ erro() }}</p>
+  } @else {
+    @if (devolucoes() > 0) {
+      <p class="historico__alerta" role="alert">
+        <mat-icon>warning</mat-icon>
+        Este adotante já devolveu {{ devolucoes() }}
+        {{ devolucoes() === 1 ? 'animal' : 'animais' }} após a adoção.
+      </p>
+    }
+
+    @if (candidaturas().length === 0) {
+      <p class="historico__vazio">Nenhuma candidatura registrada para este adotante.</p>
+    } @else {
+      <ul class="historico__lista">
+        @for (c of candidaturas(); track c.id) {
+          <li class="historico__item">
+            <div class="historico__item-info">
+              <a
+                mat-dialog-close
+                class="historico__link-animal"
+                [routerLink]="['/admin/animais', c.animalId]"
+                [queryParams]="{ aba: 'candidaturas' }"
+              >
+                {{ c.nomeAnimal }}
+              </a>
+              <span class="historico__data">{{ c.dataSolicitacao | date: 'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="historico__item-status">
+              @if (c.status) {
+                <app-status-adocao-badge [status]="c.status" />
+              }
+              @if (c.foiDevolvida) {
+                <span class="historico__devolucao">Devolução</span>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Fechar</button>
+</mat-dialog-actions>

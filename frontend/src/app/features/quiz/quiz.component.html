@@ -1,0 +1,161 @@
+<div class="quiz container">
+  @switch (etapa()) {
+    <!-- INTRO -->
+    @case ('intro') {
+      <section class="quiz__intro">
+        <h1>Qual animal combina com você?</h1>
+        <p class="quiz__intro-texto">
+          Responda 5 perguntas rápidas sobre a sua rotina e a gente cruza com quem está esperando
+          no abrigo agora. No final, você conhece o seu match — de verdade, com nome e foto.
+        </p>
+
+        @if (carregando()) {
+          <app-loading [tamanho]="36" mensagem="Preparando o quiz..." />
+        } @else if (erro()) {
+          <p class="quiz__erro" role="alert">{{ erro() }}</p>
+        } @else if (animais().length === 0) {
+          <p class="quiz__vazio">
+            Nenhum animal disponível pra dar match agora. Volte em breve — sempre chega gente nova!
+          </p>
+          <a mat-stroked-button color="primary" routerLink="/">Voltar pro início</a>
+        } @else {
+          <p class="quiz__intro-contagem">
+            <strong>{{ animais().length }}</strong>
+            {{ animais().length === 1 ? 'animal esperando' : 'animais esperando' }} do outro lado
+          </p>
+          <button mat-flat-button color="primary" class="quiz__comecar" (click)="iniciar()">
+            <mat-icon>favorite</mat-icon>
+            Começar o quiz
+          </button>
+        }
+      </section>
+    }
+
+    <!-- PERGUNTAS -->
+    @case ('perguntas') {
+      <section class="quiz__pergunta" aria-live="polite">
+        <div class="quiz__progresso">
+          <button
+            mat-icon-button
+            type="button"
+            aria-label="Voltar pergunta"
+            (click)="voltar()"
+          >
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+          <span class="quiz__progresso-contador">
+            {{ indicePergunta() + 1 }}/{{ totalPerguntas }}
+          </span>
+          <span
+            class="quiz__progresso-barra"
+            role="progressbar"
+            [attr.aria-valuenow]="indicePergunta() + 1"
+            aria-valuemin="1"
+            [attr.aria-valuemax]="totalPerguntas"
+          >
+            <span
+              class="quiz__progresso-preenchido"
+              [style.width.%]="((indicePergunta() + 1) / totalPerguntas) * 100"
+            ></span>
+          </span>
+        </div>
+
+        <h1>{{ perguntaAtual().titulo }}</h1>
+
+        <div class="quiz__opcoes">
+          @for (opcao of perguntaAtual().opcoes; track opcao.valor) {
+            <button
+              type="button"
+              class="quiz__opcao"
+              [class.quiz__opcao--selecionada]="respostaAtual() === opcao.valor"
+              (click)="responder(opcao.valor)"
+            >
+              <mat-icon class="quiz__opcao-icone" aria-hidden="true">{{ opcao.icone }}</mat-icon>
+              <span class="quiz__opcao-rotulo">{{ opcao.rotulo }}</span>
+              <span class="quiz__opcao-descricao">{{ opcao.descricao }}</span>
+            </button>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- RESULTADO -->
+    @case ('resultado') {
+      <section class="quiz__resultado">
+        @if (melhorMatch(); as match) {
+          <p class="quiz__resultado-chamada">Achamos alguém pra você</p>
+
+          <article class="quiz__match etiqueta">
+            <div class="quiz__match-midia">
+              <img [src]="imagemDe(match.animal)" [alt]="'Foto de ' + match.animal.nome" />
+              <span class="quiz__match-selo" aria-label="Compatibilidade">
+                <strong>{{ match.percentual }}%</strong>
+                <small>match</small>
+              </span>
+            </div>
+
+            <hr class="etiqueta__separador" />
+
+            <div class="quiz__match-info">
+              <h1>{{ match.animal.nome }}</h1>
+              <p class="quiz__match-meta">
+                @if (match.animal.especie) {
+                  {{ rotuloEspecie[match.animal.especie] }}
+                }
+                @if (match.animal.porte) {
+                  · {{ rotuloPorte[match.animal.porte] }}
+                }
+                @if (match.animal.idadeAproximada) {
+                  · {{ match.animal.idadeAproximada }}
+                }
+              </p>
+
+              @if (match.motivos.length > 0) {
+                <ul class="quiz__motivos">
+                  @for (motivo of match.motivos; track motivo) {
+                    <li>
+                      <mat-icon aria-hidden="true">check</mat-icon>
+                      {{ motivo }}
+                    </li>
+                  }
+                </ul>
+              }
+
+              <div class="quiz__match-acoes">
+                <a mat-flat-button color="primary" [routerLink]="['/animais', match.animal.id]">
+                  <mat-icon>pets</mat-icon>
+                  Conhecer {{ match.animal.nome }}
+                </a>
+                <button mat-stroked-button color="primary" type="button" (click)="refazer()">
+                  Refazer o quiz
+                </button>
+              </div>
+            </div>
+          </article>
+
+          @if (viceMatches().length > 0) {
+            <div class="quiz__vices">
+              <h2>Também combinam com você</h2>
+              <div class="quiz__vices-grade">
+                @for (vice of viceMatches(); track vice.animal.id) {
+                  <a class="quiz__vice" [routerLink]="['/animais', vice.animal.id]">
+                    <img [src]="imagemDe(vice.animal)" [alt]="'Foto de ' + vice.animal.nome" />
+                    <span class="quiz__vice-info">
+                      <strong>{{ vice.animal.nome }}</strong>
+                      <span class="quiz__vice-percentual">{{ vice.percentual }}% match</span>
+                    </span>
+                  </a>
+                }
+              </div>
+            </div>
+          }
+        } @else {
+          <p class="quiz__vazio">
+            Nenhum animal disponível pra dar match agora. Volte em breve!
+          </p>
+          <a mat-stroked-button color="primary" routerLink="/">Voltar pro início</a>
+        }
+      </section>
+    }
+  }
+</div>

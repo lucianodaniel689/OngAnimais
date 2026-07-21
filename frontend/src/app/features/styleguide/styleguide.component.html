@@ -1,0 +1,336 @@
+<div class="sg container">
+  <header class="sg__topo">
+    <h1>Styleguide</h1>
+    <p>
+      Catálogo vivo dos componentes do OngAnimais, sobre o <strong>Angular Material</strong>
+      (paleta mostarda/framboesa). Os tokens próprios em <code>src/styles</code> continuam
+      disponíveis para cores, tipografia e espaçamento — ver também a seção "Sistema de design"
+      no <code>CLAUDE.md</code> do frontend.
+    </p>
+  </header>
+
+  <!-- CORES -->
+  <section class="sg__secao">
+    <h2>Cores (tokens)</h2>
+    <div class="sg__cores">
+      @for (cor of cores; track cor.variavel) {
+        <div class="sg__cor">
+          <span class="sg__cor-amostra" [style.background]="'var(' + cor.variavel + ')'"></span>
+          <strong>{{ cor.nome }}</strong>
+          <code>{{ cor.variavel }}</code>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- TIPOGRAFIA -->
+  <section class="sg__secao">
+    <h2>Tipografia</h2>
+    <p class="sg__dica">
+      Três papéis (ver <code>--fonte-*</code> em <code>_tokens.scss</code>): <strong>display</strong>
+      (Fredoka) só para destaques grandes, <strong>base/título</strong> (Karla) no resto do site, e
+      <strong>mono</strong> (Space Mono) para dado "carimbado" (idade/porte, badges, KPIs).
+    </p>
+    <div class="sg__bloco">
+      <h1>Título H1 — Adote um amigo</h1>
+      <h2>Título H2 — Animais disponíveis</h2>
+      <h3>Título H3 — Detalhes do animal</h3>
+      <p>Parágrafo padrão — texto base usado em descrições e conteúdo geral.</p>
+      <p class="sg__texto-suave">Texto suave — informações secundárias e legendas.</p>
+      <p class="sg__fonte-display">Fredoka — display, usar com moderação</p>
+      <p class="sg__fonte-mono">Space Mono — 2 anos · Porte médio · 12 disponíveis</p>
+    </div>
+  </section>
+
+  <!-- ASSINATURA: ETIQUETA -->
+  <section class="sg__secao">
+    <h2>Assinatura: etiqueta de canil</h2>
+    <p class="sg__dica">
+      Padrão visual próprio do sistema (classe utilitária <code>.etiqueta</code> em
+      <code>_base.scss</code>, token <code>--etiqueta-furo</code>): cartão reto (sem inclinação —
+      testamos torto e não pegou bem) com furo perfurado no topo e divisor pontilhado
+      (<code>.etiqueta__separador</code>). Hoje aplicado no <code>app-animal-card</code> (veja a
+      seção "Cards" abaixo) — reaproveite em qualquer novo
+      "cartão de identidade" do sistema antes de recorrer a um <code>mat-card</code> genérico.
+    </p>
+    <div class="sg__linha">
+      <div class="etiqueta sg__etiqueta-exemplo" tabindex="0">
+        <strong>Etiqueta de exemplo</strong>
+        <hr class="etiqueta__separador" />
+        <span class="sg__fonte-mono">3 anos · Porte pequeno</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- BOTÕES (Material) -->
+  <section class="sg__secao">
+    <h2>Botões</h2>
+    <p class="sg__dica">Variantes do Material</p>
+    <div class="sg__linha">
+      <button mat-button>Basic</button>
+      <button mat-raised-button color="primary">Primário</button>
+      <button mat-raised-button color="accent">Acento</button>
+      <button mat-stroked-button color="primary">Contorno</button>
+      <button mat-flat-button color="primary">Flat</button>
+      <button mat-flat-button class="botao-perigo">
+        <mat-icon>delete</mat-icon> Excluir
+      </button>
+      <button mat-raised-button color="primary" disabled>Desabilitado</button>
+    </div>
+    <p class="sg__dica">
+      Ação destrutiva: o tema M3 ignora <code>color="warn"</code> — use a classe global
+      <code>.botao-perigo</code> num <code>mat-flat-button</code> (regra em <code>_base.scss</code>,
+      tokens <code>--cor-perigo</code>). Sempre acompanhada do diálogo de confirmação.
+    </p>
+    <p class="sg__dica">Com ícone</p>
+    <div class="sg__linha">
+      <button mat-raised-button color="primary">
+        <mat-icon>pets</mat-icon> Quero adotar
+      </button>
+      <button mat-icon-button color="primary" aria-label="Favoritar">
+        <mat-icon>favorite</mat-icon>
+      </button>
+      <button mat-fab color="primary" aria-label="Adicionar">
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
+    <p class="sg__dica">
+      Passe o mouse em qualquer botão acima: todo `mat-button`/`mat-icon-button`/`mat-fab`... já
+      "levanta" levemente no hover (regra global em <code>_base.scss</code>, sem precisar de classe
+      extra) — soma ao ripple padrão do Material.
+    </p>
+  </section>
+
+  <!-- CHIPS / BADGES -->
+  <section class="sg__secao">
+    <h2>Chips e status</h2>
+    <p class="sg__dica">Chips do Material</p>
+    <mat-chip-set>
+      <mat-chip>Cachorro</mat-chip>
+      <mat-chip>Gato</mat-chip>
+      <mat-chip highlighted color="primary">Destaque</mat-chip>
+    </mat-chip-set>
+    <p class="sg__dica">Status de animal (resolve cor + rótulo)</p>
+    <div class="sg__linha">
+      @for (status of statusAnimal; track status) {
+        <app-status-animal-badge [status]="status" />
+      }
+    </div>
+    <p class="sg__dica">Status de adoção (resolve cor + rótulo)</p>
+    <div class="sg__linha">
+      @for (status of statusAdocao; track status) {
+        <app-status-adocao-badge [status]="status" />
+      }
+    </div>
+  </section>
+
+  <!-- FORM FIELDS -->
+  <section class="sg__secao">
+    <h2>Campos de formulário</h2>
+    <div class="sg__form">
+      <mat-form-field appearance="outline">
+        <mat-label>Nome do animal</mat-label>
+        <input matInput placeholder="Ex: Thor" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Espécie</mat-label>
+        <mat-select>
+          @for (especie of especies; track especie) {
+            <mat-option [value]="especie">{{ especie }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="sg__form-largo">
+        <mat-label>Descrição</mat-label>
+        <textarea matInput rows="3" placeholder="Temperamento, cuidados, histórico..."></textarea>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Data de aplicação</mat-label>
+        <input matInput [matDatepicker]="sgPicker" />
+        <mat-datepicker-toggle matSuffix [for]="sgPicker" />
+        <mat-datepicker #sgPicker />
+      </mat-form-field>
+    </div>
+    <p class="sg__dica">
+      Datepicker do Material (<code>provideNativeDateAdapter()</code> em <code>app.config.ts</code>).
+      Usado em <code>VacinaFormComponent</code> (data de aplicação / próxima dose).
+    </p>
+  </section>
+
+  <!-- SNACKBAR -->
+  <section class="sg__secao">
+    <h2>Snackbar</h2>
+    <p class="sg__dica">Feedback rápido de ações (ex.: após salvar).</p>
+    <button mat-stroked-button color="primary" (click)="abrirSnackbar()">
+      <mat-icon>notifications</mat-icon>
+      Mostrar snackbar
+    </button>
+  </section>
+
+  <!-- LOADING -->
+  <section class="sg__secao">
+    <h2>Loading</h2>
+    <p class="sg__dica">
+      Componente próprio <code>app-loading</code> — indicador de carregamento
+      <strong>padrão do sistema</strong>: use em qualquer lista, formulário em modo de edição ou
+      seção pública que espera dados assíncronos, em vez de montar
+      <code>mat-progress-spinner</code> "na mão". Não é para spinner inline em botão de submit
+      (esse continua pequeno, direto no botão).
+    </p>
+    <div class="sg__linha">
+      <app-loading />
+      <app-loading [tamanho]="28" mensagem="Carregando animais..." />
+    </div>
+    <p class="sg__dica">
+      Troca de página no <code>/admin</code> também mostra uma barra de progresso fina no topo
+      enquanto a rota (e o chunk lazy) carrega — ver <code>AppComponent</code>.
+    </p>
+  </section>
+
+  <!-- CARDS -->
+  <section class="sg__secao">
+    <h2>Cards</h2>
+    <div class="sg__grade-cards">
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-card-title>Card simples</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Container `mat-card` com borda. Conteúdo livre.</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card appearance="raised">
+        <mat-card-header>
+          <mat-card-title>Card elevado</mat-card-title>
+          <mat-card-subtitle>com ações</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Variante com sombra e rodapé de ações.</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-button color="primary">Ação</button>
+        </mat-card-actions>
+      </mat-card>
+
+      <app-animal-card [animal]="animalExemplo" />
+    </div>
+
+    <p class="sg__dica">
+      Card clicável (classe <code>.hover-elevar</code>, global em <code>_base.scss</code>): levanta +
+      aumenta a sombra no hover/foco. Use no elemento inteiro que funciona como link/botão — o
+      <code>app-animal-card</code> acima já usa (clique nele para abrir o modal de detalhes).
+    </p>
+    <div class="sg__grade-cards">
+      <mat-card appearance="outlined" class="hover-elevar" tabindex="0" role="button">
+        <mat-card-header>
+          <mat-card-title>Card clicável</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Passe o mouse ou navegue até aqui pelo teclado (Tab).</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </section>
+
+  <!-- TABELA -->
+  <section class="sg__secao">
+    <h2>Tabela</h2>
+    <p class="sg__dica">
+      `mat-table` + `mat-paginator` (Material). Usado nas telas de manutenção/listagem
+      (ex.: <code>/admin/animais</code>) com paginação, ordenação e ações por linha.
+    </p>
+    <div class="sg__tabela-wrapper">
+      <table mat-table [dataSource]="animaisTabela" class="sg__tabela">
+        <ng-container matColumnDef="nome">
+          <th mat-header-cell *matHeaderCellDef>Nome</th>
+          <td mat-cell *matCellDef="let a">{{ a.nome }}</td>
+        </ng-container>
+        <ng-container matColumnDef="especie">
+          <th mat-header-cell *matHeaderCellDef>Espécie</th>
+          <td mat-cell *matCellDef="let a">{{ a.especie }}</td>
+        </ng-container>
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let a">
+            @if (a.status) {
+              <app-status-animal-badge [status]="a.status" />
+            }
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="colunasTabela"></tr>
+        <tr mat-row *matRowDef="let row; columns: colunasTabela"></tr>
+      </table>
+      <mat-paginator [length]="2" [pageSize]="10" [pageSizeOptions]="[10, 20, 50]" />
+    </div>
+  </section>
+
+  <!-- DIÁLOGO DE CONFIRMAÇÃO -->
+  <section class="sg__secao">
+    <h2>Diálogo de confirmação</h2>
+    <p class="sg__dica">
+      Componente próprio <code>app-confirm-dialog</code> (o Material só fornece o container
+      <code>MatDialog</code>) para confirmar ações irreversíveis, como exclusões.
+    </p>
+    <button mat-stroked-button color="warn" (click)="abrirConfirmacao()">
+      <mat-icon>delete</mat-icon>
+      Abrir diálogo de exclusão
+    </button>
+  </section>
+
+  <!-- CARROSSEL -->
+  <section class="sg__secao">
+    <h2>Carrossel</h2>
+    <p class="sg__dica">
+      Componente próprio (o Material não tem carrossel): autoplay, setas,
+      indicadores e swipe.
+    </p>
+    <app-carrossel [intervalo]="4000" rotulo="Exemplo de carrossel">
+      <ng-template appCarrosselSlide>
+        <div class="sg__slide" style="background: var(--cor-primaria)">Slide 1</div>
+      </ng-template>
+      <ng-template appCarrosselSlide>
+        <div class="sg__slide" style="background: var(--cor-secundaria)">Slide 2</div>
+      </ng-template>
+      <ng-template appCarrosselSlide>
+        <div class="sg__slide" style="background: var(--cor-info)">Slide 3</div>
+      </ng-template>
+    </app-carrossel>
+  </section>
+
+  <!-- STAT TILE -->
+  <section class="sg__secao">
+    <h2>Stat tile (KPI)</h2>
+    <p class="sg__dica">
+      Componente próprio <code>app-stat-tile</code> — rótulo + valor em destaque + ícone, com
+      variantes de cor (mesmos tokens dos badges de status). Usado no dashboard administrativo.
+      Passe <code>rota</code> para o tile inteiro virar um link — e, opcionalmente,
+      <code>queryParams</code> para a lista de destino abrir já filtrada (é assim que os KPIs do
+      dashboard abrem cada lista com o mesmo filtro que gerou o número).
+    </p>
+    <div class="sg__grade-cards">
+      <app-stat-tile titulo="Animais disponíveis" [valor]="12" icone="pets" cor="secundaria" />
+      <app-stat-tile titulo="Adoções pendentes" [valor]="3" icone="volunteer_activism" cor="alerta" />
+      <app-stat-tile titulo="Vacinas registradas" [valor]="47" icone="vaccines" cor="info" />
+      <app-stat-tile titulo="Carregando..." [valor]="null" icone="badge" cor="primaria" />
+    </div>
+  </section>
+
+  <!-- UPLOAD DE IMAGENS -->
+  <section class="sg__secao">
+    <h2>Upload de imagens</h2>
+    <p class="sg__dica">
+      Componente próprio <code>app-upload-imagens</code> (o Material não tem dropzone): drag & drop
+      ou clique para selecionar, com validação de tipo/tamanho no cliente. Usado em
+      <code>AnimalFotosComponent</code> (galeria de fotos no formulário de animal).
+    </p>
+    <app-upload-imagens
+      [multiplo]="true"
+      (arquivosSelecionados)="aoSelecionarImagensExemplo($event)"
+      (arquivosRejeitados)="aoRejeitarImagensExemplo($event)"
+    />
+  </section>
+</div>

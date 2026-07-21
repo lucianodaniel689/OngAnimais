@@ -1,0 +1,368 @@
+.animal-ficha {
+  max-width: 920px;
+  margin-inline: auto;
+}
+
+.animal-ficha__topo {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  margin-bottom: var(--esp-4);
+}
+
+.animal-ficha__topo h1 {
+  margin: 0;
+  font-size: var(--texto-xl);
+}
+
+.animal-ficha__erro {
+  margin: 0;
+  padding: var(--esp-2) var(--esp-3);
+  border-radius: var(--raio-sm);
+  background-color: var(--cor-perigo-bg);
+  color: var(--cor-perigo);
+  font-size: var(--texto-sm);
+}
+
+// Cabeçalho de identidade: foto + dados + ações. Empilha no mobile.
+.animal-ficha__cabecalho {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+  padding: var(--esp-5);
+  margin-bottom: var(--esp-4);
+}
+
+.animal-ficha__foto {
+  width: 96px;
+  height: 96px;
+  border-radius: var(--raio-md);
+  object-fit: cover;
+  border: 1px solid var(--cor-borda);
+  flex-shrink: 0;
+}
+
+.animal-ficha__foto--vazia {
+  display: grid;
+  place-items: center;
+  background: var(--cor-fundo);
+  color: var(--cor-borda);
+}
+
+.animal-ficha__foto--vazia mat-icon {
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+}
+
+.animal-ficha__identidade {
+  flex: 1;
+  min-width: 0;
+}
+
+.animal-ficha__nome-linha {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+}
+
+.animal-ficha__nome-linha h2 {
+  margin: 0;
+  font-size: var(--texto-xl);
+}
+
+.animal-ficha__meta {
+  margin: var(--esp-1) 0 0;
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+}
+
+.animal-ficha__selos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2) var(--esp-3);
+  margin-top: var(--esp-2);
+}
+
+.animal-ficha__selo {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--cor-sucesso);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+}
+
+.animal-ficha__selo mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.animal-ficha__selo--inativo,
+.animal-ficha__selo--atrasada {
+  color: var(--cor-perigo);
+}
+
+// Pontinho de alerta na label da aba Vacinas quando há dose vencida.
+.animal-ficha__aba-alerta {
+  width: 8px;
+  height: 8px;
+  margin-left: var(--esp-1);
+  border-radius: var(--raio-full);
+  background: var(--cor-perigo);
+}
+
+.animal-ficha__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+}
+
+.animal-ficha__card {
+  // O padding fica dentro de cada aba, para as tabs encostarem na borda do card.
+  padding: 0;
+  overflow: hidden;
+}
+
+.animal-ficha__aba {
+  padding: var(--esp-4) var(--esp-5) var(--esp-5);
+}
+
+.animal-ficha__aba h3 {
+  margin: 0 0 var(--esp-3);
+  font-size: var(--texto-lg);
+}
+
+.animal-ficha__aba-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+  margin-bottom: var(--esp-3);
+}
+
+.animal-ficha__aba-cabecalho h3 {
+  margin: 0;
+}
+
+.animal-ficha__pendentes {
+  margin-left: var(--esp-2);
+  padding: 2px var(--esp-2);
+  border-radius: var(--raio-full);
+  background: var(--cor-alerta-bg);
+  color: var(--cor-alerta);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.animal-ficha__descricao {
+  margin: 0 0 var(--esp-4);
+  white-space: pre-line;
+}
+
+.animal-ficha__vazio {
+  margin: 0;
+  padding: var(--esp-4) 0;
+  color: var(--cor-texto-suave);
+}
+
+.animal-ficha__detalhes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--esp-3) var(--esp-4);
+  margin: var(--esp-4) 0 0;
+}
+
+.animal-ficha__detalhes dt {
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}
+
+.animal-ficha__detalhes dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.animal-ficha__tabela-wrapper {
+  overflow-x: auto;
+}
+
+.animal-ficha__tabela {
+  width: 100%;
+}
+
+// Destaques da carteira de vacinação: dose vencida (perigo) e nos próximos 30 dias (alerta).
+.animal-ficha__dose--vencida,
+.animal-ficha__dose--proxima {
+  font-weight: 600;
+}
+
+.animal-ficha__dose--vencida {
+  color: var(--cor-perigo);
+}
+
+.animal-ficha__dose--proxima {
+  color: var(--cor-alerta);
+}
+
+.animal-ficha__dose--vencida mat-icon,
+.animal-ficha__dose--proxima mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  vertical-align: text-bottom;
+  margin-left: 4px;
+}
+
+.animal-ficha__adotante {
+  display: flex;
+  flex-direction: column;
+}
+
+.animal-ficha__adotante span {
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}
+
+// Botão com cara de link (abre o histórico do adotante em diálogo, não navega).
+.animal-ficha__link-adotante {
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.animal-ficha__link-adotante:hover,
+.animal-ficha__link-adotante:focus-visible {
+  text-decoration: underline;
+  color: var(--cor-primaria-escura);
+}
+
+// Observações truncadas na tabela — o texto completo fica no tooltip.
+.animal-ficha__observacoes {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// ─── Edição in-place (campos habilitam no próprio layout da ficha) ─────────
+
+.animal-ficha__erro--form {
+  margin-bottom: var(--esp-3);
+}
+
+// Campos do cabeçalho em edição: nome largo na primeira linha, demais menores.
+.animal-ficha__campos-identidade {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--esp-1) var(--esp-3);
+}
+
+.animal-ficha__campos-identidade mat-form-field {
+  width: 100%;
+}
+
+.animal-ficha__campo-nome {
+  grid-column: 1 / -1;
+}
+
+.animal-ficha__campo-descricao {
+  width: 100%;
+  margin-bottom: var(--esp-3);
+}
+
+.animal-ficha__saude--edicao {
+  margin-top: var(--esp-4);
+}
+
+// ─── Formulário de criação (/admin/animais/novo) ───────────────────────────
+
+.animal-ficha__card--form {
+  padding: var(--esp-5);
+  max-width: 720px;
+  margin-inline: auto;
+}
+
+// Grid 1 coluna (mobile) → 2 colunas (desktop). Campos largos ocupam as 2.
+.animal-ficha__form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--esp-2) var(--esp-4);
+}
+
+.animal-ficha__form mat-form-field {
+  width: 100%;
+}
+
+// Checkboxes de saúde (castrado/vermifugado) lado a lado.
+.animal-ficha__saude {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2) var(--esp-4);
+}
+
+// Dica do fluxo de cadastro: fotos vêm logo depois de salvar.
+.animal-ficha__dica {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  margin: 0;
+  padding: var(--esp-2) var(--esp-3);
+  border-radius: var(--raio-sm);
+  background: var(--cor-fundo);
+  border: 1px dashed var(--cor-borda);
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+}
+
+.animal-ficha__dica mat-icon {
+  flex-shrink: 0;
+  color: var(--cor-primaria-escura);
+}
+
+.animal-ficha__form-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--esp-3);
+  margin-top: var(--esp-3);
+}
+
+.animal-ficha__form-acoes mat-progress-spinner,
+.animal-ficha__acoes mat-progress-spinner {
+  margin-inline: auto;
+  --mdc-circular-progress-active-indicator-color: currentColor;
+}
+
+@media (min-width: 600px) {
+  .animal-ficha__cabecalho {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .animal-ficha__acoes {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .animal-ficha__form {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .animal-ficha__span-2 {
+    grid-column: 1 / -1;
+  }
+
+  .animal-ficha__form-acoes {
+    grid-column: 1 / -1;
+  }
+}

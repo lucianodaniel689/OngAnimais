@@ -1,0 +1,8 @@
+<div class="animal-detalhe container">
+  <a mat-button color="primary" routerLink="/" class="animal-detalhe__voltar">
+    <mat-icon>arrow_back</mat-icon>
+    Voltar
+  </a>
+
+  <app-animal-detalhe-conteudo [animalId]="animalId()" (animalCarregado)="aoAnimalCarregado($event)" />
+</div>

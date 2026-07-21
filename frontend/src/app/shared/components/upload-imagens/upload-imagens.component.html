@@ -1,0 +1,29 @@
+<div
+  class="upload-imagens"
+  [class.upload-imagens--arrastando]="arrastando()"
+  role="button"
+  tabindex="0"
+  [attr.aria-label]="rotulo()"
+  (click)="abrirSeletor()"
+  (keydown.enter)="abrirSeletor()"
+  (keydown.space)="abrirSeletor()"
+  (dragover)="aoArrastarSobre($event)"
+  (dragenter)="aoEntrarNaZona($event)"
+  (dragleave)="aoSairDaZona($event)"
+  (drop)="aoSoltarArquivos($event)"
+>
+  <mat-icon class="upload-imagens__icone">add_photo_alternate</mat-icon>
+  <p class="upload-imagens__rotulo">{{ rotulo() }}</p>
+  <p class="upload-imagens__dica">
+    {{ extensoesAceitas().join(', ') }} · até {{ tamanhoMaximoMb() }}MB por arquivo
+  </p>
+
+  <input
+    #inputArquivo
+    type="file"
+    class="upload-imagens__input"
+    [accept]="aceitaAtributo"
+    [multiple]="multiplo()"
+    (change)="aoSelecionarViaInput($event)"
+  />
+</div>

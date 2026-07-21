@@ -1,0 +1,6 @@
+@OngAnimais_HostAddress = http://localhost:5049
+
+GET {{OngAnimais_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

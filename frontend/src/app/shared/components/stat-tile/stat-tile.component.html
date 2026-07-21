@@ -1,0 +1,19 @@
+<mat-card
+  appearance="outlined"
+  class="stat-tile"
+  [class.hover-elevar]="rota()"
+  [routerLink]="rota()"
+  [queryParams]="queryParams()"
+  [attr.tabindex]="rota() ? 0 : null"
+  [attr.role]="rota() ? 'link' : null"
+>
+  <mat-icon class="stat-tile__icone">{{ icone() }}</mat-icon>
+  <div class="stat-tile__conteudo">
+    <span class="stat-tile__titulo">{{ titulo() }}</span>
+    @if (carregando()) {
+      <mat-progress-spinner mode="indeterminate" diameter="24" />
+    } @else {
+      <span class="stat-tile__valor">{{ valor() }}</span>
+    }
+  </div>
+</mat-card>

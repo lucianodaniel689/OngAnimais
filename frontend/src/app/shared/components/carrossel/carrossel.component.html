@@ -1,0 +1,59 @@
+<section
+  class="carrossel"
+  role="region"
+  [attr.aria-roledescription]="'carrossel'"
+  [attr.aria-label]="rotulo()"
+>
+  <div
+    class="carrossel__janela"
+    (pointerdown)="aoIniciarSwipe($event)"
+    (pointerup)="aoFinalizarSwipe($event)"
+  >
+    <div class="carrossel__trilha" [style.transform]="'translateX(' + -indiceAtual() * 100 + '%)'">
+      @for (slide of slides(); track $index) {
+        <div
+          class="carrossel__slide"
+          role="group"
+          [attr.aria-roledescription]="'slide'"
+          [attr.aria-label]="$index + 1 + ' de ' + slides().length"
+          [attr.aria-hidden]="$index !== indiceAtual()"
+        >
+          <ng-container [ngTemplateOutlet]="slide.template" />
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (slides().length > 1) {
+    <button
+      type="button"
+      class="carrossel__seta carrossel__seta--anterior"
+      aria-label="Slide anterior"
+      (click)="anterior()"
+    >
+      ‹
+    </button>
+    <button
+      type="button"
+      class="carrossel__seta carrossel__seta--proximo"
+      aria-label="Próximo slide"
+      (click)="proximo()"
+    >
+      ›
+    </button>
+
+    <div class="carrossel__indicadores" role="tablist" aria-label="Escolher slide">
+      @for (slide of slides(); track $index) {
+        <button
+          type="button"
+          class="carrossel__ponto"
+          [class.carrossel__ponto--ativo]="$index === indiceAtual()"
+          role="tab"
+          [attr.aria-selected]="$index === indiceAtual()"
+          [attr.aria-label]="'Ir para o slide ' + ($index + 1)"
+          (click)="irPara($index)"
+        ></button>
+      }
+    </div>
+  }
+</section>

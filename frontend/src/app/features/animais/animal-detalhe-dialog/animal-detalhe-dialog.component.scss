@@ -1,0 +1,18 @@
+:host {
+  display: block;
+  position: relative;
+}
+
+.animal-detalhe-dialog__fechar {
+  position: absolute;
+  top: var(--esp-2);
+  right: var(--esp-2);
+  z-index: 1;
+  background-color: var(--cor-superficie);
+  box-shadow: var(--sombra-sm);
+}
+
+.animal-detalhe-dialog__conteudo {
+  max-height: 85vh;
+  padding-top: var(--esp-6);
+}

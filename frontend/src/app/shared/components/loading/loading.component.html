@@ -1,0 +1,6 @@
+<div class="loading" role="status">
+  <mat-progress-spinner mode="indeterminate" [diameter]="tamanho()" />
+  @if (mensagem(); as msg) {
+    <p class="loading__mensagem">{{ msg }}</p>
+  }
+</div>

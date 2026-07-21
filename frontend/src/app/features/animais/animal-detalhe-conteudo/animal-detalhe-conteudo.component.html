@@ -1,0 +1,168 @@
+@if (animal(); as a) {
+  <div class="animal-detalhe-conteudo__grade">
+    <div class="animal-detalhe-conteudo__midia">
+      <app-carrossel [rotulo]="'Fotos de ' + a.nome">
+        @if (fotos().length > 0) {
+          @for (foto of fotos(); track foto.id) {
+            <ng-template appCarrosselSlide>
+              <img
+                class="animal-detalhe-conteudo__imagem"
+                [src]="urlFoto(foto.url)"
+                [alt]="foto.descricao || ('Foto de ' + a.nome)"
+              />
+            </ng-template>
+          }
+        } @else {
+          <ng-template appCarrosselSlide>
+            <img
+              class="animal-detalhe-conteudo__imagem"
+              [src]="imagemPadrao"
+              [alt]="'Foto de ' + a.nome"
+            />
+          </ng-template>
+        }
+      </app-carrossel>
+    </div>
+
+    <div class="animal-detalhe-conteudo__info">
+      <div class="animal-detalhe-conteudo__cabecalho">
+        <h1>{{ a.nome }}</h1>
+        @if (a.status) {
+          <app-status-animal-badge [status]="a.status" />
+        }
+      </div>
+
+      <p class="animal-detalhe-conteudo__meta">
+        {{ especieRotulo() }} · {{ sexoRotulo() }} · {{ porteRotulo() }}
+        @if (a.idadeAproximada) {
+          · {{ a.idadeAproximada }}
+        }
+      </p>
+
+      @if (a.castrado || a.vermifugado) {
+        <ul class="animal-detalhe-conteudo__saude" aria-label="Cuidados de saúde">
+          @if (a.castrado) {
+            <li class="animal-detalhe-conteudo__saude-item">
+              <mat-icon>check_circle</mat-icon>
+              Castrado
+            </li>
+          }
+          @if (a.vermifugado) {
+            <li class="animal-detalhe-conteudo__saude-item">
+              <mat-icon>check_circle</mat-icon>
+              Vermifugado
+            </li>
+          }
+        </ul>
+      }
+
+      @if (a.descricao) {
+        <p class="animal-detalhe-conteudo__descricao">{{ a.descricao }}</p>
+      }
+
+      @if (enviado()) {
+        <div class="animal-detalhe-conteudo__acoes">
+          <p class="animal-detalhe-conteudo__sucesso">
+            <mat-icon>check_circle</mat-icon>
+            Solicitação enviada! Nossa equipe vai entrar em contato em breve.
+          </p>
+          @if (linkWhatsappPosEnvio(); as link) {
+            <a mat-stroked-button color="primary" [href]="link" target="_blank" rel="noopener">
+              <mat-icon>chat</mat-icon>
+              Avisar também pelo WhatsApp
+            </a>
+          }
+        </div>
+      } @else if (!disponivel()) {
+        <p class="animal-detalhe-conteudo__indisponivel">
+          Este animal não está disponível para adoção no momento.
+        </p>
+      } @else if (!mostrarForm()) {
+        <div class="animal-detalhe-conteudo__acoes">
+          <button mat-flat-button color="primary" (click)="abrirForm()">
+            <mat-icon>pets</mat-icon>
+            Quero adotar
+          </button>
+          <a mat-stroked-button color="primary" [href]="linkWhatsapp()" target="_blank" rel="noopener">
+            <mat-icon>chat</mat-icon>
+            Falar no WhatsApp
+          </a>
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (mostrarForm() && disponivel() && !enviado()) {
+    <mat-card appearance="outlined" class="animal-detalhe-conteudo__form-card">
+      <h2>Solicitar adoção de {{ a.nome }}</h2>
+      <p class="animal-detalhe-conteudo__form-dica">
+        Preencha seus dados de contato — um funcionário da ONG vai falar com você.
+      </p>
+
+      @if (erroEnvio(); as msg) {
+        <p class="animal-detalhe-conteudo__erro" role="alert">{{ msg }}</p>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="enviar()" class="animal-detalhe-conteudo__form">
+        <mat-form-field appearance="outline">
+          <mat-label>Nome completo</mat-label>
+          <input matInput formControlName="nome" maxlength="150" />
+          @if (form.controls.nome.hasError('required')) {
+            <mat-error>Informe seu nome.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" />
+          @if (form.controls.email.hasError('required')) {
+            <mat-error>Informe seu email.</mat-error>
+          } @else if (form.controls.email.hasError('email')) {
+            <mat-error>Email inválido.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Telefone</mat-label>
+          <input matInput formControlName="telefone" placeholder="(11) 91234-5678" maxlength="20" />
+          @if (form.controls.telefone.hasError('required')) {
+            <mat-error>Informe seu telefone.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Observações (opcional)</mat-label>
+          <textarea
+            matInput
+            formControlName="observacoes"
+            rows="3"
+            maxlength="500"
+            placeholder="Algo a mais que queira contar pra gente? (rotina, experiência com pets...)"
+          ></textarea>
+          @if (form.controls.observacoes.hasError('maxlength')) {
+            <mat-error>Máximo de 500 caracteres.</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="animal-detalhe-conteudo__form-acoes">
+          <button mat-button type="button" (click)="mostrarForm.set(false)">Cancelar</button>
+          <button mat-flat-button color="primary" type="submit" [disabled]="enviando()">
+            @if (enviando()) {
+              <mat-progress-spinner mode="indeterminate" diameter="20" />
+            } @else {
+              Enviar solicitação
+            }
+          </button>
+        </div>
+      </form>
+    </mat-card>
+  }
+} @else if (carregando()) {
+  <div class="animal-detalhe-conteudo__estado">
+    <app-loading [tamanho]="44" mensagem="Carregando..." />
+  </div>
+} @else {
+  <div class="animal-detalhe-conteudo__estado">
+    <p>Animal não encontrado.</p>
+  </div>
+}

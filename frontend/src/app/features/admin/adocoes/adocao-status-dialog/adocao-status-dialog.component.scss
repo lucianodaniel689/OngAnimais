@@ -1,0 +1,17 @@
+// Sem min-width: o diálogo abre com `min(420px, 92vw)` (ver AdocaoListaComponent)
+// e um mínimo fixo estouraria em celulares estreitos.
+.adocao-status-dialog__conteudo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.adocao-status-dialog__conteudo mat-form-field {
+  width: 100%;
+}
+
+.adocao-status-dialog__resumo {
+  margin: 0 0 var(--esp-2);
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+}

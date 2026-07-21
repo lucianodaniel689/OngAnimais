@@ -1,0 +1,3858 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "OngAnimais API",
+    "description": "API para gerenciamento de ONG de animais.",
+    "version": "v1"
+  },
+  "paths": {
+    "/api/adocao": {
+      "post": {
+        "tags": [
+          "Adocao"
+        ],
+        "summary": "Abre uma candidatura de adoção para um animal.\r\nO animal deve estar com status 'Disponivel' e continua disponível para outras\r\ncandidaturas — a reserva só acontece quando a ONG aprova uma delas.\r\nEndpoint público — o adotante não tem conta no sistema (login é exclusivo dos\r\nfuncionários).",
+        "operationId": "Adocao_Criar",
+        "requestBody": {
+          "description": "Dados da solicitação e do adotante.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdocaoCreateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdocaoCreateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdocaoCreateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Solicitação aberta com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfAdocaoRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfAdocaoRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfAdocaoRespostaDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Animal indisponível ou dados inválidos.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Muitas solicitações seguidas — aguarde antes de tentar de novo."
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Adocao"
+        ],
+        "summary": "Lista as solicitações de adoção de forma paginada, com filtros e ordenação.",
+        "operationId": "Adocao_Listar",
+        "parameters": [
+          {
+            "name": "Status",
+            "in": "query",
+            "description": "Filtra pelo status da adoção.",
+            "schema": {
+              "$ref": "#/components/schemas/StatusAdocao"
+            }
+          },
+          {
+            "name": "AnimalId",
+            "in": "query",
+            "description": "Filtra pelas adoções de um animal específico.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "AdotanteId",
+            "in": "query",
+            "description": "Filtra pelas candidaturas de um adotante específico (histórico do adotante).",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Pagina",
+            "in": "query",
+            "description": "Número da página solicitada (começa em 1). Valores inválidos são normalizados para 1.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "TamanhoPagina",
+            "in": "query",
+            "description": "Quantidade de itens por página (padrão 10, máximo 100).",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "OrdenarPor",
+            "in": "query",
+            "description": "Campo pelo qual ordenar (nome amigável; validado contra uma lista permitida no módulo).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Descendente",
+            "in": "query",
+            "description": "Indica se a ordenação deve ser decrescente (padrão: crescente).",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "Offset",
+            "in": "query",
+            "description": "Deslocamento (OFFSET) calculado a partir da página e do tamanho da página.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista retornada com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfResultadoPaginadoOfAdocaoRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfResultadoPaginadoOfAdocaoRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfResultadoPaginadoOfAdocaoRespostaDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/adocao/{id}": {
+      "get": {
+        "tags": [
+          "Adocao"
+        ],
+        "summary": "Obtém uma adoção pelo seu identificador.",
+        "operationId": "Adocao_ObterPorId",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID da adoção.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Adoção encontrada.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfAdocaoRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfAdocaoRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfAdocaoRespostaDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Adoção não encontrada.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Adocao"
+        ],
+        "summary": "Atualiza o status de uma adoção (aprovar, recusar, concluir ou cancelar).\r\nAprovar reserva o animal; concluir marca o animal como 'Adotado' e recusa\r\nautomaticamente as demais candidaturas pendentes; recusar/cancelar uma adoção\r\naprovada (ou cancelar uma concluída — devolução) libera o animal.\r\nTransições fora da máquina de status retornam 400.",
+        "operationId": "Adocao_Atualizar",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID da adoção.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Novo status e observações.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdocaoUpdateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdocaoUpdateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdocaoUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Adoção atualizada com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfAdocaoRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfAdocaoRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfAdocaoRespostaDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou transição de status não permitida.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Adoção não encontrada.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/animal": {
+      "post": {
+        "tags": [
+          "Animal"
+        ],
+        "summary": "Cadastra um novo animal no sistema.",
+        "operationId": "Animal_Criar",
+        "requestBody": {
+          "description": "Dados do animal.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnimalCreateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnimalCreateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnimalCreateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Animal cadastrado com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfAnimalRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfAnimalRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfAnimalRespostaDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Animal"
+        ],
+        "summary": "Lista os animais cadastrados de forma paginada, com filtros e ordenação.",
+        "operationId": "Animal_Listar",
+        "parameters": [
+          {
+            "name": "Nome",
+            "in": "query",
+            "description": "Busca parcial por nome (case-insensitive).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Especie",
+            "in": "query",
+            "description": "Filtra pela espécie.",
+            "schema": {
+              "$ref": "#/components/schemas/EspecieAnimal"
+            }
+          },
+          {
+            "name": "Sexo",
+            "in": "query",
+            "description": "Filtra pelo sexo.",
+            "schema": {
+              "$ref": "#/components/schemas/SexoAnimal"
+            }
+          },
+          {
+            "name": "Porte",
+            "in": "query",
+            "description": "Filtra pelo porte.",
+            "schema": {
+              "$ref": "#/components/schemas/PorteAnimal"
+            }
+          },
+          {
+            "name": "Status",
+            "in": "query",
+            "description": "Filtra pelo status.",
+            "schema": {
+              "$ref": "#/components/schemas/StatusAnimal"
+            }
+          },
+          {
+            "name": "Castrado",
+            "in": "query",
+            "description": "Filtra por animais castrados (true) ou não castrados (false).",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "Ativo",
+            "in": "query",
+            "description": "Filtra por animais ativos/inativos.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "Pagina",
+            "in": "query",
+            "description": "Número da página solicitada (começa em 1). Valores inválidos são normalizados para 1.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "TamanhoPagina",
+            "in": "query",
+            "description": "Quantidade de itens por página (padrão 10, máximo 100).",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "OrdenarPor",
+            "in": "query",
+            "description": "Campo pelo qual ordenar (nome amigável; validado contra uma lista permitida no módulo).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Descendente",
+            "in": "query",
+            "description": "Indica se a ordenação deve ser decrescente (padrão: crescente).",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "Offset",
+            "in": "query",
+            "description": "Deslocamento (OFFSET) calculado a partir da página e do tamanho da página.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de animais retornada com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfResultadoPaginadoOfAnimalRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfResultadoPaginadoOfAnimalRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfResultadoPaginadoOfAnimalRespostaDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/animal/disponiveis": {
+      "get": {
+        "tags": [
+          "Animal"
+        ],
+        "summary": "Lista todos os animais disponíveis para adoção.",
+        "description": "Endpoint público para exibição na página inicial de adoção.",
+        "operationId": "Animal_ListarDisponiveis",
+        "responses": {
+          "200": {
+            "description": "Lista retornada com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfIEnumerableOfAnimalRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfIEnumerableOfAnimalRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfIEnumerableOfAnimalRespostaDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/animal/{id}": {
+      "get": {
+        "tags": [
+          "Animal"
+        ],
+        "summary": "Obtém um animal pelo seu identificador.",
+        "operationId": "Animal_ObterPorId",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID do animal.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Animal encontrado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfAnimalRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfAnimalRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfAnimalRespostaDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Animal não encontrado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Animal"
+        ],
+        "summary": "Atualiza os dados de um animal existente.",
+        "operationId": "Animal_Atualizar",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID do animal a ser atualizado.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Novos dados do animal.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnimalUpdateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnimalUpdateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnimalUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Animal atualizado com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfAnimalRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfAnimalRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfAnimalRespostaDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Animal não encontrado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Animal"
+        ],
+        "summary": "Exclui um animal do sistema.",
+        "operationId": "Animal_Excluir",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID do animal a ser excluído.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Animal excluído com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Animal não encontrado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auditoria": {
+      "get": {
+        "tags": [
+          "Auditoria"
+        ],
+        "summary": "Lista os registros de auditoria de forma paginada, com filtros por\r\ncategoria, funcionário, período e busca textual.",
+        "operationId": "Auditoria_Listar",
+        "parameters": [
+          {
+            "name": "Categoria",
+            "in": "query",
+            "description": "Filtra pela categoria do evento.",
+            "schema": {
+              "$ref": "#/components/schemas/CategoriaAuditoria"
+            }
+          },
+          {
+            "name": "UsuarioId",
+            "in": "query",
+            "description": "Filtra pelos eventos de um funcionário específico.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Busca",
+            "in": "query",
+            "description": "Busca parcial em ação, nome do funcionário e detalhes (case-insensitive).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "DataDe",
+            "in": "query",
+            "description": "Filtra eventos a partir desta data (inclusive). Formato: `yyyy-MM-dd`.",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "DataAte",
+            "in": "query",
+            "description": "Filtra eventos até esta data (inclusive). Formato: `yyyy-MM-dd`.",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "Pagina",
+            "in": "query",
+            "description": "Número da página solicitada (começa em 1). Valores inválidos são normalizados para 1.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "TamanhoPagina",
+            "in": "query",
+            "description": "Quantidade de itens por página (padrão 10, máximo 100).",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "OrdenarPor",
+            "in": "query",
+            "description": "Campo pelo qual ordenar (nome amigável; validado contra uma lista permitida no módulo).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Descendente",
+            "in": "query",
+            "description": "Indica se a ordenação deve ser decrescente (padrão: crescente).",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "Offset",
+            "in": "query",
+            "description": "Deslocamento (OFFSET) calculado a partir da página e do tamanho da página.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Registros listados com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfResultadoPaginadoOfAuditoriaRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfResultadoPaginadoOfAuditoriaRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfResultadoPaginadoOfAuditoriaRespostaDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuário autenticado não é Admin."
+          }
+        }
+      }
+    },
+    "/api/foto": {
+      "post": {
+        "tags": [
+          "Foto"
+        ],
+        "summary": "Faz upload de uma foto e adiciona à galeria de um animal.",
+        "operationId": "Foto_Criar",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "AnimalId",
+                  "Arquivo"
+                ],
+                "type": "object",
+                "properties": {
+                  "AnimalId": {
+                    "maximum": 2147483647,
+                    "minimum": 1,
+                    "type": "integer",
+                    "description": "Identificador do animal dono da foto.",
+                    "format": "int32"
+                  },
+                  "Arquivo": {
+                    "type": "string",
+                    "description": "Arquivo de imagem enviado (.jpg, .jpeg, .png, .webp ou .gif).",
+                    "format": "binary"
+                  },
+                  "Descricao": {
+                    "maxLength": 255,
+                    "minLength": 0,
+                    "type": "string",
+                    "description": "Descrição/legenda da foto (opcional)."
+                  },
+                  "Principal": {
+                    "type": "boolean",
+                    "description": "Indica se esta deve ser a foto principal (de capa) do animal."
+                  }
+                }
+              },
+              "encoding": {
+                "AnimalId": {
+                  "style": "form"
+                },
+                "Arquivo": {
+                  "style": "form"
+                },
+                "Descricao": {
+                  "style": "form"
+                },
+                "Principal": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Foto adicionada com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfFotoRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfFotoRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfFotoRespostaDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Animal inexistente/inativo, arquivo inválido ou dados inválidos.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Foto"
+        ],
+        "summary": "Lista as fotos cadastradas de forma paginada, com filtros e ordenação.",
+        "operationId": "Foto_Listar",
+        "parameters": [
+          {
+            "name": "AnimalId",
+            "in": "query",
+            "description": "Filtra pelas fotos de um animal específico.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Principal",
+            "in": "query",
+            "description": "Filtra apenas fotos principais (de capa).",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "Pagina",
+            "in": "query",
+            "description": "Número da página solicitada (começa em 1). Valores inválidos são normalizados para 1.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "TamanhoPagina",
+            "in": "query",
+            "description": "Quantidade de itens por página (padrão 10, máximo 100).",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "OrdenarPor",
+            "in": "query",
+            "description": "Campo pelo qual ordenar (nome amigável; validado contra uma lista permitida no módulo).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Descendente",
+            "in": "query",
+            "description": "Indica se a ordenação deve ser decrescente (padrão: crescente).",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "Offset",
+            "in": "query",
+            "description": "Deslocamento (OFFSET) calculado a partir da página e do tamanho da página.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista retornada com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfResultadoPaginadoOfFotoRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfResultadoPaginadoOfFotoRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfResultadoPaginadoOfFotoRespostaDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/foto/animal/{animalId}": {
+      "get": {
+        "tags": [
+          "Foto"
+        ],
+        "summary": "Lista a galeria de fotos de um animal específico.",
+        "operationId": "Foto_ListarPorAnimal",
+        "parameters": [
+          {
+            "name": "animalId",
+            "in": "path",
+            "description": "ID do animal.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Galeria retornada com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfIEnumerableOfFotoRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfIEnumerableOfFotoRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfIEnumerableOfFotoRespostaDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/foto/{id}": {
+      "get": {
+        "tags": [
+          "Foto"
+        ],
+        "summary": "Obtém uma foto pelo seu identificador.",
+        "operationId": "Foto_ObterPorId",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID da foto.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Foto encontrada.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfFotoRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfFotoRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfFotoRespostaDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Foto não encontrada.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Foto"
+        ],
+        "summary": "Atualiza a descrição e o indicador de principal de uma foto.",
+        "operationId": "Foto_Atualizar",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID da foto a ser atualizada.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Novos dados da foto.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FotoUpdateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FotoUpdateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/FotoUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Foto atualizada com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfFotoRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfFotoRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfFotoRespostaDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Foto não encontrada.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Foto"
+        ],
+        "summary": "Exclui uma foto da galeria.",
+        "operationId": "Foto_Excluir",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID da foto a ser excluída.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Foto excluída com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Foto não encontrada.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/usuario/registrar": {
+      "post": {
+        "tags": [
+          "Usuario"
+        ],
+        "summary": "Registra um novo usuário (funcionário) no sistema.\r\nExige um funcionário Admin logado — não há auto-cadastro público, já que\r\no login é exclusivo da equipe da ONG (quem adota não tem conta).",
+        "operationId": "Usuario_Registrar",
+        "requestBody": {
+          "description": "Dados de registro do usuário.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioRegistroDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioRegistroDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioRegistroDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Usuário registrado com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfUsuarioRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfUsuarioRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfUsuarioRespostaDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou email já cadastrado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuário autenticado não é Admin."
+          }
+        }
+      }
+    },
+    "/api/usuario/login": {
+      "post": {
+        "tags": [
+          "Usuario"
+        ],
+        "summary": "Realiza o login do usuário e retorna um token JWT.",
+        "operationId": "Usuario_Login",
+        "requestBody": {
+          "description": "Dados de login do usuário.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioLoginDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioLoginDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioLoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login realizado com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciais inválidas.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Muitas tentativas de login — aguarde antes de tentar de novo."
+          }
+        }
+      }
+    },
+    "/api/usuario": {
+      "get": {
+        "tags": [
+          "Usuario"
+        ],
+        "summary": "Lista os usuários cadastrados de forma paginada, com busca e ordenação.",
+        "operationId": "Usuario_Listar",
+        "parameters": [
+          {
+            "name": "Busca",
+            "in": "query",
+            "description": "Busca parcial por nome ou e-mail (case-insensitive).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Ativo",
+            "in": "query",
+            "description": "Filtra por usuários ativos/inativos.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "Pagina",
+            "in": "query",
+            "description": "Número da página solicitada (começa em 1). Valores inválidos são normalizados para 1.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "TamanhoPagina",
+            "in": "query",
+            "description": "Quantidade de itens por página (padrão 10, máximo 100).",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "OrdenarPor",
+            "in": "query",
+            "description": "Campo pelo qual ordenar (nome amigável; validado contra uma lista permitida no módulo).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Descendente",
+            "in": "query",
+            "description": "Indica se a ordenação deve ser decrescente (padrão: crescente).",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "Offset",
+            "in": "query",
+            "description": "Deslocamento (OFFSET) calculado a partir da página e do tamanho da página.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de usuários retornada com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfResultadoPaginadoOfUsuarioRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfResultadoPaginadoOfUsuarioRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfResultadoPaginadoOfUsuarioRespostaDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuário autenticado não é Admin."
+          }
+        }
+      }
+    },
+    "/api/usuario/{id}": {
+      "get": {
+        "tags": [
+          "Usuario"
+        ],
+        "summary": "Obtém um usuário pelo seu identificador.",
+        "operationId": "Usuario_ObterPorId",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID do usuário.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Usuário encontrado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfUsuarioRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfUsuarioRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfUsuarioRespostaDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuário não encontrado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuário autenticado não é Admin."
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Usuario"
+        ],
+        "summary": "Atualiza os dados de um usuário existente (uso administrativo:\r\nnome, email, perfil e situação).",
+        "operationId": "Usuario_Atualizar",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID do usuário a ser atualizado.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Novos dados do usuário.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioUpdateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioUpdateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Usuário atualizado com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfUsuarioRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfUsuarioRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfUsuarioRespostaDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Email já em uso por outro usuário.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuário não encontrado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuário autenticado não é Admin."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Usuario"
+        ],
+        "summary": "Exclui um usuário do sistema.",
+        "operationId": "Usuario_Excluir",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID do usuário a ser excluído.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Usuário excluído com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuário não encontrado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Usuário autenticado não é Admin."
+          }
+        }
+      }
+    },
+    "/api/usuario/me": {
+      "get": {
+        "tags": [
+          "Usuario"
+        ],
+        "summary": "Obtém os dados do funcionário autenticado (autoatendimento, qualquer perfil).",
+        "operationId": "Usuario_ObterMe",
+        "responses": {
+          "200": {
+            "description": "Usuário encontrado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfUsuarioRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfUsuarioRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfUsuarioRespostaDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuário não encontrado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Usuario"
+        ],
+        "summary": "Atualiza os dados pessoais (nome e email) do funcionário autenticado —\r\nautoatendimento, disponível a qualquer perfil. Não permite alterar\r\nperfil nem situação (isso é exclusivo do PUT administrativo por id).",
+        "operationId": "Usuario_AtualizarMe",
+        "requestBody": {
+          "description": "Novos dados pessoais.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioMeUpdateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioMeUpdateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioMeUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Dados atualizados com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfUsuarioRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfUsuarioRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfUsuarioRespostaDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Email já em uso por outro usuário.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuário não encontrado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/usuario/me/senha": {
+      "put": {
+        "tags": [
+          "Usuario"
+        ],
+        "summary": "Altera a senha do funcionário autenticado (o próprio, não de terceiros).\r\nExige a senha atual como confirmação.",
+        "operationId": "Usuario_AlterarMinhaSenha",
+        "requestBody": {
+          "description": "Senha atual e nova senha.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioSenhaDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioSenhaDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioSenhaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Senha alterada com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Senha atual incorreta ou dados inválidos.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/vacina": {
+      "post": {
+        "tags": [
+          "Vacina"
+        ],
+        "summary": "Registra uma nova vacina aplicada em um animal.",
+        "operationId": "Vacina_Criar",
+        "requestBody": {
+          "description": "Dados da vacina.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VacinaCreateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VacinaCreateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/VacinaCreateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Vacina registrada com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfVacinaRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfVacinaRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfVacinaRespostaDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Animal inexistente/inativo ou dados inválidos.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Vacina"
+        ],
+        "summary": "Lista as vacinas registradas de forma paginada, com filtros e ordenação.",
+        "operationId": "Vacina_Listar",
+        "parameters": [
+          {
+            "name": "AnimalId",
+            "in": "query",
+            "description": "Filtra pelas vacinas de um animal específico.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Nome",
+            "in": "query",
+            "description": "Busca parcial pelo nome da vacina (case-insensitive).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ProximaDoseDe",
+            "in": "query",
+            "description": "Filtra vacinas com próxima dose a partir desta data (inclusive).\r\nFormato: `yyyy-MM-dd`. Combinado com OngAnimais.DTOs.VacinaFiltroDto.ProximaDoseAte,\r\npermite janelas como \"doses dos próximos 30 dias\".",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "ProximaDoseAte",
+            "in": "query",
+            "description": "Filtra vacinas com próxima dose até esta data (inclusive).\r\nFormato: `yyyy-MM-dd`. Sozinho com a data de hoje, retorna as doses atrasadas.",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "Pagina",
+            "in": "query",
+            "description": "Número da página solicitada (começa em 1). Valores inválidos são normalizados para 1.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "TamanhoPagina",
+            "in": "query",
+            "description": "Quantidade de itens por página (padrão 10, máximo 100).",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "OrdenarPor",
+            "in": "query",
+            "description": "Campo pelo qual ordenar (nome amigável; validado contra uma lista permitida no módulo).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Descendente",
+            "in": "query",
+            "description": "Indica se a ordenação deve ser decrescente (padrão: crescente).",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "Offset",
+            "in": "query",
+            "description": "Deslocamento (OFFSET) calculado a partir da página e do tamanho da página.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista retornada com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfResultadoPaginadoOfVacinaRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfResultadoPaginadoOfVacinaRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfResultadoPaginadoOfVacinaRespostaDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/vacina/animal/{animalId}": {
+      "get": {
+        "tags": [
+          "Vacina"
+        ],
+        "summary": "Lista o histórico de vacinas de um animal específico.",
+        "operationId": "Vacina_ListarPorAnimal",
+        "parameters": [
+          {
+            "name": "animalId",
+            "in": "path",
+            "description": "ID do animal.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Histórico retornado com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfIEnumerableOfVacinaRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfIEnumerableOfVacinaRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfIEnumerableOfVacinaRespostaDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/vacina/{id}": {
+      "get": {
+        "tags": [
+          "Vacina"
+        ],
+        "summary": "Obtém uma vacina pelo seu identificador.",
+        "operationId": "Vacina_ObterPorId",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID da vacina.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vacina encontrada.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfVacinaRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfVacinaRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfVacinaRespostaDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Vacina não encontrada.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Vacina"
+        ],
+        "summary": "Atualiza os dados de uma vacina existente.",
+        "operationId": "Vacina_Atualizar",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID da vacina a ser atualizada.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Novos dados da vacina.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VacinaUpdateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VacinaUpdateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/VacinaUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Vacina atualizada com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfVacinaRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfVacinaRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfVacinaRespostaDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Vacina não encontrada.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Vacina"
+        ],
+        "summary": "Exclui uma vacina do sistema.",
+        "operationId": "Vacina_Excluir",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID da vacina a ser excluída.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vacina excluída com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Vacina não encontrada.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AdocaoCreateDto": {
+        "required": [
+          "animalId",
+          "emailAdotante",
+          "nomeAdotante",
+          "telefoneAdotante"
+        ],
+        "type": "object",
+        "properties": {
+          "animalId": {
+            "maximum": 2147483647,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Identificador do animal a ser adotado.",
+            "format": "int32"
+          },
+          "nomeAdotante": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string",
+            "description": "Nome completo do adotante."
+          },
+          "emailAdotante": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string",
+            "description": "Email de contato do adotante.",
+            "format": "email"
+          },
+          "telefoneAdotante": {
+            "maxLength": 20,
+            "minLength": 0,
+            "type": "string",
+            "description": "Telefone de contato do adotante."
+          },
+          "observacoes": {
+            "type": "string",
+            "description": "Observações adicionais do solicitante.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "DTO para abertura de uma solicitação de adoção.\r\nEnviado pelo site público — sem exigir login, já que o adotante não\r\ntem conta no sistema (apenas os funcionários da ONG têm)."
+      },
+      "AdocaoRespostaDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Identificador da adoção.",
+            "format": "int32"
+          },
+          "animalId": {
+            "type": "integer",
+            "description": "Identificador do animal.",
+            "format": "int32"
+          },
+          "nomeAnimal": {
+            "type": "string",
+            "description": "Nome do animal solicitado.",
+            "nullable": true
+          },
+          "adotanteId": {
+            "type": "integer",
+            "description": "Identificador do adotante solicitante.",
+            "format": "int32"
+          },
+          "nomeAdotante": {
+            "type": "string",
+            "description": "Nome do adotante solicitante.",
+            "nullable": true
+          },
+          "emailAdotante": {
+            "type": "string",
+            "description": "Email de contato do adotante.",
+            "nullable": true
+          },
+          "telefoneAdotante": {
+            "type": "string",
+            "description": "Telefone de contato do adotante.",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/StatusAdocao"
+          },
+          "dataSolicitacao": {
+            "type": "string",
+            "description": "Data da solicitação.",
+            "format": "date-time"
+          },
+          "dataConclusao": {
+            "type": "string",
+            "description": "Data de conclusão da adoção (quando aplicável).",
+            "format": "date-time",
+            "nullable": true
+          },
+          "observacoes": {
+            "type": "string",
+            "description": "Observações adicionais.",
+            "nullable": true
+          },
+          "foiDevolvida": {
+            "type": "boolean",
+            "description": "Indica se esta adoção foi uma devolução: chegou a ser concluída e depois\r\nfoi cancelada (animal devolvido à ONG). Derivado da trilha de auditoria —\r\ndevoluções anteriores à Fase 16 (sem auditoria) aparecem como false."
+          }
+        },
+        "additionalProperties": false,
+        "description": "DTO de resposta com os dados da adoção, incluindo nome do animal e o\r\ncontato do adotante."
+      },
+      "AdocaoUpdateDto": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/StatusAdocao"
+          },
+          "observacoes": {
+            "type": "string",
+            "description": "Observações adicionais (ex: motivo da recusa).",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "DTO para atualização do status de uma adoção."
+      },
+      "AnimalCreateDto": {
+        "required": [
+          "especie",
+          "nome",
+          "porte",
+          "sexo"
+        ],
+        "type": "object",
+        "properties": {
+          "nome": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string",
+            "description": "Nome do animal."
+          },
+          "especie": {
+            "$ref": "#/components/schemas/EspecieAnimal"
+          },
+          "sexo": {
+            "$ref": "#/components/schemas/SexoAnimal"
+          },
+          "idadeAproximada": {
+            "maxLength": 50,
+            "minLength": 0,
+            "type": "string",
+            "description": "Idade aproximada do animal (ex: \"2 anos\", \"6 meses\").",
+            "nullable": true
+          },
+          "porte": {
+            "$ref": "#/components/schemas/PorteAnimal"
+          },
+          "descricao": {
+            "type": "string",
+            "description": "Descrição detalhada do animal.",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/StatusAnimal"
+          },
+          "castrado": {
+            "type": "boolean",
+            "description": "Indica se o animal é castrado (padrão: false)."
+          },
+          "vermifugado": {
+            "type": "boolean",
+            "description": "Indica se o animal está vermifugado (padrão: false)."
+          }
+        },
+        "additionalProperties": false,
+        "description": "DTO para cadastro de um novo animal."
+      },
+      "AnimalRespostaDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Identificador do animal.",
+            "format": "int32"
+          },
+          "nome": {
+            "type": "string",
+            "description": "Nome do animal.",
+            "nullable": true
+          },
+          "especie": {
+            "$ref": "#/components/schemas/EspecieAnimal"
+          },
+          "sexo": {
+            "$ref": "#/components/schemas/SexoAnimal"
+          },
+          "idadeAproximada": {
+            "type": "string",
+            "description": "Idade aproximada do animal.",
+            "nullable": true
+          },
+          "porte": {
+            "$ref": "#/components/schemas/PorteAnimal"
+          },
+          "descricao": {
+            "type": "string",
+            "description": "Descrição detalhada do animal.",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/StatusAnimal"
+          },
+          "castrado": {
+            "type": "boolean",
+            "description": "Indica se o animal é castrado."
+          },
+          "vermifugado": {
+            "type": "boolean",
+            "description": "Indica se o animal está vermifugado."
+          },
+          "dataCadastro": {
+            "type": "string",
+            "description": "Data de cadastro do animal.",
+            "format": "date-time"
+          },
+          "ativo": {
+            "type": "boolean",
+            "description": "Indica se o animal está ativo."
+          },
+          "fotoPrincipalUrl": {
+            "type": "string",
+            "description": "URL da foto principal do animal (ou a mais recente, se nenhuma foto estiver\r\nmarcada como principal); `null` se o animal não tiver fotos cadastradas.\r\nNão populado nas respostas de `Criar`/`Atualizar` (o card/carrossel\r\nbusca a galeria separadamente via `GET /api/foto/animal/{id}`).",
+            "nullable": true
+          },
+          "candidaturasPendentes": {
+            "type": "integer",
+            "description": "Quantidade de candidaturas de adoção pendentes do animal. Populado apenas\r\nna listagem administrativa (`ListarPaginadoAsync`) — ajuda a equipe a\r\npriorizar quais animais têm interessados aguardando; `0` nas demais\r\nrespostas (detalhe público, vitrine, criar/atualizar).",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "DTO de resposta com os dados do animal."
+      },
+      "AnimalUpdateDto": {
+        "required": [
+          "especie",
+          "nome",
+          "porte",
+          "sexo",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "nome": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string",
+            "description": "Nome do animal."
+          },
+          "especie": {
+            "$ref": "#/components/schemas/EspecieAnimal"
+          },
+          "sexo": {
+            "$ref": "#/components/schemas/SexoAnimal"
+          },
+          "idadeAproximada": {
+            "maxLength": 50,
+            "minLength": 0,
+            "type": "string",
+            "description": "Idade aproximada do animal (ex: \"2 anos\", \"6 meses\").",
+            "nullable": true
+          },
+          "porte": {
+            "$ref": "#/components/schemas/PorteAnimal"
+          },
+          "descricao": {
+            "type": "string",
+            "description": "Descrição detalhada do animal.",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/StatusAnimal"
+          },
+          "castrado": {
+            "type": "boolean",
+            "description": "Indica se o animal é castrado."
+          },
+          "vermifugado": {
+            "type": "boolean",
+            "description": "Indica se o animal está vermifugado."
+          },
+          "ativo": {
+            "type": "boolean",
+            "description": "Indica se o animal está ativo no sistema."
+          }
+        },
+        "additionalProperties": false,
+        "description": "DTO para atualização dos dados de um animal."
+      },
+      "ApiResponseOfAdocaoRespostaDto": {
+        "type": "object",
+        "properties": {
+          "sucesso": {
+            "type": "boolean",
+            "description": "Indica se a operação foi bem-sucedida."
+          },
+          "mensagem": {
+            "type": "string",
+            "description": "Mensagem descritiva do resultado.",
+            "nullable": true
+          },
+          "dados": {
+            "$ref": "#/components/schemas/AdocaoRespostaDto"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Modelo de resposta padrão da API."
+      },
+      "ApiResponseOfAnimalRespostaDto": {
+        "type": "object",
+        "properties": {
+          "sucesso": {
+            "type": "boolean",
+            "description": "Indica se a operação foi bem-sucedida."
+          },
+          "mensagem": {
+            "type": "string",
+            "description": "Mensagem descritiva do resultado.",
+            "nullable": true
+          },
+          "dados": {
+            "$ref": "#/components/schemas/AnimalRespostaDto"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Modelo de resposta padrão da API."
+      },
+      "ApiResponseOfFotoRespostaDto": {
+        "type": "object",
+        "properties": {
+          "sucesso": {
+            "type": "boolean",
+            "description": "Indica se a operação foi bem-sucedida."
+          },
+          "mensagem": {
+            "type": "string",
+            "description": "Mensagem descritiva do resultado.",
+            "nullable": true
+          },
+          "dados": {
+            "$ref": "#/components/schemas/FotoRespostaDto"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Modelo de resposta padrão da API."
+      },
+      "ApiResponseOfIEnumerableOfAnimalRespostaDto": {
+        "type": "object",
+        "properties": {
+          "sucesso": {
+            "type": "boolean",
+            "description": "Indica se a operação foi bem-sucedida."
+          },
+          "mensagem": {
+            "type": "string",
+            "description": "Mensagem descritiva do resultado.",
+            "nullable": true
+          },
+          "dados": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnimalRespostaDto"
+            },
+            "description": "Dados retornados pela operação.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Modelo de resposta padrão da API."
+      },
+      "ApiResponseOfIEnumerableOfFotoRespostaDto": {
+        "type": "object",
+        "properties": {
+          "sucesso": {
+            "type": "boolean",
+            "description": "Indica se a operação foi bem-sucedida."
+          },
+          "mensagem": {
+            "type": "string",
+            "description": "Mensagem descritiva do resultado.",
+            "nullable": true
+          },
+          "dados": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FotoRespostaDto"
+            },
+            "description": "Dados retornados pela operação.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Modelo de resposta padrão da API."
+      },
+      "ApiResponseOfIEnumerableOfVacinaRespostaDto": {
+        "type": "object",
+        "properties": {
+          "sucesso": {
+            "type": "boolean",
+            "description": "Indica se a operação foi bem-sucedida."
+          },
+          "mensagem": {
+            "type": "string",
+            "description": "Mensagem descritiva do resultado.",
+            "nullable": true
+          },
+          "dados": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VacinaRespostaDto"
+            },
+            "description": "Dados retornados pela operação.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Modelo de resposta padrão da API."
+      },
+      "ApiResponseOfObject": {
+        "type": "object",
+        "properties": {
+          "sucesso": {
+            "type": "boolean",
+            "description": "Indica se a operação foi bem-sucedida."
+          },
+          "mensagem": {
+            "type": "string",
+            "description": "Mensagem descritiva do resultado.",
+            "nullable": true
+          },
+          "dados": {
+            "description": "Dados retornados pela operação.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Modelo de resposta padrão da API."
+      },
+      "ApiResponseOfResultadoPaginadoOfAdocaoRespostaDto": {
+        "type": "object",
+        "properties": {
+          "sucesso": {
+            "type": "boolean",
+            "description": "Indica se a operação foi bem-sucedida."
+          },
+          "mensagem": {
+            "type": "string",
+            "description": "Mensagem descritiva do resultado.",
+            "nullable": true
+          },
+          "dados": {
+            "$ref": "#/components/schemas/ResultadoPaginadoOfAdocaoRespostaDto"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Modelo de resposta padrão da API."
+      },
+      "ApiResponseOfResultadoPaginadoOfAnimalRespostaDto": {
+        "type": "object",
+        "properties": {
+          "sucesso": {
+            "type": "boolean",
+            "description": "Indica se a operação foi bem-sucedida."
+          },
+          "mensagem": {
+            "type": "string",
+            "description": "Mensagem descritiva do resultado.",
+            "nullable": true
+          },
+          "dados": {
+            "$ref": "#/components/schemas/ResultadoPaginadoOfAnimalRespostaDto"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Modelo de resposta padrão da API."
+      },
+      "ApiResponseOfResultadoPaginadoOfAuditoriaRespostaDto": {
+        "type": "object",
+        "properties": {
+          "sucesso": {
+            "type": "boolean",
+            "description": "Indica se a operação foi bem-sucedida."
+          },
+          "mensagem": {
+            "type": "string",
+            "description": "Mensagem descritiva do resultado.",
+            "nullable": true
+          },
+          "dados": {
+            "$ref": "#/components/schemas/ResultadoPaginadoOfAuditoriaRespostaDto"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Modelo de resposta padrão da API."
+      },
+      "ApiResponseOfResultadoPaginadoOfFotoRespostaDto": {
+        "type": "object",
+        "properties": {
+          "sucesso": {
+            "type": "boolean",
+            "description": "Indica se a operação foi bem-sucedida."
+          },
+          "mensagem": {
+            "type": "string",
+            "description": "Mensagem descritiva do resultado.",
+            "nullable": true
+          },
+          "dados": {
+            "$ref": "#/components/schemas/ResultadoPaginadoOfFotoRespostaDto"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Modelo de resposta padrão da API."
+      },
+      "ApiResponseOfResultadoPaginadoOfUsuarioRespostaDto": {
+        "type": "object",
+        "properties": {
+          "sucesso": {
+            "type": "boolean",
+            "description": "Indica se a operação foi bem-sucedida."
+          },
+          "mensagem": {
+            "type": "string",
+            "description": "Mensagem descritiva do resultado.",
+            "nullable": true
+          },
+          "dados": {
+            "$ref": "#/components/schemas/ResultadoPaginadoOfUsuarioRespostaDto"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Modelo de resposta padrão da API."
+      },
+      "ApiResponseOfResultadoPaginadoOfVacinaRespostaDto": {
+        "type": "object",
+        "properties": {
+          "sucesso": {
+            "type": "boolean",
+            "description": "Indica se a operação foi bem-sucedida."
+          },
+          "mensagem": {
+            "type": "string",
+            "description": "Mensagem descritiva do resultado.",
+            "nullable": true
+          },
+          "dados": {
+            "$ref": "#/components/schemas/ResultadoPaginadoOfVacinaRespostaDto"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Modelo de resposta padrão da API."
+      },
+      "ApiResponseOfUsuarioRespostaDto": {
+        "type": "object",
+        "properties": {
+          "sucesso": {
+            "type": "boolean",
+            "description": "Indica se a operação foi bem-sucedida."
+          },
+          "mensagem": {
+            "type": "string",
+            "description": "Mensagem descritiva do resultado.",
+            "nullable": true
+          },
+          "dados": {
+            "$ref": "#/components/schemas/UsuarioRespostaDto"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Modelo de resposta padrão da API."
+      },
+      "ApiResponseOfVacinaRespostaDto": {
+        "type": "object",
+        "properties": {
+          "sucesso": {
+            "type": "boolean",
+            "description": "Indica se a operação foi bem-sucedida."
+          },
+          "mensagem": {
+            "type": "string",
+            "description": "Mensagem descritiva do resultado.",
+            "nullable": true
+          },
+          "dados": {
+            "$ref": "#/components/schemas/VacinaRespostaDto"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Modelo de resposta padrão da API."
+      },
+      "AuditoriaRespostaDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Identificador do registro de auditoria.",
+            "format": "int32"
+          },
+          "usuarioId": {
+            "type": "integer",
+            "description": "ID do funcionário que executou a ação (nulo em ações públicas\r\nou se a conta foi excluída).",
+            "format": "int32",
+            "nullable": true
+          },
+          "usuarioNome": {
+            "type": "string",
+            "description": "Nome do funcionário no momento do evento (snapshot).",
+            "nullable": true
+          },
+          "categoria": {
+            "$ref": "#/components/schemas/CategoriaAuditoria"
+          },
+          "acao": {
+            "type": "string",
+            "description": "Ação executada (ex.: 'AdocaoAprovada', 'LoginFalhou').",
+            "nullable": true
+          },
+          "entidadeId": {
+            "type": "integer",
+            "description": "ID do registro afetado na entidade da categoria, quando aplicável.",
+            "format": "int32",
+            "nullable": true
+          },
+          "detalhes": {
+            "type": "string",
+            "description": "Detalhes legíveis do evento.",
+            "nullable": true
+          },
+          "ip": {
+            "type": "string",
+            "description": "IP de origem da requisição que gerou o evento.",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Data e hora do evento.",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false,
+        "description": "DTO de resposta com os dados de um registro de auditoria."
+      },
+      "CategoriaAuditoria": {
+        "enum": [
+          "Seguranca",
+          "Adocao",
+          "Animal",
+          "Usuario"
+        ],
+        "type": "string",
+        "description": "Categoria de um evento de auditoria — agrupa os eventos por área do sistema.\r\nOs valores precisam bater com o CHECK constraint da coluna 'auditoria.categoria'."
+      },
+      "EspecieAnimal": {
+        "enum": [
+          "Cachorro",
+          "Gato",
+          "Ave",
+          "Roedor",
+          "Reptil",
+          "Outro"
+        ],
+        "type": "string",
+        "description": "Espécies de animais aceitas pelo sistema."
+      },
+      "FotoRespostaDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Identificador da foto.",
+            "format": "int32"
+          },
+          "animalId": {
+            "type": "integer",
+            "description": "Identificador do animal dono da foto.",
+            "format": "int32"
+          },
+          "url": {
+            "type": "string",
+            "description": "URL/caminho da imagem.",
+            "nullable": true
+          },
+          "descricao": {
+            "type": "string",
+            "description": "Descrição/legenda da foto.",
+            "nullable": true
+          },
+          "principal": {
+            "type": "boolean",
+            "description": "Indica se esta é a foto principal (de capa) do animal."
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Data em que a foto foi adicionada.",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false,
+        "description": "DTO de resposta com os dados de uma foto."
+      },
+      "FotoUpdateDto": {
+        "type": "object",
+        "properties": {
+          "descricao": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string",
+            "description": "Descrição/legenda da foto (opcional).",
+            "nullable": true
+          },
+          "principal": {
+            "type": "boolean",
+            "description": "Indica se esta deve passar a ser a foto principal (de capa) do animal."
+          }
+        },
+        "additionalProperties": false,
+        "description": "DTO para atualização dos dados de uma foto."
+      },
+      "PerfilUsuario": {
+        "enum": [
+          "Admin",
+          "Comum"
+        ],
+        "type": "string",
+        "description": "Perfil de acesso de um usuário (funcionário da ONG).\r\nOs valores precisam bater com o CHECK constraint da coluna 'usuarios.perfil'."
+      },
+      "PorteAnimal": {
+        "enum": [
+          "Pequeno",
+          "Medio",
+          "Grande"
+        ],
+        "type": "string",
+        "description": "Porte do animal."
+      },
+      "ResultadoPaginadoOfAdocaoRespostaDto": {
+        "type": "object",
+        "properties": {
+          "itens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdocaoRespostaDto"
+            },
+            "description": "Itens da página atual.",
+            "nullable": true
+          },
+          "pagina": {
+            "type": "integer",
+            "description": "Número da página atual.",
+            "format": "int32"
+          },
+          "tamanhoPagina": {
+            "type": "integer",
+            "description": "Quantidade de itens por página.",
+            "format": "int32"
+          },
+          "totalItens": {
+            "type": "integer",
+            "description": "Total de itens existentes (em todas as páginas).",
+            "format": "int64"
+          },
+          "totalPaginas": {
+            "type": "integer",
+            "description": "Total de páginas disponíveis.",
+            "format": "int32",
+            "readOnly": true
+          },
+          "temPaginaAnterior": {
+            "type": "boolean",
+            "description": "Indica se existe página anterior.",
+            "readOnly": true
+          },
+          "temProximaPagina": {
+            "type": "boolean",
+            "description": "Indica se existe próxima página.",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Envelope de resposta para listagens paginadas.\r\nCarrega os itens da página atual e os metadados de paginação."
+      },
+      "ResultadoPaginadoOfAnimalRespostaDto": {
+        "type": "object",
+        "properties": {
+          "itens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnimalRespostaDto"
+            },
+            "description": "Itens da página atual.",
+            "nullable": true
+          },
+          "pagina": {
+            "type": "integer",
+            "description": "Número da página atual.",
+            "format": "int32"
+          },
+          "tamanhoPagina": {
+            "type": "integer",
+            "description": "Quantidade de itens por página.",
+            "format": "int32"
+          },
+          "totalItens": {
+            "type": "integer",
+            "description": "Total de itens existentes (em todas as páginas).",
+            "format": "int64"
+          },
+          "totalPaginas": {
+            "type": "integer",
+            "description": "Total de páginas disponíveis.",
+            "format": "int32",
+            "readOnly": true
+          },
+          "temPaginaAnterior": {
+            "type": "boolean",
+            "description": "Indica se existe página anterior.",
+            "readOnly": true
+          },
+          "temProximaPagina": {
+            "type": "boolean",
+            "description": "Indica se existe próxima página.",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Envelope de resposta para listagens paginadas.\r\nCarrega os itens da página atual e os metadados de paginação."
+      },
+      "ResultadoPaginadoOfAuditoriaRespostaDto": {
+        "type": "object",
+        "properties": {
+          "itens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuditoriaRespostaDto"
+            },
+            "description": "Itens da página atual.",
+            "nullable": true
+          },
+          "pagina": {
+            "type": "integer",
+            "description": "Número da página atual.",
+            "format": "int32"
+          },
+          "tamanhoPagina": {
+            "type": "integer",
+            "description": "Quantidade de itens por página.",
+            "format": "int32"
+          },
+          "totalItens": {
+            "type": "integer",
+            "description": "Total de itens existentes (em todas as páginas).",
+            "format": "int64"
+          },
+          "totalPaginas": {
+            "type": "integer",
+            "description": "Total de páginas disponíveis.",
+            "format": "int32",
+            "readOnly": true
+          },
+          "temPaginaAnterior": {
+            "type": "boolean",
+            "description": "Indica se existe página anterior.",
+            "readOnly": true
+          },
+          "temProximaPagina": {
+            "type": "boolean",
+            "description": "Indica se existe próxima página.",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Envelope de resposta para listagens paginadas.\r\nCarrega os itens da página atual e os metadados de paginação."
+      },
+      "ResultadoPaginadoOfFotoRespostaDto": {
+        "type": "object",
+        "properties": {
+          "itens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FotoRespostaDto"
+            },
+            "description": "Itens da página atual.",
+            "nullable": true
+          },
+          "pagina": {
+            "type": "integer",
+            "description": "Número da página atual.",
+            "format": "int32"
+          },
+          "tamanhoPagina": {
+            "type": "integer",
+            "description": "Quantidade de itens por página.",
+            "format": "int32"
+          },
+          "totalItens": {
+            "type": "integer",
+            "description": "Total de itens existentes (em todas as páginas).",
+            "format": "int64"
+          },
+          "totalPaginas": {
+            "type": "integer",
+            "description": "Total de páginas disponíveis.",
+            "format": "int32",
+            "readOnly": true
+          },
+          "temPaginaAnterior": {
+            "type": "boolean",
+            "description": "Indica se existe página anterior.",
+            "readOnly": true
+          },
+          "temProximaPagina": {
+            "type": "boolean",
+            "description": "Indica se existe próxima página.",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Envelope de resposta para listagens paginadas.\r\nCarrega os itens da página atual e os metadados de paginação."
+      },
+      "ResultadoPaginadoOfUsuarioRespostaDto": {
+        "type": "object",
+        "properties": {
+          "itens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UsuarioRespostaDto"
+            },
+            "description": "Itens da página atual.",
+            "nullable": true
+          },
+          "pagina": {
+            "type": "integer",
+            "description": "Número da página atual.",
+            "format": "int32"
+          },
+          "tamanhoPagina": {
+            "type": "integer",
+            "description": "Quantidade de itens por página.",
+            "format": "int32"
+          },
+          "totalItens": {
+            "type": "integer",
+            "description": "Total de itens existentes (em todas as páginas).",
+            "format": "int64"
+          },
+          "totalPaginas": {
+            "type": "integer",
+            "description": "Total de páginas disponíveis.",
+            "format": "int32",
+            "readOnly": true
+          },
+          "temPaginaAnterior": {
+            "type": "boolean",
+            "description": "Indica se existe página anterior.",
+            "readOnly": true
+          },
+          "temProximaPagina": {
+            "type": "boolean",
+            "description": "Indica se existe próxima página.",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Envelope de resposta para listagens paginadas.\r\nCarrega os itens da página atual e os metadados de paginação."
+      },
+      "ResultadoPaginadoOfVacinaRespostaDto": {
+        "type": "object",
+        "properties": {
+          "itens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VacinaRespostaDto"
+            },
+            "description": "Itens da página atual.",
+            "nullable": true
+          },
+          "pagina": {
+            "type": "integer",
+            "description": "Número da página atual.",
+            "format": "int32"
+          },
+          "tamanhoPagina": {
+            "type": "integer",
+            "description": "Quantidade de itens por página.",
+            "format": "int32"
+          },
+          "totalItens": {
+            "type": "integer",
+            "description": "Total de itens existentes (em todas as páginas).",
+            "format": "int64"
+          },
+          "totalPaginas": {
+            "type": "integer",
+            "description": "Total de páginas disponíveis.",
+            "format": "int32",
+            "readOnly": true
+          },
+          "temPaginaAnterior": {
+            "type": "boolean",
+            "description": "Indica se existe página anterior.",
+            "readOnly": true
+          },
+          "temProximaPagina": {
+            "type": "boolean",
+            "description": "Indica se existe próxima página.",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Envelope de resposta para listagens paginadas.\r\nCarrega os itens da página atual e os metadados de paginação."
+      },
+      "SexoAnimal": {
+        "enum": [
+          "Macho",
+          "Femea"
+        ],
+        "type": "string",
+        "description": "Sexo do animal."
+      },
+      "StatusAdocao": {
+        "enum": [
+          "Pendente",
+          "Aprovada",
+          "Recusada",
+          "Concluida",
+          "Cancelada"
+        ],
+        "type": "string",
+        "description": "Status de uma solicitação de adoção."
+      },
+      "StatusAnimal": {
+        "enum": [
+          "Disponivel",
+          "Adotado",
+          "EmTratamento",
+          "Reservado"
+        ],
+        "type": "string",
+        "description": "Status do animal no sistema."
+      },
+      "UsuarioLoginDto": {
+        "required": [
+          "email",
+          "senha"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Email do usuário.",
+            "format": "email"
+          },
+          "senha": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Senha do usuário."
+          }
+        },
+        "additionalProperties": false,
+        "description": "DTO para login de um usuário."
+      },
+      "UsuarioMeUpdateDto": {
+        "required": [
+          "email",
+          "nome"
+        ],
+        "type": "object",
+        "properties": {
+          "nome": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string",
+            "description": "Nome completo do usuário."
+          },
+          "email": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string",
+            "description": "Email do usuário (deve ser único).",
+            "format": "email"
+          }
+        },
+        "additionalProperties": false,
+        "description": "DTO para o funcionário autenticado atualizar os próprios dados (autoatendimento).\r\nNão expõe 'Perfil' nem 'Ativo' de propósito — um usuário Comum não pode se\r\npromover a Admin nem se reativar; esses campos são exclusivos do\r\nOngAnimais.DTOs.UsuarioUpdateDto (uso administrativo)."
+      },
+      "UsuarioRegistroDto": {
+        "required": [
+          "email",
+          "nome",
+          "perfil",
+          "senha"
+        ],
+        "type": "object",
+        "properties": {
+          "nome": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string",
+            "description": "Nome completo do usuário."
+          },
+          "email": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string",
+            "description": "Email do usuário (deve ser único).",
+            "format": "email"
+          },
+          "senha": {
+            "maxLength": 100,
+            "minLength": 6,
+            "type": "string",
+            "description": "Senha do usuário (mínimo 6 caracteres)."
+          },
+          "perfil": {
+            "$ref": "#/components/schemas/PerfilUsuario"
+          }
+        },
+        "additionalProperties": false,
+        "description": "DTO para registro de um novo usuário."
+      },
+      "UsuarioRespostaDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Identificador do usuário.",
+            "format": "int32"
+          },
+          "nome": {
+            "type": "string",
+            "description": "Nome completo do usuário.",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "description": "Email do usuário.",
+            "nullable": true
+          },
+          "perfil": {
+            "$ref": "#/components/schemas/PerfilUsuario"
+          },
+          "ativo": {
+            "type": "boolean",
+            "description": "Indica se o usuário está ativo."
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Data de criação do registro.",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false,
+        "description": "DTO de resposta com os dados do usuário (sem a senha)."
+      },
+      "UsuarioSenhaDto": {
+        "required": [
+          "novaSenha",
+          "senhaAtual"
+        ],
+        "type": "object",
+        "properties": {
+          "senhaAtual": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Senha atual, exigida para confirmar a identidade antes da troca."
+          },
+          "novaSenha": {
+            "maxLength": 100,
+            "minLength": 6,
+            "type": "string",
+            "description": "Nova senha (mínimo 6 caracteres)."
+          }
+        },
+        "additionalProperties": false,
+        "description": "DTO para o próprio usuário alterar sua senha."
+      },
+      "UsuarioUpdateDto": {
+        "required": [
+          "email",
+          "nome",
+          "perfil"
+        ],
+        "type": "object",
+        "properties": {
+          "nome": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string",
+            "description": "Nome completo do usuário."
+          },
+          "email": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string",
+            "description": "Email do usuário (deve ser único).",
+            "format": "email"
+          },
+          "perfil": {
+            "$ref": "#/components/schemas/PerfilUsuario"
+          },
+          "ativo": {
+            "type": "boolean",
+            "description": "Indica se o usuário está ativo no sistema (permite login)."
+          }
+        },
+        "additionalProperties": false,
+        "description": "DTO para atualização de dados do usuário (uso administrativo — exige perfil Admin)."
+      },
+      "VacinaCreateDto": {
+        "required": [
+          "animalId",
+          "dataAplicacao",
+          "nome"
+        ],
+        "type": "object",
+        "properties": {
+          "animalId": {
+            "maximum": 2147483647,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Identificador do animal vacinado.",
+            "format": "int32"
+          },
+          "nome": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string",
+            "description": "Nome da vacina aplicada."
+          },
+          "dataAplicacao": {
+            "type": "string",
+            "description": "Data em que a vacina foi aplicada.",
+            "format": "date"
+          },
+          "proximaDose": {
+            "type": "string",
+            "description": "Data prevista para a próxima dose (opcional).",
+            "format": "date",
+            "nullable": true
+          },
+          "veterinario": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string",
+            "description": "Nome do veterinário responsável (opcional).",
+            "nullable": true
+          },
+          "observacoes": {
+            "type": "string",
+            "description": "Observações adicionais (opcional).",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "DTO para registro de uma nova vacina aplicada em um animal."
+      },
+      "VacinaRespostaDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Identificador da vacina.",
+            "format": "int32"
+          },
+          "animalId": {
+            "type": "integer",
+            "description": "Identificador do animal vacinado.",
+            "format": "int32"
+          },
+          "nomeAnimal": {
+            "type": "string",
+            "description": "Nome do animal vacinado.",
+            "nullable": true
+          },
+          "nome": {
+            "type": "string",
+            "description": "Nome da vacina aplicada.",
+            "nullable": true
+          },
+          "dataAplicacao": {
+            "type": "string",
+            "description": "Data em que a vacina foi aplicada.",
+            "format": "date"
+          },
+          "proximaDose": {
+            "type": "string",
+            "description": "Data prevista para a próxima dose (quando aplicável).",
+            "format": "date",
+            "nullable": true
+          },
+          "veterinario": {
+            "type": "string",
+            "description": "Nome do veterinário responsável.",
+            "nullable": true
+          },
+          "observacoes": {
+            "type": "string",
+            "description": "Observações adicionais.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "DTO de resposta com os dados da vacina, incluindo o nome do animal."
+      },
+      "VacinaUpdateDto": {
+        "required": [
+          "dataAplicacao",
+          "nome"
+        ],
+        "type": "object",
+        "properties": {
+          "nome": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string",
+            "description": "Nome da vacina aplicada."
+          },
+          "dataAplicacao": {
+            "type": "string",
+            "description": "Data em que a vacina foi aplicada.",
+            "format": "date"
+          },
+          "proximaDose": {
+            "type": "string",
+            "description": "Data prevista para a próxima dose (opcional).",
+            "format": "date",
+            "nullable": true
+          },
+          "veterinario": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string",
+            "description": "Nome do veterinário responsável (opcional).",
+            "nullable": true
+          },
+          "observacoes": {
+            "type": "string",
+            "description": "Observações adicionais (opcional).",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "DTO para atualização de uma vacina registrada."
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "description": "Insira o token JWT. Exemplo: Bearer {seu_token}",
+        "scheme": "Bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "Bearer": [ ]
+    }
+  ],
+  "tags": [
+    {
+      "name": "Adocao"
+    },
+    {
+      "name": "Animal"
+    },
+    {
+      "name": "Auditoria"
+    },
+    {
+      "name": "Foto"
+    },
+    {
+      "name": "Usuario"
+    },
+    {
+      "name": "Vacina"
+    }
+  ]
+}

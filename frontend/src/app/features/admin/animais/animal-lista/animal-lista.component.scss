@@ -1,0 +1,160 @@
+.animal-lista {
+  max-width: 1100px;
+  margin-inline: auto;
+}
+
+.animal-lista__cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--esp-3);
+  margin-bottom: var(--esp-4);
+}
+
+.animal-lista__cabecalho h1 {
+  margin: 0 0 var(--esp-1);
+  font-size: var(--texto-xl);
+}
+
+.animal-lista__cabecalho p {
+  margin: 0;
+  color: var(--cor-texto-suave);
+}
+
+.animal-lista__card {
+  padding: var(--esp-4);
+}
+
+.animal-lista__filtros {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--esp-2) var(--esp-3);
+  margin-bottom: var(--esp-3);
+}
+
+.animal-lista__filtros mat-form-field {
+  width: 100%;
+}
+
+.animal-lista__filtros-toggle {
+  width: 100%;
+  margin-bottom: var(--esp-3);
+}
+
+@media (min-width: 720px) {
+  .animal-lista__filtros {
+    grid-template-columns: 2fr 1fr 1fr 1fr auto;
+    align-items: center;
+  }
+}
+
+.animal-lista__tabela-wrapper {
+  overflow-x: auto;
+}
+
+.animal-lista__tabela {
+  width: 100%;
+}
+
+// Coluna de ações fixa à direita (stickyEnd): precisa de fundo opaco para
+// não deixar o conteúdo aparecer por baixo durante o scroll lateral.
+.animal-lista__tabela .mat-mdc-table-sticky {
+  background-color: var(--cor-superficie);
+}
+
+.animal-lista__tabela .mat-column-acoes {
+  white-space: nowrap;
+  width: 1%;
+}
+
+// Miniatura da foto principal (já vem na listagem, sem chamada extra).
+.animal-lista__miniatura {
+  display: block;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--raio-full);
+  object-fit: cover;
+  border: 1px solid var(--cor-borda);
+}
+
+.animal-lista__miniatura--vazia {
+  display: grid;
+  place-items: center;
+  background: var(--cor-fundo);
+  color: var(--cor-borda);
+}
+
+.animal-lista__miniatura--vazia mat-icon {
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+}
+
+.animal-lista__tabela .mat-column-foto {
+  width: 56px;
+  padding-right: var(--esp-2);
+}
+
+// Badge de candidaturas pendentes ao lado do nome — abre a ficha na aba Candidaturas.
+.animal-lista__pendentes {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: var(--esp-2);
+  padding: 1px var(--esp-2);
+  border-radius: var(--raio-full);
+  background: var(--cor-alerta-bg);
+  color: var(--cor-alerta);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  text-decoration: none;
+  vertical-align: middle;
+}
+
+.animal-lista__pendentes mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+.animal-lista__pendentes:hover,
+.animal-lista__pendentes:focus-visible {
+  background: var(--cor-alerta);
+  color: var(--cor-superficie);
+}
+
+// Nome do animal linka para a ficha completa (/admin/animais/:id).
+.animal-lista__link-ficha {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.animal-lista__link-ficha:hover,
+.animal-lista__link-ficha:focus-visible {
+  text-decoration: underline;
+  color: var(--cor-primaria-escura);
+}
+
+.animal-lista__erro {
+  padding: var(--esp-3);
+  border-radius: var(--raio-sm);
+  background-color: var(--cor-perigo-bg);
+  color: var(--cor-perigo);
+  font-size: var(--texto-sm);
+}
+
+.animal-lista__vazio {
+  padding: var(--esp-6) 0;
+  text-align: center;
+  color: var(--cor-texto-suave);
+}
+
+.animal-lista__ativo {
+  color: var(--cor-sucesso);
+}
+
+.animal-lista__inativo {
+  color: var(--cor-texto-suave);
+}

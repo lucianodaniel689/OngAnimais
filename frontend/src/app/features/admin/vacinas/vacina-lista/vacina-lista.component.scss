@@ -1,0 +1,84 @@
+.vacina-lista {
+  max-width: 1200px;
+  margin-inline: auto;
+}
+
+.vacina-lista__cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--esp-3);
+  margin-bottom: var(--esp-4);
+}
+
+.vacina-lista__cabecalho h1 {
+  margin: 0 0 var(--esp-1);
+  font-size: var(--texto-xl);
+}
+
+.vacina-lista__cabecalho p {
+  margin: 0;
+  color: var(--cor-texto-suave);
+}
+
+.vacina-lista__card {
+  padding: var(--esp-4);
+}
+
+.vacina-lista__filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--esp-3);
+  margin-bottom: var(--esp-3);
+}
+
+// No celular os campos ocupam a linha toda; a largura fixa é só para desktop.
+.vacina-lista__filtros mat-form-field {
+  width: 100%;
+}
+
+@media (min-width: 720px) {
+  .vacina-lista__filtros mat-form-field {
+    width: 220px;
+  }
+}
+
+.vacina-lista__filtros-toggle {
+  width: 100%;
+  margin-bottom: var(--esp-3);
+}
+
+.vacina-lista__tabela-wrapper {
+  overflow-x: auto;
+}
+
+.vacina-lista__tabela {
+  width: 100%;
+}
+
+// Coluna de ações fixa à direita (stickyEnd): precisa de fundo opaco para
+// não deixar o conteúdo aparecer por baixo durante o scroll lateral.
+.vacina-lista__tabela .mat-mdc-table-sticky {
+  background-color: var(--cor-superficie);
+}
+
+.vacina-lista__tabela .mat-column-acoes {
+  white-space: nowrap;
+  width: 1%;
+}
+
+.vacina-lista__erro {
+  padding: var(--esp-3);
+  border-radius: var(--raio-sm);
+  background-color: var(--cor-perigo-bg);
+  color: var(--cor-perigo);
+  font-size: var(--texto-sm);
+}
+
+.vacina-lista__vazio {
+  padding: var(--esp-6) 0;
+  text-align: center;
+  color: var(--cor-texto-suave);
+}

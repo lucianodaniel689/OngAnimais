@@ -1,0 +1,166 @@
+.sg {
+  padding-block: var(--esp-5) var(--esp-7);
+}
+
+.sg__topo {
+  margin-bottom: var(--esp-6);
+}
+
+.sg__topo p {
+  color: var(--cor-texto-suave);
+  max-width: 60ch;
+}
+
+.sg__secao {
+  padding-block: var(--esp-5);
+  border-top: 1px solid var(--cor-borda);
+}
+
+.sg__secao > h2 {
+  margin-bottom: var(--esp-4);
+}
+
+.sg__dica {
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+  margin-block: var(--esp-4) var(--esp-2);
+}
+
+.sg__linha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-3);
+  align-items: center;
+}
+
+.sg__linha--centro {
+  align-items: center;
+}
+
+.sg__bloco {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.sg__form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--esp-3);
+}
+
+.sg__form mat-form-field {
+  width: 100%;
+}
+
+@media (min-width: 600px) {
+  .sg__form {
+    grid-template-columns: repeat(2, minmax(0, 280px));
+  }
+  .sg__form-largo {
+    grid-column: 1 / -1;
+  }
+}
+
+.sg__texto-suave {
+  color: var(--cor-texto-suave);
+}
+
+.sg__fonte-display {
+  font-family: var(--fonte-display);
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-semibold);
+}
+
+.sg__fonte-mono {
+  font-family: var(--fonte-mono);
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}
+
+// --- Assinatura: etiqueta -----------------------------------------------
+.sg__etiqueta-exemplo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  width: 220px;
+  max-width: 100%;
+  padding: var(--esp-4);
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-md);
+  box-shadow: var(--sombra-md);
+}
+
+// --- Cores ------------------------------------------------------------------
+.sg__cores {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--esp-3);
+}
+
+.sg__cor {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--texto-sm);
+}
+
+.sg__cor code {
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-suave);
+}
+
+.sg__cor-amostra {
+  display: block;
+  height: 56px;
+  border-radius: var(--raio-sm);
+  border: 1px solid var(--cor-borda);
+}
+
+// --- Cards ------------------------------------------------------------------
+.sg__grade-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--esp-4);
+}
+
+// --- Tabela -------------------------------------------------------------
+.sg__tabela-wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-md);
+}
+
+.sg__tabela {
+  width: 100%;
+}
+
+// --- Carrossel exemplo ------------------------------------------------------
+.sg__slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: var(--cor-texto-inverso);
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-bold);
+}
+
+@media (min-width: 600px) {
+  .sg__cores {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .sg__grade-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 900px) {
+  .sg__cores {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .sg__grade-cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

@@ -1,0 +1,30 @@
+// Cores customizadas sobre o mat-chip por status.
+// `!important` necessário para sobrepor os tokens do tema Material no chip.
+:host ::ng-deep {
+  .mat-mdc-chip {
+    font-size: var(--texto-xs);
+    font-weight: var(--peso-semibold);
+    min-height: 26px;
+  }
+
+  .chip--sucesso {
+    --mdc-chip-elevated-container-color: var(--cor-sucesso-bg);
+    --mdc-chip-label-text-color: var(--cor-sucesso);
+  }
+  .chip--alerta {
+    --mdc-chip-elevated-container-color: var(--cor-alerta-bg);
+    --mdc-chip-label-text-color: var(--cor-alerta);
+  }
+  .chip--info {
+    --mdc-chip-elevated-container-color: var(--cor-info-bg);
+    --mdc-chip-label-text-color: var(--cor-info);
+  }
+  .chip--perigo {
+    --mdc-chip-elevated-container-color: var(--cor-perigo-bg);
+    --mdc-chip-label-text-color: var(--cor-perigo);
+  }
+  .chip--neutro {
+    --mdc-chip-elevated-container-color: var(--cor-superficie-alt);
+    --mdc-chip-label-text-color: var(--cor-texto-suave);
+  }
+}

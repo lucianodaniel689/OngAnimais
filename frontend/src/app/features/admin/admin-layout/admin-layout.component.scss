@@ -1,0 +1,77 @@
+.admin {
+  // o header/footer globais não renderizam em /admin (ver AppComponent),
+  // então o shell do painel ocupa a viewport inteira.
+  height: 100vh;
+  background-color: var(--cor-fundo);
+}
+
+.admin__sidenav {
+  width: 260px;
+  border-right: 1px solid var(--cor-borda);
+  background-color: var(--cor-superficie);
+  display: flex;
+  flex-direction: column;
+}
+
+.admin__marca {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  padding: var(--esp-4);
+  font-weight: var(--peso-bold);
+  font-size: var(--texto-lg);
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.admin__logo {
+  font-size: 1.4rem;
+}
+
+.admin__sidenav .ativo {
+  background-color: var(--cor-primaria-clara);
+  color: var(--cor-primaria-escura);
+}
+
+.admin__sidenav-rodape {
+  margin-top: auto;
+  border-top: 1px solid var(--cor-borda);
+}
+
+// --- Conteúdo ---------------------------------------------------------------
+.admin__toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background-color: var(--cor-superficie);
+  border-bottom: 1px solid var(--cor-borda);
+  gap: var(--esp-2);
+}
+
+.admin__titulo {
+  font-size: var(--texto-md);
+  font-weight: var(--peso-semibold);
+}
+
+.admin__spacer {
+  flex: 1 1 auto;
+}
+
+.admin__usuario {
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+  // Nome longo não pode empurrar o botão de sair num celular estreito.
+  max-width: min(240px, 30vw);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin__main {
+  padding: var(--esp-5) var(--esp-4) var(--esp-7);
+}
+
+@media (min-width: 768px) {
+  .admin__main {
+    padding: var(--esp-6) var(--esp-5) var(--esp-7);
+  }
+}

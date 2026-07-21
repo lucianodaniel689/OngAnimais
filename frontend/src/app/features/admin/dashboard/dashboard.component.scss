@@ -1,0 +1,100 @@
+.dash__cabecalho {
+  margin-bottom: var(--esp-5);
+}
+
+.dash__cabecalho p {
+  color: var(--cor-texto-suave);
+}
+
+.dash__kpis {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--esp-3);
+  margin-bottom: var(--esp-5);
+}
+
+@media (min-width: 600px) {
+  .dash__kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 960px) {
+  .dash__kpis {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.dash__pendentes {
+  padding: var(--esp-4);
+}
+
+.dash__pendentes-cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-3);
+  margin-bottom: var(--esp-3);
+}
+
+.dash__pendentes-cabecalho h2 {
+  margin: 0;
+  font-size: var(--texto-lg);
+}
+
+.dash__pendentes-vazio {
+  margin: 0;
+  padding: var(--esp-5) 0;
+  text-align: center;
+  color: var(--cor-texto-suave);
+}
+
+.dash__pendentes-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+}
+
+.dash__pendentes-item {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  padding: var(--esp-2) var(--esp-1);
+  border-bottom: 1px solid var(--cor-borda);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.dash__pendentes-icone {
+  color: var(--cor-alerta);
+  flex-shrink: 0;
+}
+
+.dash__pendentes-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  span {
+    font-size: var(--texto-sm);
+    color: var(--cor-texto-suave);
+  }
+}
+
+// Nome do animal linka para a ficha (aba Candidaturas).
+.dash__pendentes-link {
+  color: inherit;
+  text-decoration: none;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration: underline;
+    color: var(--cor-primaria-escura);
+  }
+}

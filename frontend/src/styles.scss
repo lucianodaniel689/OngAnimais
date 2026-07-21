@@ -1,0 +1,34 @@
+// Estilos globais — OngAnimais
+// Regras @use precisam vir ANTES de qualquer outra regra (exigência do Sass).
+@use '@angular/material' as mat;
+@use 'styles/tokens';
+@use 'styles/base';
+
+// --- Tema Angular Material (M3) ---------------------------------------------
+// Paleta laranja (família da "mostarda-selo", --cor-primaria) como primária e
+// rosa (família da "framboesa-carimbo", --cor-secundaria) como terciária —
+// ver `_tokens.scss` e a seção "Sistema de design" no CLAUDE.md do frontend.
+// Densidade 0 e tipografia Karla (não Roboto — ver --fonte-base).
+html {
+  @include mat.theme(
+    (
+      color: (
+        theme-type: light,
+        primary: mat.$orange-palette,
+        tertiary: mat.$rose-palette,
+      ),
+      typography: Karla,
+      density: 0,
+    )
+  );
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Karla, 'Segoe UI', sans-serif;
+}
