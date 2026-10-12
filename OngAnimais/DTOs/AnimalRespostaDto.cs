@@ -76,6 +76,12 @@ namespace OngAnimais.DTOs
         public string? FotoPrincipalUrl { get; set; }
 
         /// <summary>
+        /// Larguras (px) disponíveis da foto principal — ver <see cref="FotoRespostaDto.Larguras"/>.
+        /// Populado junto com <see cref="FotoPrincipalUrl"/>; <c>null</c> sem foto.
+        /// </summary>
+        public int[]? FotoPrincipalLarguras { get; set; }
+
+        /// <summary>
         /// Quantidade de candidaturas de adoção pendentes do animal. Populado apenas
         /// na listagem administrativa (<c>ListarPaginadoAsync</c>) — ajuda a equipe a
         /// priorizar quais animais têm interessados aguardando; <c>0</c> nas demais

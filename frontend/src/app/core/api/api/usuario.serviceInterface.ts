@@ -17,6 +17,7 @@ import { ApiResponseOfUsuarioRespostaDto } from '../model/models';
 import { UsuarioLoginDto } from '../model/models';
 import { UsuarioMeUpdateDto } from '../model/models';
 import { UsuarioRegistroDto } from '../model/models';
+import { UsuarioResetSenhaDto } from '../model/models';
 import { UsuarioSenhaDto } from '../model/models';
 import { UsuarioUpdateDto } from '../model/models';
 
@@ -61,6 +62,11 @@ export interface UsuarioObterPorIdRequestParams {
 
 export interface UsuarioRegistrarRequestParams {
     usuarioRegistroDto?: UsuarioRegistroDto;
+}
+
+export interface UsuarioResetarSenhaRequestParams {
+    id: number;
+    usuarioResetSenhaDto?: UsuarioResetSenhaDto;
 }
 
 
@@ -129,5 +135,12 @@ export interface UsuarioServiceInterface {
 * @param requestParameters
      */
     usuarioRegistrar(requestParameters: UsuarioRegistrarRequestParams, extraHttpRequestParams?: any): Observable<ApiResponseOfUsuarioRespostaDto>;
+
+    /**
+     * Reseta a senha de um funcionário (uso administrativo — para quem esqueceu a  própria senha e não consegue logar). Não exige a senha atual; a operação  fica registrada na auditoria. Não vale para a própria conta do admin —  essa troca passa por &#x60;PUT /api/usuario/me/senha&#x60;, que exige a senha atual.
+     * 
+* @param requestParameters
+     */
+    usuarioResetarSenha(requestParameters: UsuarioResetarSenhaRequestParams, extraHttpRequestParams?: any): Observable<ApiResponseOfObject>;
 
 }

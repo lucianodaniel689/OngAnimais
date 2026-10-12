@@ -1,0 +1,437 @@
+<div class="pagina pagina--media configuracoes">
+  <header class="pagina-cabecalho">
+    <div>
+      <h1>Configurações</h1>
+      <p>Personalize o site da ONG: identidade, contato e o conteúdo da página inicial.</p>
+      @if (dataAtualizacao(); as data) {
+        <p class="configuracoes__atualizado">
+          Última alteração: {{ data | date: 'dd/MM/yyyy HH:mm' }}
+        </p>
+      }
+    </div>
+  </header>
+
+  @if (carregando()) {
+    <app-loading mensagem="Carregando as configurações..." />
+  } @else if (erroCarregar()) {
+    <p class="mensagem-erro" role="alert">{{ erroCarregar() }}</p>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="salvar()">
+      <mat-card appearance="outlined">
+        <mat-tab-group
+          [selectedIndex]="abaAtiva()"
+          (selectedIndexChange)="abaAtiva.set($event)"
+          [mat-stretch-tabs]="false"
+        >
+          <!-- ================= IDENTIDADE E CONTATO ================= -->
+          <mat-tab>
+            <ng-template mat-tab-label>
+              Identidade
+              @if (abaComErro('identidade')) {
+                <mat-icon class="configuracoes__aba-erro" aria-label="Esta aba tem erros">error</mat-icon>
+              }
+            </ng-template>
+
+            <div class="card-conteudo card-conteudo--form" formGroupName="identidade">
+              <section class="configuracoes__secao">
+                <h2>Identidade</h2>
+                <p class="configuracoes__ajuda">
+                  Aparece no cabeçalho, no rodapé, no título das abas do navegador e nas mensagens.
+                </p>
+                <mat-form-field appearance="outline" class="configuracoes__campo">
+                  <mat-label>Nome da ONG</mat-label>
+                  <input matInput formControlName="nomeOng" maxlength="150" />
+                  <mat-error>{{ erroDoCampo(identidade.nomeOng) }}</mat-error>
+                </mat-form-field>
+              </section>
+
+              <section class="configuracoes__secao">
+                <h2>Contato</h2>
+                <p class="configuracoes__ajuda">
+                  Aparecem na seção "Venha nos conhecer" da página inicial. Deixe em branco o que a
+                  ONG não usa — o item some do site.
+                </p>
+                <div class="form-grade">
+                  <mat-form-field appearance="outline">
+                    <mat-label>WhatsApp</mat-label>
+                    <input matInput formControlName="whatsapp" appTelefone maxlength="20" placeholder="(11) 99999-9999" />
+                    <mat-hint>Com DDD. Número de fora do Brasil: comece com + e o código do país.</mat-hint>
+                    <mat-error>{{ erroDoCampo(identidade.whatsapp) }}</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Instagram</mat-label>
+                    <input matInput formControlName="instagram" placeholder="@minhaong" />
+                    <mat-error>{{ erroDoCampo(identidade.instagram) }}</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Email de contato</mat-label>
+                    <input matInput type="email" formControlName="emailContato" maxlength="255" />
+                    <mat-error>{{ erroDoCampo(identidade.emailContato) }}</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Horário de atendimento</mat-label>
+                    <input
+                      matInput
+                      formControlName="horarioAtendimento"
+                      maxlength="150"
+                      placeholder="Terça a domingo, das 9h às 17h"
+                    />
+                    <mat-error>{{ erroDoCampo(identidade.horarioAtendimento) }}</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-grade__inteiro">
+                    <mat-label>Endereço</mat-label>
+                    <input matInput formControlName="endereco" maxlength="255" />
+                    <mat-error>{{ erroDoCampo(identidade.endereco) }}</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-grade__inteiro">
+                    <mat-label>Texto da seção de contato</mat-label>
+                    <textarea
+                      matInput
+                      formControlName="textoContato"
+                      rows="3"
+                      maxlength="1000"
+                      placeholder="Ex.: Atendemos com hora marcada — chame no WhatsApp antes de vir."
+                    ></textarea>
+                    <mat-error>{{ erroDoCampo(identidade.textoContato) }}</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-grade__inteiro">
+                    <mat-label>Mensagem pronta do WhatsApp</mat-label>
+                    <input matInput formControlName="mensagemWhatsapp" maxlength="500" />
+                    <mat-hint>Texto que já vem escrito quando a pessoa toca no WhatsApp da página inicial.</mat-hint>
+                    <mat-error>{{ erroDoCampo(identidade.mensagemWhatsapp) }}</mat-error>
+                  </mat-form-field>
+                </div>
+              </section>
+            </div>
+          </mat-tab>
+
+          <!-- ================= PÁGINA INICIAL ================= -->
+          <mat-tab>
+            <ng-template mat-tab-label>
+              Página inicial
+              @if (abaComErro('pagina')) {
+                <mat-icon class="configuracoes__aba-erro" aria-label="Esta aba tem erros">error</mat-icon>
+              }
+            </ng-template>
+
+            <div class="card-conteudo card-conteudo--form" formGroupName="pagina">
+              <!-- Topo -->
+              <section class="configuracoes__secao">
+                <h2>Topo da página</h2>
+                <p class="configuracoes__ajuda">Título e texto logo abaixo do carrossel de animais.</p>
+                <div class="form-grade">
+                  <mat-form-field appearance="outline" class="form-grade__inteiro">
+                    <mat-label>Título</mat-label>
+                    <input matInput formControlName="heroTitulo" maxlength="150" />
+                    <mat-error>{{ erroDoCampo(pagina.heroTitulo) }}</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-grade__inteiro">
+                    <mat-label>Subtítulo</mat-label>
+                    <textarea matInput formControlName="heroSubtitulo" rows="3" maxlength="500"></textarea>
+                    <mat-error>{{ erroDoCampo(pagina.heroSubtitulo) }}</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Animais no carrossel</mat-label>
+                    <input matInput type="number" formControlName="quantidadeDestaque" min="1" max="20" />
+                    <mat-hint>De 1 a 20 — os primeiros animais disponíveis.</mat-hint>
+                    <mat-error>{{ erroDoCampo(pagina.quantidadeDestaque) }}</mat-error>
+                  </mat-form-field>
+                </div>
+              </section>
+
+              <!-- Como adotar -->
+              <section class="configuracoes__secao">
+                <h2>Como adotar</h2>
+                <p class="configuracoes__ajuda">
+                  Os passos do processo de adoção da ONG, na ordem (de 1 a {{ maxPassos }}).
+                </p>
+
+                <div formArrayName="passos" class="configuracoes__lista">
+                  @for (passo of passos.controls; track passo; let i = $index; let primeiro = $first; let ultimo = $last) {
+                    <div class="configuracoes__item" [formGroupName]="i">
+                      <div class="configuracoes__item-cabecalho">
+                        <mat-icon class="configuracoes__item-icone" aria-hidden="true">{{ passo.controls.icone.value }}</mat-icon>
+                        <strong>Passo {{ i + 1 }}</strong>
+                        <span class="configuracoes__item-acoes">
+                          <button mat-icon-button type="button" matTooltip="Mover para cima"
+                            [disabled]="primeiro" (click)="mover(passos, i, -1)" aria-label="Mover passo para cima">
+                            <mat-icon>arrow_upward</mat-icon>
+                          </button>
+                          <button mat-icon-button type="button" matTooltip="Mover para baixo"
+                            [disabled]="ultimo" (click)="mover(passos, i, 1)" aria-label="Mover passo para baixo">
+                            <mat-icon>arrow_downward</mat-icon>
+                          </button>
+                          <button mat-icon-button type="button" matTooltip="Remover passo"
+                            [disabled]="passos.length === 1" (click)="remover(passos, i)" aria-label="Remover passo">
+                            <mat-icon>delete</mat-icon>
+                          </button>
+                        </span>
+                      </div>
+
+                      <div class="form-grade">
+                        <mat-form-field appearance="outline">
+                          <mat-label>Título</mat-label>
+                          <input matInput formControlName="titulo" maxlength="60" />
+                          <mat-error>{{ erroDoCampo(passo.controls.titulo) }}</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline">
+                          <mat-label>Ícone</mat-label>
+                          <mat-select formControlName="icone">
+                            @for (icone of icones(); track icone.nome) {
+                              <mat-option [value]="icone.nome">
+                                <mat-icon>{{ icone.nome }}</mat-icon>
+                                {{ icone.rotulo }}
+                              </mat-option>
+                            }
+                          </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="form-grade__inteiro">
+                          <mat-label>Descrição</mat-label>
+                          <textarea matInput formControlName="descricao" rows="2" maxlength="300"></textarea>
+                          <mat-error>{{ erroDoCampo(passo.controls.descricao) }}</mat-error>
+                        </mat-form-field>
+                      </div>
+                    </div>
+                  }
+                </div>
+
+                @if (passos.length < maxPassos) {
+                  <button mat-stroked-button type="button" color="primary" (click)="adicionarPasso()">
+                    <mat-icon>add</mat-icon>
+                    Adicionar passo
+                  </button>
+                }
+              </section>
+
+              <!-- Formas de ajudar -->
+              <section class="configuracoes__secao">
+                <h2>Formas de ajudar</h2>
+                <p class="configuracoes__ajuda">
+                  Cards da seção "Formas de ajudar" (até {{ maxFormas }}). Desmarque "Mostrar no site"
+                  para esconder um card sem apagá-lo.
+                </p>
+
+                <div formArrayName="formas" class="configuracoes__lista">
+                  @for (forma of formas.controls; track forma; let i = $index; let primeiro = $first; let ultimo = $last) {
+                    <div class="configuracoes__item" [class.configuracoes__item--inativo]="!forma.controls.ativo.value" [formGroupName]="i">
+                      <div class="configuracoes__item-cabecalho">
+                        <mat-icon class="configuracoes__item-icone" aria-hidden="true">{{ forma.controls.icone.value }}</mat-icon>
+                        <strong>{{ forma.controls.titulo.value || 'Card ' + (i + 1) }}</strong>
+                        <span class="configuracoes__item-acoes">
+                          <button mat-icon-button type="button" matTooltip="Mover para cima"
+                            [disabled]="primeiro" (click)="mover(formas, i, -1)" aria-label="Mover card para cima">
+                            <mat-icon>arrow_upward</mat-icon>
+                          </button>
+                          <button mat-icon-button type="button" matTooltip="Mover para baixo"
+                            [disabled]="ultimo" (click)="mover(formas, i, 1)" aria-label="Mover card para baixo">
+                            <mat-icon>arrow_downward</mat-icon>
+                          </button>
+                          <button mat-icon-button type="button" matTooltip="Remover card"
+                            (click)="remover(formas, i)" aria-label="Remover card">
+                            <mat-icon>delete</mat-icon>
+                          </button>
+                        </span>
+                      </div>
+
+                      <mat-checkbox formControlName="ativo">Mostrar no site</mat-checkbox>
+
+                      <div class="form-grade">
+                        <mat-form-field appearance="outline">
+                          <mat-label>Título</mat-label>
+                          <input matInput formControlName="titulo" maxlength="60" />
+                          <mat-error>{{ erroDoCampo(forma.controls.titulo) }}</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline">
+                          <mat-label>Ícone</mat-label>
+                          <mat-select formControlName="icone">
+                            @for (icone of icones(); track icone.nome) {
+                              <mat-option [value]="icone.nome">
+                                <mat-icon>{{ icone.nome }}</mat-icon>
+                                {{ icone.rotulo }}
+                              </mat-option>
+                            }
+                          </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="form-grade__inteiro">
+                          <mat-label>Descrição</mat-label>
+                          <textarea matInput formControlName="descricao" rows="2" maxlength="300"></textarea>
+                          <mat-error>{{ erroDoCampo(forma.controls.descricao) }}</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline">
+                          <mat-label>Texto do link</mat-label>
+                          <input matInput formControlName="rotuloAcao" maxlength="60" placeholder="Quero ser voluntário" />
+                          <mat-error>{{ erroDoCampo(forma.controls.rotuloAcao) }}</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline">
+                          <mat-label>O link leva para</mat-label>
+                          <mat-select formControlName="destino">
+                            @for (destino of destinos(); track destino.valor) {
+                              <mat-option [value]="destino.valor">{{ destino.rotulo }}</mat-option>
+                            }
+                          </mat-select>
+                          <mat-error>{{ erroDoCampo(forma.controls.destino) }}</mat-error>
+                        </mat-form-field>
+                      </div>
+                    </div>
+                  } @empty {
+                    <p class="configuracoes__ajuda">
+                      Nenhum card. Sem cards e sem chave PIX, a seção "Formas de ajudar" não aparece.
+                    </p>
+                  }
+                </div>
+
+                @if (formas.length < maxFormas) {
+                  <button mat-stroked-button type="button" color="primary" (click)="adicionarForma()">
+                    <mat-icon>add</mat-icon>
+                    Adicionar card
+                  </button>
+                }
+              </section>
+
+              <!-- Doação -->
+              <section class="configuracoes__secao">
+                <h2>Doação</h2>
+                <p class="configuracoes__ajuda">
+                  Com uma chave PIX preenchida, a página inicial mostra o bloco "Doe" com o botão de
+                  copiar a chave. Sem chave, o bloco não aparece.
+                </p>
+                <div class="form-grade">
+                  <mat-form-field appearance="outline" class="form-grade__inteiro">
+                    <mat-label>Chave PIX</mat-label>
+                    <input matInput formControlName="doacaoPixChave" maxlength="150" placeholder="CNPJ, email, telefone ou chave aleatória" />
+                    <mat-error>{{ erroDoCampo(pagina.doacaoPixChave) }}</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-grade__inteiro">
+                    <mat-label>Texto da doação</mat-label>
+                    <textarea
+                      matInput
+                      formControlName="doacaoTexto"
+                      rows="4"
+                      maxlength="1000"
+                      placeholder="Ex.: Toda doação vira ração, vacina e castração. Dados bancários: ..."
+                    ></textarea>
+                    <mat-hint>As quebras de linha aparecem no site.</mat-hint>
+                    <mat-error>{{ erroDoCampo(pagina.doacaoTexto) }}</mat-error>
+                  </mat-form-field>
+                </div>
+              </section>
+            </div>
+          </mat-tab>
+          <!-- ================= APARÊNCIA ================= -->
+          <mat-tab label="Aparência">
+            <div class="card-conteudo card-conteudo--form">
+              <!-- Logo: grava na hora (endpoint próprio), fora do botão Salvar -->
+              <section class="configuracoes__secao">
+                <h2>Logo</h2>
+                <p class="configuracoes__ajuda">
+                  Aparece no cabeçalho, no rodapé e no painel, ao lado do nome da ONG (o nome é o da
+                  aba "Identidade"). O ícone da aba do navegador é gerado a partir dele.
+                  Prefira PNG com fundo transparente. <strong>O logo é salvo assim que é enviado.</strong>
+                </p>
+
+                <div class="configuracoes__logo-previa">
+                  <div class="configuracoes__logo-marca">
+                    <app-logo-ong [altura]="40" [decorativo]="false" />
+                    <strong>{{ identidade.nomeOng.value || 'Nome da ONG' }}</strong>
+                  </div>
+                  <div class="configuracoes__aba-navegador" aria-label="Prévia do ícone na aba do navegador">
+                    <img [src]="faviconAtual() ?? 'favicon.ico'" width="16" height="16" alt="" />
+                    <span>{{ identidade.nomeOng.value || 'Nome da ONG' }}</span>
+                  </div>
+                </div>
+
+                @if (enviandoLogo()) {
+                  <app-loading [tamanho]="28" mensagem="Salvando o logo..." />
+                } @else {
+                  <app-upload-imagens
+                    [multiplo]="false"
+                    rotulo="Arraste o logo aqui ou clique para escolher"
+                    (arquivosSelecionados)="enviarLogo($event)"
+                    (arquivosRejeitados)="aoRejeitarLogo($event)"
+                  />
+                  @if (logoAtual()) {
+                    <button mat-flat-button type="button" class="botao-perigo configuracoes__remover-logo" (click)="removerLogo()">
+                      <mat-icon>delete</mat-icon>
+                      Remover logo
+                    </button>
+                  }
+                }
+                @if (erroLogo(); as msg) {
+                  <p class="mensagem-erro" role="alert">{{ msg }}</p>
+                }
+              </section>
+
+              <!-- Cores: vale depois de Salvar; escolher já mostra a prévia no site inteiro -->
+              <section class="configuracoes__secao" formGroupName="aparencia">
+                <h2 id="titulo-paleta">Cores</h2>
+                <p class="configuracoes__ajuda">
+                  Escolha a paleta do site. Ao clicar, esta tela e o resto do site já mostram as
+                  cores — elas só ficam valendo para todos depois de <strong>Salvar</strong>.
+                </p>
+
+                <mat-radio-group
+                  formControlName="paleta"
+                  class="configuracoes__paletas"
+                  aria-labelledby="titulo-paleta"
+                >
+                  @for (paleta of paletas; track paleta.valor) {
+                    <mat-radio-button
+                      class="configuracoes__paleta"
+                      [class.configuracoes__paleta--selecionada]="aparencia.paleta.value === paleta.valor"
+                      [value]="paleta.valor"
+                    >
+                      <span class="configuracoes__amostras" aria-hidden="true">
+                        <span [style.background-color]="paleta.amostras.primaria"></span>
+                        <span [style.background-color]="paleta.amostras.secundaria"></span>
+                        <span [style.background-color]="paleta.amostras.fundo"></span>
+                        <span [style.background-color]="paleta.amostras.superficie"></span>
+                      </span>
+                      <span class="configuracoes__paleta-texto">
+                        <strong>{{ paleta.nome }}</strong>
+                        <span>{{ paleta.descricao }}</span>
+                      </span>
+                    </mat-radio-button>
+                  }
+                </mat-radio-group>
+              </section>
+            </div>
+          </mat-tab>
+        </mat-tab-group>
+      </mat-card>
+
+      <!-- Barra de ações fixa no rodapé: as abas são longas e o Salvar vale para as duas. -->
+      <div class="configuracoes__barra">
+        @if (erroSalvar(); as msg) {
+          <p class="mensagem-erro" role="alert">{{ msg }}</p>
+        }
+        <div class="form-acoes configuracoes__acoes">
+          <button mat-button type="button" (click)="desfazer()" [disabled]="form.pristine || salvando()">
+            Desfazer alterações
+          </button>
+          <button mat-flat-button color="primary" type="submit" [disabled]="form.pristine || salvando()">
+            @if (salvando()) {
+              <mat-progress-spinner mode="indeterminate" diameter="20" />
+            } @else {
+              Salvar
+            }
+          </button>
+        </div>
+      </div>
+    </form>
+  }
+</div>

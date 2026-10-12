@@ -9,15 +9,22 @@ import {
   inject,
   input,
   signal,
+  untracked,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { interval } from 'rxjs';
 import { CarrosselSlideDirective } from './carrossel-slide.directive';
 
+/** `padrao`: indicadores abaixo dos slides. `destaque`: indicadores sobre a imagem (hero). */
+export type CarrosselVariante = 'padrao' | 'destaque';
+
 /**
  * Carrossel reutilizável, mobile-first.
  * - Slides definidos via `<ng-template appCarrosselSlide>` (conteúdo livre).
  * - Navegação por setas, indicadores (bolinhas), swipe (touch) e autoplay.
+ * - Autoplay desligado para quem pediu menos movimento (`prefers-reduced-motion`).
+ * - `variante="destaque"`: para carrossel de página inteira (hero da home) — indicadores
+ *   sobrepostos no canto da imagem e setas maiores, sem roubar altura da foto.
  *
  * Uso:
  * ```html
@@ -37,6 +44,7 @@ import { CarrosselSlideDirective } from './carrossel-slide.directive';
   host: {
     '(pointerenter)': 'pausar()',
     '(pointerleave)': 'retomar()',
+    '[class.carrossel--destaque]': "variante() === 'destaque'",
   },
 })
 export class CarrosselComponent implements OnInit {
@@ -47,10 +55,26 @@ export class CarrosselComponent implements OnInit {
   readonly intervalo = input<number>(5000);
   /** Texto acessível do carrossel. */
   readonly rotulo = input<string>('Carrossel');
+  /** Aparência — ver `CarrosselVariante`. */
+  readonly variante = input<CarrosselVariante>('padrao');
 
   readonly indiceAtual = signal(0);
   private readonly pausado = signal(false);
   private readonly destroyRef = inject(DestroyRef);
+
+  /**
+   * Slides já exibidos (ou vizinhos de um exibido). Só esses têm o conteúdo renderizado: o atual,
+   * o próximo e o anterior (para a transição/swipe não mostrar um slide vazio) — os demais ficam
+   * vazios até chegar a vez. Desempenho: sem isso, um carrossel de fotos baixava **todas** as fotos
+   * na abertura da página (o `loading="lazy"` não ajuda — os slides fora da tela estão na mesma
+   * faixa vertical). Uma vez renderizado, fica: voltar a ele não baixa de novo nem pisca.
+   */
+  private readonly renderizados = signal<ReadonlySet<number>>(new Set([0]));
+
+  /** O slide `indice` deve ter o conteúdo no DOM? */
+  deveRenderizar(indice: number): boolean {
+    return this.renderizados().has(indice);
+  }
 
   // Suporte a swipe.
   private xInicial: number | null = null;
@@ -63,11 +87,30 @@ export class CarrosselComponent implements OnInit {
         this.indiceAtual.set(0);
       }
     });
+
+    // Atual + vizinhos (circular: no 1º slide, o "anterior" é o último).
+    effect(() => {
+      const total = this.slides().length;
+      if (total === 0) {
+        return;
+      }
+      const atual = this.indiceAtual();
+      const vizinhos = [atual, (atual + 1) % total, (atual - 1 + total) % total];
+      const ja = untracked(this.renderizados);
+      if (vizinhos.every((i) => ja.has(i))) {
+        return;
+      }
+      this.renderizados.set(new Set([...ja, ...vizinhos]));
+    });
   }
 
   ngOnInit(): void {
     const ms = this.intervalo();
-    if (ms > 0) {
+    // Slide trocando sozinho é movimento não pedido — respeita quem desligou animações no
+    // sistema (setas, bolinhas e swipe continuam funcionando).
+    const menosMovimento =
+      typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (ms > 0 && !menosMovimento) {
       interval(ms)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(() => {

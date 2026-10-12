@@ -14,6 +14,7 @@ import { Observable }                                        from 'rxjs';
 import { AnimalCreateDto } from '../model/models';
 import { AnimalUpdateDto } from '../model/models';
 import { ApiResponseOfAnimalRespostaDto } from '../model/models';
+import { ApiResponseOfAnimalVinculosDto } from '../model/models';
 import { ApiResponseOfIEnumerableOfAnimalRespostaDto } from '../model/models';
 import { ApiResponseOfObject } from '../model/models';
 import { ApiResponseOfResultadoPaginadoOfAnimalRespostaDto } from '../model/models';
@@ -37,6 +38,7 @@ export interface AnimalCriarRequestParams {
 
 export interface AnimalExcluirRequestParams {
     id: number;
+    excluirVinculos?: boolean;
 }
 
 export interface AnimalListarRequestParams {
@@ -55,6 +57,10 @@ export interface AnimalListarRequestParams {
 }
 
 export interface AnimalObterPorIdRequestParams {
+    id: number;
+}
+
+export interface AnimalObterVinculosRequestParams {
     id: number;
 }
 
@@ -78,7 +84,7 @@ export interface AnimalServiceInterface {
     animalCriar(requestParameters: AnimalCriarRequestParams, extraHttpRequestParams?: any): Observable<ApiResponseOfAnimalRespostaDto>;
 
     /**
-     * Exclui um animal do sistema.
+     * Exclui um animal do sistema. Com adoções, vacinas ou fotos vinculadas, só exclui se  &#x60;excluirVinculos&#x3D;true&#x60; (confirmação explícita) — nesse caso apaga também esses registros.
      * 
 * @param requestParameters
      */
@@ -103,5 +109,12 @@ export interface AnimalServiceInterface {
 * @param requestParameters
      */
     animalObterPorId(requestParameters: AnimalObterPorIdRequestParams, extraHttpRequestParams?: any): Observable<ApiResponseOfAnimalRespostaDto>;
+
+    /**
+     * Lista o que está vinculado a um animal (adoções, vacinas e fotos) — ou seja, o que  também seria apagado ao excluí-lo com confirmação.
+     * 
+* @param requestParameters
+     */
+    animalObterVinculos(requestParameters: AnimalObterVinculosRequestParams, extraHttpRequestParams?: any): Observable<ApiResponseOfAnimalVinculosDto>;
 
 }

@@ -117,36 +117,8 @@
   margin: 0 0 var(--esp-3);
 }
 
-.animal-detalhe-conteudo__erro {
-  margin: 0 0 var(--esp-3);
-  padding: var(--esp-2) var(--esp-3);
-  border-radius: var(--raio-sm);
-  background-color: var(--cor-perigo-bg);
-  color: var(--cor-perigo);
-  font-size: var(--texto-sm);
-}
-
-.animal-detalhe-conteudo__form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--esp-2);
-}
-
-.animal-detalhe-conteudo__form mat-form-field {
-  width: 100%;
-}
-
-.animal-detalhe-conteudo__form-acoes {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--esp-3);
-  margin-top: var(--esp-2);
-}
-
-.animal-detalhe-conteudo__form-acoes mat-progress-spinner {
-  margin-inline: auto;
-  --mdc-circular-progress-active-indicator-color: currentColor;
-}
+// Erro, campos empilhados e ações do formulário "Quero adotar" vêm das classes globais
+// (`.mensagem-erro`, `.form-coluna`, `.form-acoes` em `_padroes.scss`).
 
 @media (min-width: 640px) {
   .animal-detalhe-conteudo__grade {

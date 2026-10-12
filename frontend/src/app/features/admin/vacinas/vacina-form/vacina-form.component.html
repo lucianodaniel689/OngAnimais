@@ -1,21 +1,21 @@
-<div class="vacina-form">
-  <header class="vacina-form__cabecalho">
+<div class="pagina pagina--media">
+  <header class="pagina-cabecalho pagina-cabecalho--voltar">
     <a mat-icon-button [routerLink]="linkVoltar()" [queryParams]="queryParamsVoltar()" aria-label="Voltar">
       <mat-icon>arrow_back</mat-icon>
     </a>
     <h1>{{ editando() ? 'Editar vacina' : 'Registrar vacina' }}</h1>
   </header>
 
-  <mat-card appearance="outlined" class="vacina-form__card">
+  <mat-card appearance="outlined" class="card-conteudo card-conteudo--form">
     @if (carregandoDados()) {
       <app-loading [tamanho]="36" />
     } @else {
       @if (erro(); as msg) {
-        <p class="vacina-form__erro" role="alert">{{ msg }}</p>
+        <p class="mensagem-erro" role="alert">{{ msg }}</p>
       }
 
-      <form [formGroup]="form" (ngSubmit)="enviar()" class="vacina-form__form">
-        <mat-form-field appearance="outline" class="vacina-form__span-2">
+      <form [formGroup]="form" (ngSubmit)="enviar()" class="form-grade">
+        <mat-form-field appearance="outline" class="form-grade__inteiro">
           <mat-label>Animal</mat-label>
           <mat-select formControlName="animalId">
             @for (a of animais(); track a.id) {
@@ -27,7 +27,7 @@
           }
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="vacina-form__span-2">
+        <mat-form-field appearance="outline" class="form-grade__inteiro">
           <mat-label>Nome da vacina</mat-label>
           <input matInput formControlName="nome" maxlength="150" />
           @if (form.controls.nome.hasError('required')) {
@@ -54,7 +54,7 @@
           <mat-datepicker #pickerProximaDose />
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="vacina-form__span-2">
+        <mat-form-field appearance="outline" class="form-grade__inteiro">
           <mat-label>Veterinário (opcional)</mat-label>
           <input matInput formControlName="veterinario" maxlength="150" />
           @if (form.controls.veterinario.hasError('maxlength')) {
@@ -62,17 +62,17 @@
           }
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="vacina-form__span-2">
+        <mat-form-field appearance="outline" class="form-grade__inteiro">
           <mat-label>Observações</mat-label>
           <textarea matInput formControlName="observacoes" rows="4"></textarea>
         </mat-form-field>
 
-        <div class="vacina-form__acoes">
+        <div class="form-acoes">
           @if (editando()) {
             <button
               mat-flat-button
               type="button"
-              class="botao-perigo vacina-form__excluir"
+              class="botao-perigo form-acoes__excluir"
               [disabled]="carregando() || excluindo()"
               (click)="confirmarExclusao()"
             >

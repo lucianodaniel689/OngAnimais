@@ -15,6 +15,12 @@
   color: var(--cor-texto-suave);
 }
 
+.rodape__marca {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-2);
+}
+
 .rodape__nota {
   font-size: var(--texto-xs);
 }

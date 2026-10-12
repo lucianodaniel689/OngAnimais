@@ -1,0 +1,47 @@
+// Cores customizadas sobre o mat-chip — mesma base dos app-status-*-badge.
+:host {
+  display: inline-block;
+}
+
+:host ::ng-deep {
+  .mat-mdc-chip {
+    font-size: var(--texto-xs);
+    font-weight: var(--peso-semibold);
+    min-height: 26px;
+  }
+
+  .mat-mdc-chip .mat-icon {
+    color: currentColor;
+  }
+
+  .selo--sucesso {
+    --mdc-chip-elevated-container-color: var(--cor-sucesso-bg);
+    --mdc-chip-label-text-color: var(--cor-sucesso);
+    color: var(--cor-sucesso);
+  }
+  .selo--alerta {
+    --mdc-chip-elevated-container-color: var(--cor-alerta-bg);
+    --mdc-chip-label-text-color: var(--cor-alerta);
+    color: var(--cor-alerta);
+  }
+  .selo--info {
+    --mdc-chip-elevated-container-color: var(--cor-info-bg);
+    --mdc-chip-label-text-color: var(--cor-info);
+    color: var(--cor-info);
+  }
+  .selo--perigo {
+    --mdc-chip-elevated-container-color: var(--cor-perigo-bg);
+    --mdc-chip-label-text-color: var(--cor-perigo);
+    color: var(--cor-perigo);
+  }
+  .selo--primaria {
+    --mdc-chip-elevated-container-color: var(--cor-primaria-clara);
+    --mdc-chip-label-text-color: var(--cor-primaria-escura);
+    color: var(--cor-primaria-escura);
+  }
+  .selo--neutro {
+    --mdc-chip-elevated-container-color: var(--cor-superficie-alt);
+    --mdc-chip-label-text-color: var(--cor-texto-suave);
+    color: var(--cor-texto-suave);
+  }
+}

@@ -83,10 +83,14 @@ export class VacinaFormComponent {
     return doParam ? Number(doParam) : this.animalIdVacina();
   });
 
-  /** Destino do "Voltar"/"Cancelar" — ficha do animal ou lista de vacinas. */
+  /**
+   * Destino do "Voltar"/"Cancelar" — sempre a ficha do animal (vacinas só se
+   * gerenciam por lá). Sem um animal resolvido (link aberto fora do fluxo da
+   * ficha), cai na lista de animais em vez de uma rota inexistente.
+   */
   readonly linkVoltar = computed(() => {
     const animalId = this.fichaAnimalId();
-    return this.voltaParaFicha() && animalId ? `/admin/animais/${animalId}` : '/admin/vacinas';
+    return this.voltaParaFicha() && animalId ? `/admin/animais/${animalId}` : '/admin/animais';
   });
   readonly queryParamsVoltar = computed(() =>
     this.voltaParaFicha() && this.fichaAnimalId() ? { aba: 'vacinas' } : null,
@@ -187,13 +191,13 @@ export class VacinaFormComponent {
     });
   }
 
-  /** Volta para onde a tela foi aberta: ficha do animal (aba Vacinas) ou lista de vacinas. */
+  /** Volta para onde a tela foi aberta: ficha do animal (aba Vacinas) ou, na falta de um, a lista de animais. */
   private irParaOrigem(animalId?: number | null): void {
     const idFicha = animalId ?? this.fichaAnimalId();
     if (this.voltaParaFicha() && idFicha) {
       this.router.navigate(['/admin/animais', idFicha], { queryParams: { aba: 'vacinas' } });
     } else {
-      this.router.navigateByUrl('/admin/vacinas');
+      this.router.navigateByUrl('/admin/animais');
     }
   }
 

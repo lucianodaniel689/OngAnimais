@@ -1,0 +1,223 @@
+// =============================================================================
+// Padrões de tela — classes globais reaproveitadas entre as páginas
+// =============================================================================
+// Estrutura que se repetia (copiada com outro prefixo) em toda lista/formulário do
+// admin: largura da página, cabeçalho, card, filtros, tabela clicável, caixa de erro,
+// estado vazio e barra de ações de formulário. Use estas classes no template em vez de
+// recriar o CSS no componente; o SCSS do componente fica só com o que é específico da
+// tela (colunas da tabela, miniaturas, grids próprios...).
+//
+// Ajustes por tela sem duplicar: as classes leem variáveis CSS com padrão — ex.:
+// `--filtro-largura` em `.filtros`. Como os estilos de componente têm especificidade
+// maior (atributo de encapsulamento), uma regra local sempre vence a global.
+//
+// Catalogadas em /styleguide → "Padrões de tela". Mobile-first, como o resto.
+
+// --- Página ------------------------------------------------------------------
+// Container centralizado com largura máxima. Padrão (1100px) para listas.
+.pagina {
+  max-width: 1100px;
+  margin-inline: auto;
+}
+
+.pagina--larga {
+  max-width: 1200px; // listas com muitas colunas (ex.: adoções)
+}
+
+.pagina--media {
+  max-width: 720px; // formulários em duas colunas
+}
+
+.pagina--estreita {
+  max-width: 560px; // formulários de uma coluna, perfil
+}
+
+// --- Cabeçalho da página -----------------------------------------------------
+// Título (h1) + subtítulo (p) à esquerda, ação principal à direita (quebra no celular).
+.pagina-cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--esp-3);
+  margin-bottom: var(--esp-4);
+}
+
+.pagina-cabecalho h1 {
+  margin: 0 0 var(--esp-1);
+  font-size: var(--texto-xl);
+}
+
+.pagina-cabecalho p {
+  margin: 0;
+  color: var(--cor-texto-suave);
+}
+
+// Variante de formulário: botão "voltar" (mat-icon-button) + título na mesma linha.
+.pagina-cabecalho--voltar {
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--esp-2);
+}
+
+.pagina-cabecalho--voltar h1 {
+  margin: 0;
+}
+
+// Instrução de lista com linha clicável ("Toque em um ... para ver a ficha") — o padrão
+// de tabela clicável exige avisar no cabeçalho (ver `.tabela-clicavel`).
+.instrucao-toque {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-1);
+}
+
+.instrucao-toque mat-icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+  color: var(--cor-primaria-escura);
+}
+
+// --- Card de conteúdo --------------------------------------------------------
+// Padding padrão do mat-card que envolve a lista (filtros + tabela) ou o formulário.
+.card-conteudo {
+  padding: var(--esp-4);
+}
+
+.card-conteudo--form {
+  padding: var(--esp-5);
+}
+
+// --- Filtros de lista --------------------------------------------------------
+// Campos lado a lado no desktop, um por linha no celular. Largura dos campos no desktop
+// via `--filtro-largura` (padrão 220px). `.filtros__principal` marca o campo de busca,
+// que cresce para ocupar o espaço livre.
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--esp-3);
+  margin-bottom: var(--esp-3);
+}
+
+.filtros mat-form-field {
+  width: 100%;
+}
+
+@media (min-width: 720px) {
+  .filtros mat-form-field {
+    width: var(--filtro-largura, 220px);
+  }
+
+  .filtros .filtros__principal {
+    flex: 1 1 260px;
+  }
+}
+
+// Botão "Filtros" que abre/fecha o formulário no celular (filtros começam recolhidos).
+.filtros-toggle {
+  width: 100%;
+  margin-bottom: var(--esp-3);
+}
+
+// --- Tabela ------------------------------------------------------------------
+// Rolagem horizontal quando a tabela não cabe (celular).
+.tabela-wrapper {
+  overflow-x: auto;
+}
+
+.tabela-wrapper .mat-mdc-table {
+  width: 100%;
+}
+
+// Linha inteira clicável (abre a ficha) — vai no <table mat-table>; a <tr> só precisa do
+// (click). Lembre de avisar no cabeçalho com `.instrucao-toque`.
+.tabela-clicavel .mat-mdc-row {
+  cursor: pointer;
+}
+
+.tabela-clicavel .mat-mdc-row:hover {
+  background-color: var(--cor-fundo);
+}
+
+.tabela-clicavel .mat-mdc-row:active {
+  background-color: var(--cor-borda);
+}
+
+@media (max-width: 768px) {
+  // Linhas maiores no celular: alvo de toque confortável para abrir a ficha.
+  .tabela-clicavel .mat-mdc-cell {
+    padding-block: var(--esp-3);
+    font-size: var(--texto-md);
+  }
+}
+
+// --- Mensagens ---------------------------------------------------------------
+// Caixa de erro (carregamento falhou, erro ao salvar). Use com role="alert".
+.mensagem-erro {
+  margin: 0 0 var(--esp-3);
+  padding: var(--esp-2) var(--esp-3);
+  border-radius: var(--raio-sm);
+  background-color: var(--cor-perigo-bg);
+  color: var(--cor-perigo);
+  font-size: var(--texto-sm);
+}
+
+// Lista sem resultados ("Nenhum ... encontrado com esses filtros").
+.estado-vazio {
+  margin: 0;
+  padding: var(--esp-6) 0;
+  text-align: center;
+  color: var(--cor-texto-suave);
+}
+
+// --- Formulários -------------------------------------------------------------
+// Campos empilhados, cada um na largura toda.
+.form-coluna {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.form-coluna mat-form-field {
+  width: 100%;
+}
+
+// Grade de 1 coluna (celular) → 2 colunas (≥ 600px). `.form-grade__inteiro` ocupa a
+// linha toda (campos longos); a `.form-acoes` dentro da grade também ocupa.
+.form-grade {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--esp-2) var(--esp-4);
+}
+
+.form-grade mat-form-field {
+  width: 100%;
+}
+
+@media (min-width: 600px) {
+  .form-grade {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .form-grade__inteiro,
+  .form-grade > .form-acoes {
+    grid-column: 1 / -1;
+  }
+}
+
+// Barra de ações no fim do formulário: Cancelar/Salvar à direita. `.form-acoes__excluir`
+// (ação destrutiva, com `.botao-perigo`) fica isolada à esquerda.
+.form-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--esp-3);
+  margin-top: var(--esp-3);
+}
+
+.form-acoes__excluir {
+  margin-right: auto;
+}

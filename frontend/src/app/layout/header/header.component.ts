@@ -5,6 +5,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { AuthService } from '@app/core/auth/auth.service';
+import { ConfiguracaoOngService } from '@app/core/config/configuracao-ong.service';
+import { LogoOngComponent } from '@app/shared/components/logo-ong/logo-ong.component';
 
 /**
  * Cabeçalho do app com `mat-toolbar`. No mobile, os links ficam num
@@ -22,6 +24,7 @@ import { AuthService } from '@app/core/auth/auth.service';
     MatButtonModule,
     MatIconModule,
     MatMenuModule,
+    LogoOngComponent,
   ],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
@@ -31,6 +34,9 @@ export class HeaderComponent {
   private router = inject(Router);
 
   readonly usuario = this.auth.usuario;
+
+  /** Nome da ONG na marca (vem das configurações). */
+  readonly nomeOng = inject(ConfiguracaoOngService).nomeOng;
 
   sair(): void {
     this.auth.logout();

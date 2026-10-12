@@ -1,65 +1,10 @@
-.auditoria-lista {
-  max-width: 1100px;
-  margin-inline: auto;
-}
+// Estrutura da página (cabeçalho, card, filtros, tabela, erro, vazio) vem das classes
+// globais de `styles/_padroes.scss`. Aqui fica só o que é desta lista.
 
-.auditoria-lista__cabecalho {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--esp-3);
-  margin-bottom: var(--esp-4);
-}
-
-.auditoria-lista__cabecalho h1 {
-  margin: 0 0 var(--esp-1);
-  font-size: var(--texto-xl);
-}
-
-.auditoria-lista__cabecalho p {
-  margin: 0;
-  color: var(--cor-texto-suave);
-}
-
-.auditoria-lista__card {
-  padding: var(--esp-4);
-}
-
+// Mais campos de filtro que as outras listas (busca, categoria, funcionário, datas) —
+// campos um pouco mais estreitos para caber numa linha no desktop.
 .auditoria-lista__filtros {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--esp-3);
-  margin-bottom: var(--esp-3);
-}
-
-.auditoria-lista__filtros mat-form-field:first-child {
-  flex: 1 1 260px;
-}
-
-// No celular os campos ocupam a linha toda; a largura fixa é só para desktop.
-.auditoria-lista__filtros mat-form-field {
-  width: 100%;
-}
-
-@media (min-width: 720px) {
-  .auditoria-lista__filtros mat-form-field {
-    width: 190px;
-  }
-}
-
-.auditoria-lista__filtros-toggle {
-  width: 100%;
-  margin-bottom: var(--esp-3);
-}
-
-.auditoria-lista__tabela-wrapper {
-  overflow-x: auto;
-}
-
-.auditoria-lista__tabela {
-  width: 100%;
+  --filtro-largura: 190px;
 }
 
 // Detalhes podem ser longos — truncar na célula, texto completo no tooltip.
@@ -79,18 +24,4 @@
 .auditoria-lista__publico {
   color: var(--cor-texto-suave);
   font-style: italic;
-}
-
-.auditoria-lista__erro {
-  padding: var(--esp-3);
-  border-radius: var(--raio-sm);
-  background-color: var(--cor-perigo-bg);
-  color: var(--cor-perigo);
-  font-size: var(--texto-sm);
-}
-
-.auditoria-lista__vazio {
-  padding: var(--esp-6) 0;
-  text-align: center;
-  color: var(--cor-texto-suave);
 }

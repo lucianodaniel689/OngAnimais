@@ -26,26 +26,78 @@ Código, textos e comentários em **português**.
 ### O que já existe
 
 - **Layout**: `app-header` (mat-toolbar + mat-menu responsivo) e `app-footer`.
-- **Home** (`/`, pública): hero (título + selos com números reais — animais disponíveis e espécies
-  à espera — e **carrossel** dos primeiros animais disponíveis, não banners de marketing), "Como
-  adotar" (3 passos), vitrine de animais disponíveis com **filtros por espécie/porte/sexo**
-  (client-side sobre a lista já carregada de `animalListarDisponiveis` — cada grupo de chips só
-  aparece quando há mais de um valor entre os animais carregados), "Formas de ajudar"
-  (adotar/apadrinhar/ser voluntário/divulgar — só âncoras internas, sem backend próprio) e
-  contato/localização.
-- **Quiz de match** (`/quiz`, pública, aba "Encontre seu match" no header + link na vitrine): 5
-  perguntas sobre moradia/rotina/experiência, pontuadas **client-side** contra os animais realmente
-  disponíveis (`QuizComponent.pontuar` — pesos por espécie/porte/fase de vida; a fase é inferida do
-  texto livre `idadeAproximada` por `faseDeVida`, que trata texto irreconhecível como adulto/neutro).
-  Resultado mostra o melhor match (% + motivos) com CTA pra `/animais/:id` (onde já existem o form
-  de adoção e o WhatsApp) e até 2 vice-matches. **Sem backend** — é heurística de engajamento, não
-  recomendação persistida; se a pontuação mudar, não há nada pra migrar.
-- **Contato da ONG**: centralizado em `core/config/ong.config.ts` (telefone/WhatsApp, Instagram,
-  endereço, horário) — **dados de exemplo (placeholder)**, substituir pelos reais antes de publicar.
-  Usado na seção de contato da home e no botão de WhatsApp da página do animal (abaixo). Trocar em
-  um lugar só evita divergência entre os dois pontos.
+- **Home** (`/`, pública): o hero **é a vitrine** — `app-carrossel` grande, `variante="destaque"`,
+  com os primeiros animais disponíveis (não banners de marketing). Cada slide é a foto do animal
+  de ponta a ponta (quadrada e com teto de 62vh no celular, de borda a borda; ~68vh/até 680px no
+  desktop) com a **etiqueta de canil "pendurada"** nela (`.etiqueta`: nome em Fredoka, "Gato de
+  porte médio, 1 ano", "Conheça {nome}") — sem gradiente escurecendo a foto. O slide inteiro é
+  clicável (`(click)`/`(keydown)`) e abre o mesmo `AnimalDetalheDialogComponent` dos cards. Logo
+  abaixo, título + o CTA principal **"Quero adotar"** (`.botao-cta`, framboesa, largura toda no
+  celular e visível sem rolar; `routerLink` para `/adotar`) + "Hoje são N animais esperando por um
+  lar" + link de texto "Outras formas de ajudar". Fotos via `appFoto` com `srcset` (o celular baixa
+  ~800px, o desktop com escala alta ~2048 — ver "Imagens responsivas"); o carrossel só monta o slide
+  atual e os vizinhos. **Foto com pouca resolução** (ex.: acervo antigo 800×600): ao carregar, a home
+  compara a **maior largura disponível** (`fotoPrincipalLarguras`; `naturalWidth` só sem escada —
+  com `srcset` o arquivo baixado pode ser menor de propósito) com a largura exibida ×
+  `devicePixelRatio` e, se faltar resolução, o slide ganha
+  `.hero__slide--resolucao-baixa` — no desktop a foto aparece inteira (`contain`) sobre um fundo
+  desfocado dela mesma, em vez de esticada até borrar; no celular continua `cover`. Depois: "Como adotar" (3 passos), "Formas de ajudar" (adotar/apadrinhar/ser
+  voluntário/divulgar — "Adotar"/"Divulgue" usam `routerLink` para `/adotar`, os demais são
+  âncoras internas pra `#contato`, sem backend próprio) e contato/localização. Deliberadamente
+  **sem** grade de animais nem filtros na home — isso vive todo em `/adotar` (ver abaixo), pra não
+  competir por espaço com o resto do conteúdo institucional.
+- **Quero adotar** (`/adotar`, pública, `AnimaisDisponiveisComponent` em
+  `features/animais/animais-disponiveis/`): página dedicada com todos os animais disponíveis e
+  **filtros por espécie/porte/sexo** (client-side sobre a lista já carregada de
+  `animalListarDisponiveis` — cada grupo de chips só aparece quando há mais de um valor entre os
+  animais carregados). No celular os chips de cada grupo viram uma faixa horizontal com scroll
+  (`overflow-x: auto`, sem quebra de linha) em vez de quebrar e virar uma "nuvem" centralizada —
+  ver `.pagina-adotar__filtros` no SCSS do componente. Reaproveita `AnimalCardComponent` (mesmo
+  card clicável da home) e "Mostrar mais" incremental (`QUANTIDADE_INICIAL` = 12).
+- **Configurações da ONG (Fase 24)** — `ConfiguracaoOngService` (`core/config/`): nome, contato
+  (WhatsApp/Instagram/email/endereço/horário/textos), hero, passos de "Como adotar", formas de
+  ajudar e doação/PIX vêm da API (`GET /api/configuracao/publica`), **não** de constantes no código
+  (o antigo `ong.config.ts` foi removido). Carregado uma vez no `provideAppInitializer`
+  (`app.config.ts`, tempo limite de 3s, nunca falha) e exposto como signal (`configuracao()`,
+  `nomeOng()`, `whatsappFormatado()`, `instagram()`, `linkWhatsapp(msg)` — `null` sem WhatsApp, o
+  botão some). Se a API falhar, fica um padrão **sem contato nenhum** (melhor esconder do que mostrar
+  número de exemplo). O título das abas é montado pela `TituloOngStrategy` ("{nome} — {página}"):
+  as rotas declaram só a página (`title: 'Quero adotar'`) — **não** volte a pôr o nome fixo nelas.
+  Na home, item de contato vazio some, a seção de contato some se não houver nada, "Formas de
+  ajudar" mostra só cards ativos + o bloco **"Doe"** (`#doacao`, chave PIX com botão copiar via
+  `Clipboard` do CDK) quando há chave PIX, e as grades de passos/cards ajustam as colunas pela
+  quantidade (`--passos-colunas`/`--formas-colunas`).
+  **Tela de edição: `/admin/configuracoes`** (`ConfiguracoesComponent`, `adminGuard`, item
+  "Configurações" no sidenav só para Admin) — abas "Identidade" (nome e contato), "Página inicial"
+  e "Aparência"; listas editáveis de passos (1–6) e cards (até 8, com "Mostrar no site", mover e
+  remover), ícone e destino do link por `mat-select` (listas fixas `ICONES`/`DESTINOS` + valores já
+  salvos fora delas), barra de Salvar fixa no rodapé. No celular as abas encolhem o padding para as 3
+  caberem sem rolagem. ⚠️ O `PUT` substitui a configuração **inteira**: os campos
+  sem tela ainda (espécies, regras de adoção, módulos) são reenviados como vieram do `GET`
+  (`montarDto`) — ao criar a tela de um deles, mova-o do bloco "reenviados" para o form. WhatsApp
+  usa a máscara `appTelefone` e é enviado só com dígitos (sem "+" e com 10–11 dígitos → acrescenta o DDI
+  55). Ao salvar, `ConfiguracaoOngService.aplicar()` atualiza o site sem recarregar.
+  **Aparência:** (1) **Logo** — `app-upload-imagens` de um arquivo → `configuracaoAtualizarLogo`
+  (grava **na hora**, fora do Salvar e sem repreencher o form — não perde edição pendente);
+  "Remover logo" com `ConfirmDialogComponent`. O backend gera o favicon (PNG 64) e o ícone de atalho
+  (PNG 180); o `ConfiguracaoOngService` troca os `<link rel="icon">`/`apple-touch-icon` sozinho
+  (sem logo, volta ao `favicon.ico`). A tela mostra o logo como no cabeçalho + uma imitação da aba
+  do navegador com o favicon. (2) **Paleta** — `mat-radio-group` com um cartão por paleta
+  (amostras). **Prévia ao vivo:** escolher já pinta o site inteiro (`previsualizarPaleta`); sair
+  da tela sem salvar volta à paleta salva (`encerrarPrevisualizacao` no `DestroyRef`).
+- **Paletas de cores (`core/config/paletas.ts`)**: 5 paletas prontas (`PaletaCores` — Kraft é a
+  original e **não sobrescreve nada**). `aplicarPaleta()` grava no `<html>` (estilo inline, vence o
+  `:root`) os tokens `--cor-*` da paleta **e** as variáveis do Material (`--mat-sys-primary`,
+  `--mat-sys-surface*`, `--mat-sys-tertiary`...) apontadas para esses tokens — sem isso botões,
+  campos, abas e checkboxes ficariam laranja; também troca o `<meta name="theme-color">`. Por isso
+  **nunca** use hex fixo em componente: só `var(--cor-*)` acompanha a troca de paleta. Contraste
+  conferido (regras no topo do arquivo) — ao criar/ajustar paleta, confira de novo. ⚠️ A Kraft
+  atual tem `--cor-primaria-escura` (#b97d1f) como texto com contraste 3,4:1 (abaixo de 4,5) —
+  problema anterior, não corrigido para não mudar a identidade sem decisão.
+- **Logo (`app-logo-ong`, `shared/components/logo-ong/`)**: logo enviado (via `appFoto`, `sizes`
+  fixo 160px) ou o símbolo 🐾; usado no cabeçalho (32px), painel (28px) e rodapé (20px).
 - **Página do animal (`/animais/:id`)**: antes do formulário, um botão **"Falar no WhatsApp"**
-  (`linkWhatsapp()` em `ong.config.ts`, mensagem pré-preenchida com o nome do animal) — canal mais
+  (`ConfiguracaoOngService.linkWhatsapp()`, mensagem pré-preenchida com o nome do animal) — canal mais
   direto pra quem prefere não preencher nada. O formulário "Quero adotar" tem os 3 campos que o
   backend exige (`nome`/`email`/`telefone` — `AdocaoCreateDto` não aceita menos que isso) **+
   observações opcional** (grava em `adocoes.observacoes`, coluna `TEXT` sem limite no backend;
@@ -63,8 +115,8 @@ Código, textos e comentários em **português**.
   tags `og:*` estáticas do `index.html`. Corrigir isso de verdade exigiria Angular SSR (fora de
   escopo hoje).
 - **Styleguide** (`/styleguide`): catálogo vivo dos componentes (botões, chips, cards, form fields,
-  datepicker, loading, badges de status, carrossel, upload de imagens, stat tile) e dos tokens de
-  cor/tipografia.
+  datepicker, loading, badges de status, carrossel, upload de imagens, stat tile, selo genérico, avatar de iniciais, foto responsiva `appFoto`, máscara de telefone, escolha única `mat-radio`, logo da ONG `app-logo-ong`) e dos tokens de
+  cor/tipografia (com as paletas da ONG).
 - **Loading padrão**: `LoadingComponent` (`app-loading`) substitui qualquer bloco de
   `mat-progress-spinner` centralizado (listas, formulários carregando dados, seções públicas) —
   **não** é para o spinner pequeno dentro de um botão de submit (`diameter="20"` direto no botão,
@@ -80,7 +132,9 @@ Código, textos e comentários em **português**.
   `status`/`ativo` em animais, `status` em adoções, `ativo` em funcionários,
   `proximaDoseDe`/`proximaDoseAte` em vacinas — nesse caso a ordenação padrão vira `proximaDose`
   ascendente)) + prévia das solicitações de adoção pendentes (até 5, link "Ver
-  todas" para `/admin/adocoes`). Os contadores vêm de `totalItens` dos próprios `GET` paginados
+  todas" para `/admin/adocoes?status=Pendente`) — uma `mat-table` com `.tabela-clicavel` igual às
+  listas: a linha inteira abre a ficha da candidatura (`/admin/adocoes/:id`, onde se altera o
+  status), com a instrução "Toque em…" no cabeçalho do card. Os contadores vêm de `totalItens` dos próprios `GET` paginados
   (`tamanhoPagina: 1` quando só o número interessa) — **não existe endpoint de estatísticas
   dedicado**, e não crie um só por conveniência do dashboard.
 - **Ficha do animal** (`AnimalFichaComponent`): **o lugar único do animal no admin** — leitura,
@@ -133,10 +187,20 @@ Código, textos e comentários em **português**.
   local, evitando o shift de fuso de `new Date(string)`) — reaproveite esse padrão em qualquer campo
   de data novo.
 - **Auth**: `AuthService` (token em `localStorage`, signals, decodifica JWT — inclusive a claim
-  `perfil` → `ehAdmin()`), `authInterceptor`, `errorInterceptor` (401 → logout + `/login`),
-  `authGuard` (logado?) e `adminGuard` (perfil Admin? — protege `/admin/usuarios/**`; não-admin é
-  redirecionado ao dashboard).
-- Client gerado em `src/app/core/api/` (5 services + models + enums + envelopes).
+  `perfil` → `ehAdmin()`), `authInterceptor`, `errorInterceptor` (401 → logout + `/login`, **exceto** o 401 do próprio
+  `/usuario/login` — senha errada não é sessão expirada), `authGuard` (logado?) e `adminGuard`
+  (perfil Admin? — protege `/admin/usuarios/**` e `/admin/auditoria`).
+- **Página 404 (`NaoEncontradoComponent`, `features/nao-encontrado/`)**: rota `**` (URL
+  desconhecida) **e** destino dos guards quando falta acesso — por segurança, quem não tem acesso
+  vê "Página não encontrada" em vez de "sem acesso", sem saber que a área existe. Os guards usam
+  `paginaNaoEncontrada(router)` (`core/auth/nao-encontrado.util.ts`: `RedirectCommand` com
+  `skipLocationChange`, a URL digitada continua na barra). Visitante sem sessão em `/admin/**` →
+  404; funcionário com token **expirado** neste navegador (`AuthService.sessaoExpirada`) → login
+  com `returnUrl`; Comum em rota Admin → 404. Funcionário entra pelo botão "Entrar" do cabeçalho.
+  ⚠️ URL inválida e área restrita precisam continuar com a **mesma** resposta — não volte o `**`
+  para `redirectTo: `.
+- Client gerado em `src/app/core/api/` (services por controller — inclusive `ConfiguracaoService` —
+  + models + enums + envelopes).
 
 ---
 
@@ -184,6 +248,46 @@ custom a partir de uma cor semente); se algum dia for preciso bater exato, troca
   `app-animal-card` (`.animal-card__idade`) e números de KPI (`app-stat-tile`). **Não** usar em
   texto corrido (nome, descrição, "espécie · porte") nem em blocos maiores — é um destaque curto,
   não uma fonte de leitura.
+
+### Padrões de tela: classes globais (`_padroes.scss`)
+
+A estrutura que toda lista/formulário do painel repetia (copiada com outro prefixo BEM) virou
+classes globais em `src/styles/_padroes.scss` (importado em `styles.scss`). **Use-as no template em
+vez de recriar o CSS no componente** — o SCSS do componente fica só com o que é da tela (colunas,
+miniaturas, grids próprios).
+
+| Classe | Uso |
+|---|---|
+| `.pagina` (+ `--larga` 1200 / `--media` 720 / `--estreita` 560; padrão 1100px) | container centralizado da página |
+| `.pagina-cabecalho` (+ `--voltar` p/ formulário com botão voltar) | h1 + subtítulo + ação principal |
+| `.instrucao-toque` | "Toque em um ... para ver a ficha" — **obrigatória** em lista com linha clicável |
+| `.card-conteudo` (+ `--form`) | padding do `mat-card` da lista / do formulário |
+| `.filtros` + `.filtros__principal` (campo de busca, cresce) + `.filtros-toggle` | barra de filtros; largura dos campos via `--filtro-largura` (padrão 220px) |
+| `.tabela-wrapper` / `.tabela-clicavel` (no `<table mat-table>`) | rolagem horizontal / linha inteira clicável (a `<tr>` só leva o `(click)`) |
+| `.mensagem-erro` (com `role="alert"`) / `.estado-vazio` | erro ao carregar/salvar / lista sem resultados |
+| `.form-coluna` / `.form-grade` (+ `__inteiro`) / `.form-acoes` (+ `__excluir`) | campos empilhados / 2 colunas ≥ 600px / barra Cancelar-Salvar |
+
+- **Ajuste por tela sem duplicar:** estilos de componente têm especificidade maior que os globais
+  (atributo do encapsulamento), então uma regra local sempre vence — ex.: `AnimalListaComponent`
+  usa `class="filtros animal-lista__filtros"` e redefine só o grid; a auditoria só seta
+  `--filtro-largura: 190px`.
+- Spinner dentro de botão (`<mat-progress-spinner diameter="20">`) já sai centralizado e na cor do
+  texto por uma regra global em `_base.scss` — não repita no componente.
+- Os estados vazios das **fichas** (dentro de abas, alinhados à esquerda, mais compactos) ficaram
+  locais de propósito — não são o `.estado-vazio` das listas.
+- Catalogado em `/styleguide` → "Padrões de tela". Ao criar um padrão novo que se repete em 2+
+  telas, adicione aqui e lá (mesma regra dos componentes compartilhados).
+
+### Botão de chamada principal: `.botao-cta` (`_base.scss`)
+
+Para a ação mais importante de uma página pública (hoje: "Quero adotar" no hero da home), num
+`mat-flat-button`: framboesa (`--cor-secundaria`, a cor reservada pro destaque), 56px de altura,
+texto `--texto-lg` em negrito. **No máximo um por tela** — o resto usa os botões normais (a ação
+secundária do hero virou link de texto para não competir). Catalogado em `/styleguide` → Botões.
+
+O `app-carrossel` tem `variante="destaque"` (indicadores numa pílula sobre a imagem, no canto
+inferior direito; setas maiores) para carrossel de página inteira, e o arredondamento é ajustável
+por `--carrossel-raio`. O autoplay desliga sozinho com `prefers-reduced-motion`.
 
 ### Assinatura: `.etiqueta` (`_base.scss`)
 
@@ -340,7 +444,8 @@ Não há refresh token ainda. Token expira em ~60 min (dev: 120 min), **sem tole
 2. Guardar o token (ex: `localStorage`), decodificar `exp`/`sub`/`email`/`given_name` se precisar.
 3. **Interceptor** adiciona `Authorization: Bearer {token}` em toda requisição, **exceto `/login`**
    (é a única forma de obter um token, não faz sentido exigir um).
-4. **Guard** protege rotas privadas: sem token (ou expirado) → redireciona para `/login`.
+4. **Guard** protege rotas privadas: token expirado → `/login`; sem sessão nenhuma → página 404
+   (não revela que o `/admin` existe — ver "Página 404" em "O que já existe").
 5. **Interceptor de erro**: ao receber **401**, limpar token e mandar para `/login`.
 
 Claims no token: `sub` (id do usuário), `email`, `given_name` (nome), `perfil` (`"Admin"` |
@@ -382,8 +487,8 @@ Legenda: 🔓 público (`AllowAnonymous`) · 🔒 exige Bearer token.
 Listas marcadas **(paginado)** retornam `ResultadoPaginado<T>`; as demais retornam `T` ou `T[]`.
 
 ### Usuário (funcionário) — `/api/usuario`
-Legenda extra: 🔑 = exige perfil **Admin** (Comum recebe **403 com corpo vazio**, fora do formato
-`ApiResponse` — esconda a UI em vez de tratar a mensagem).
+Legenda extra: 🔑 = exige perfil **Admin** (Comum recebe **404** "Recurso não encontrado." — o backend mascara o 403 para não revelar o
+recurso; esconda a UI em vez de tratar a mensagem).
 
 | Verbo | Rota | Auth | Body | Retorno (`dados`) |
 |---|---|---|---|---|
@@ -392,6 +497,7 @@ Legenda extra: 🔑 = exige perfil **Admin** (Comum recebe **403 com corpo vazio
 | GET | `` | 🔑 | — (query: `busca`, `ativo`) | `ResultadoPaginado<Usuario>` |
 | GET | `/{id}` | 🔑 | — | `Usuario` / 404 |
 | PUT | `/{id}` | 🔑 | `{ nome, email, perfil, ativo }` | `Usuario` |
+| PUT | `/{id}/senha` | 🔑 | `{ novaSenha }` | `true` — reset de senha (não exige a atual) |
 | DELETE | `/{id}` | 🔑 | — | `true` |
 | GET | `/me` | 🔒 | — | `Usuario` — autoatendimento, sem `{id}` |
 | PUT | `/me` | 🔒 | `{ nome, email }` | `Usuario` — autoatendimento (sem `perfil`/`ativo` de propósito) |
@@ -401,8 +507,27 @@ Ordenar por: `nome`, `email`, `dataCriacao`. `perfil` é o enum `PerfilUsuario` 
 rótulos em `PERFIS_USUARIO`/`ROTULO_PERFIL_USUARIO` de `rotulos.ts`). `ativo = false` bloqueia o
 login (mensagem "Usuário inativo"), sem excluir a conta — é a forma de tirar o acesso de alguém sem
 apagar o histórico. O front impede o funcionário logado de excluir/desativar/rebaixar a própria
-conta (ver `UsuarioListaComponent` e `UsuarioFormComponent`); o menu "Funcionários", o KPI do
+conta (ver `UsuarioFichaDialogComponent`); o menu "Funcionários", o KPI do
 dashboard e as rotas `/admin/usuarios/**` (via `adminGuard`) só existem para Admin.
+
+**Ficha do funcionário em modal** (`UsuarioFichaDialogComponent`): a lista de funcionários segue o
+padrão das listas de animais/adoções — **sem coluna de ícones**, a linha inteira é clicável — mas
+abre uma **modal** (não uma página: funcionário tem poucos dados, sem abas) com cartão `.etiqueta`
+(avatar com iniciais, nome, email, selos de perfil/situação, data de cadastro) e as ações
+**Editar** e **Resetar senha**. **Edição in-place** (como a ficha do animal): "Editar" troca o
+cartão pelos campos nome/email/perfil/ativo e as ações viram Excluir/Cancelar/Salvar — o PUT e o
+DELETE saem da própria modal (não existe mais a rota `usuarios/:id/editar`; o
+`UsuarioFormComponent` é **só cadastro**, `/admin/usuarios/novo`). Na própria conta, perfil/ativo
+ficam desabilitados e Excluir/Resetar senha indisponíveis. A modal abre com `disableClose` e trata
+Esc/clique fora sozinha (não fecha durante a edição, para não perder o digitado), fechando sempre
+com `UsuarioFichaDialogResultado` (`alterado` → a lista recarrega; `resetarSenha` → a lista abre
+o diálogo de reset).
+
+**Reset de senha por admin** (`PUT /{id}/senha`, Fase 18): a ação "Resetar senha" da ficha abre o `UsuarioResetSenhaDialogComponent` (nova senha +
+confirmação; o diálogo devolve o dado e a lista chama `usuarioResetarSenha` — mesmo padrão do
+`AdocaoStatusDialogComponent`). Não exige a senha atual — é o caminho para funcionário que esqueceu
+a senha e não consegue logar; o backend audita como `SenhaResetada`. Desabilitado na própria conta
+(o caminho é "Meu perfil", que exige a senha atual).
 
 **Meu perfil** (`/admin/perfil`, `PerfilComponent`): autoatendimento do funcionário logado — editar
 nome/email (`usuarioObterMe`/`usuarioAtualizarMe`, endpoints `/me` que funcionam para qualquer
@@ -423,8 +548,9 @@ da diretiva, e os campos vazios reaparecem com erro de obrigatório (ver `Perfil
 | POST | `` | 🔒 | `AnimalCreate` | `Animal` (201) |
 | GET | `` | 🔒 | query (ver abaixo) | `ResultadoPaginado<Animal>` |
 | GET | `/{id}` | 🔓 | — | `Animal` / 404 — página pública de detalhe |
+| GET | `/{id}/vinculos` | 🔒 | — | `AnimalVinculos` (`adocoes`/`vacinas`/`fotos` + `possuiVinculos`) / 404 |
 | PUT | `/{id}` | 🔒 | `AnimalUpdate` | `Animal` |
-| DELETE | `/{id}` | 🔒 | — | `true` |
+| DELETE | `/{id}?excluirVinculos=` | 🔒 | — | `true` / 400 se há vínculos e `excluirVinculos` não é `true` |
 
 Filtros: `nome`, `especie`, `sexo`, `porte`, `status`, `castrado`, `ativo`. Ordenar por: `nome`, `especie`, `status`, `dataCadastro`.
 
@@ -433,13 +559,20 @@ admin e selos (tom musgo, só quando positivos) na página pública de detalhe.
 
 `AnimalRespostaDto.fotoPrincipalUrl` (opcional) já vem populado em todo `GET` de leitura — é a foto
 principal do animal (ou a mais recente, se nenhuma marcada como principal), `undefined` se não
-tiver foto. Sempre resolva com `urlMidia()` antes de usar num `[src]` (é uma URL relativa). `null`
-em respostas de `POST`/`PUT` (não fazem o JOIN com `fotos`). A lista do admin usa isso para a
-**miniatura** de cada animal.
+tiver foto. Use com a diretiva `appFoto` junto de `fotoPrincipalLarguras` (ver "Imagens
+responsivas"), nunca direto num `[src]`. `null` em respostas de `POST`/`PUT` (não fazem o JOIN com
+`fotos`). A lista do admin usa isso para a **miniatura** de cada animal.
 
 `AnimalRespostaDto.candidaturasPendentes` só vem populado no `GET /api/animal` (listagem
 administrativa) — `0` nas demais respostas. A lista do admin mostra um badge ao lado do nome
 quando > 0, linkando para a ficha na aba Candidaturas.
+
+**Exclusão de animal com vínculos (Fase 19):** o botão Excluir da ficha primeiro chama
+`animalObterVinculos`. Sem vínculos → confirmação simples. Com vínculos → o mesmo
+`ConfirmDialogComponent` (agora com `itens` + `rodape`, catalogado no `/styleguide`) lista só o que
+o animal tem (adoções, vacinas, fotos) e avisa que tudo será apagado junto; ao confirmar, chama
+`animalExcluir({ id, excluirVinculos: true })`. Sem essa flag o backend recusa (400) — o front nunca
+deve mandá-la sem passar pela modal.
 
 ### Adoção — `/api/adocao`
 | Verbo | Rota | Auth | Body | Retorno |
@@ -450,6 +583,8 @@ quando > 0, linkando para a ficha na aba Candidaturas.
 | PUT | `/{id}` | 🔒 | `{ status, observacoes? }` | `Adocao` |
 
 **Não existe DELETE** (removido na Fase 14 — histórico permanente; a fila é gerida só por status).
+Única exceção: excluir um **animal** com vínculos (Fase 19) apaga também as adoções dele — ver
+"Exclusão de animal com vínculos" abaixo.
 
 **POST é público** — quem envia é o adotante, que não tem conta. Cria (ou **reutiliza por email** —
 dedup da Fase 14, atualizando nome/telefone) o registro em `adotantes` e a `adocao` na mesma
@@ -511,7 +646,8 @@ dashboard monta os dois KPIs de vacina).
 
 Obs: marcar uma foto como `principal` desmarca as outras do mesmo animal. Criação é **upload real de
 arquivo** (não uma URL de texto) — o backend salva em disco e devolve a `url` relativa gerada
-(ex.: `/uploads/animais/{guid}.jpg`) já em `FotoRespostaDto.url`, pronta para usar num `<img [src]>`.
+(ex.: `/uploads/animais/{guid}-2048.webp` — a maior largura; as demais em `FotoRespostaDto.larguras`,
+ver "Imagens responsivas" abaixo) já em `FotoRespostaDto.url` — exiba com a diretiva `appFoto`.
 `PUT` continua só editando `descricao`/`principal` (não troca o arquivo).
 
 ### Auditoria — `/api/auditoria` (🔑 Admin)
@@ -541,9 +677,34 @@ rótulos das ações no próprio componente (mapa `ROTULO_ACAO` — a `acao` é 
   absoluta (ex.: as fotos de seed em `placehold.co`) ou prefixa com `environment.apiUrl` se for
   relativa. Em dev, `apiUrl` é `''` e quem resolve é o proxy (por isso `/uploads` também precisa estar
   no `proxy.conf.json`, ver acima).
-- Validação de arquivo (extensão `.jpg/.jpeg/.png/.webp/.gif`, `image/*`, até 5MB) acontece **no
-  cliente** em `UploadImagensComponent` antes de emitir os arquivos aceitos — mesmas regras do
-  backend, só para dar feedback imediato; o backend valida tudo de novo.
+- **Imagens responsivas (Fase 23) — diretiva `appFoto`** (`shared/components/foto-responsiva/`,
+  catalogada no `/styleguide`): o backend grava cada foto em várias larguras
+  (`{guid}-{largura}.webp`, 480/800/1200/1600/2048, só até a largura da original) e a API devolve a
+  lista (`larguras`, `fotoPrincipalLarguras`, `fotoAnimalLarguras`). **Toda foto de animal** é uma
+  `<img [appFoto]="url" [larguras]="larguras" sizes="...">` — a diretiva monta `src` + `srcset` e o
+  **navegador** baixa a versão certa para a tela. **Sempre informe `sizes`** (largura que a imagem
+  ocupa; sem ele o navegador assume a tela inteira): carrossel da home `(min-width: 1120px) 1072px,
+  (min-width: 768px) calc(100vw - 48px), 100vw`; card de `/adotar` `(min-width: 1024px) 270px,
+  (min-width: 768px) 33vw, (min-width: 480px) 50vw, calc(100vw - 32px)`; listas do admin `48px`;
+  ficha do animal `96px`; ficha da adoção `72px`. Errar o `sizes` para cima desperdiça banda
+  (medido: com `100vw` no card, o celular baixava 1080px em vez de 720). Foto sem escada (seed
+  externa) usa só o `src`. `urlMidia()` continua só para o `og:image` (precisa da URL absoluta da
+  maior). Não existe mais `urlMiniatura`/`-mini`.
+- **Prioridade de carregamento:** a maior imagem visível na abertura (LCP) leva
+  `fetchpriority="high"` e **não** leva `loading="lazy"` (1º slide do carrossel; 1º card de
+  `/adotar` via `[prioridade]="'alta'"`); o resto da primeira dobra carrega na hora sem prioridade
+  (`'normal'`); o resto, `lazy` (`'adiada'`). Prioridade alta em vários ao mesmo tempo piora o LCP
+  no celular (disputam a banda) — medido.
+- **Carrossel monta só o slide atual e os vizinhos** (`CarrosselComponent.deveRenderizar`): antes
+  ele baixava todas as fotos na abertura (o `lazy` não ajuda — os slides fora da tela estão na
+  mesma faixa vertical). Uma vez montado, o slide fica (voltar não baixa de novo).
+- **Rodapé estável:** `<main class="conteudo">` tem `min-height: 100vh` no `AppComponent` — sem isso,
+  enquanto a rota lazy carregava, o rodapé aparecia no meio da tela e era empurrado para baixo
+  (90% do CLS medido).
+- Validação de arquivo (extensão `.jpg/.jpeg/.png/.webp/.gif`, `image/*`, até **15MB** — limite da
+  foto original; o backend reduz ao salvar) acontece **no cliente** em `UploadImagensComponent` antes
+  de emitir os arquivos aceitos — mesmas regras do backend, só para dar feedback imediato; o backend
+  valida tudo de novo.
 
 ---
 
@@ -582,12 +743,13 @@ src/app/
     models/      rotulos.ts (helpers de UI) + index.ts (barrel: re-exporta os models gerados)
   layout/        header/ (mat-toolbar), footer/
   features/
-    home/        homepage (carrossel + vitrine)
-    animais/     animal-detalhe/ (página PÚBLICA, sem guard): detalhe + form "Quero adotar";
+    home/        homepage (hero com carrossel de destaques + CTA "Quero Adotar")
+    animais/     animais-disponiveis/ (página PÚBLICA `/adotar`: grade de todos os animais
+                 disponíveis + filtros por espécie/porte/sexo, sem guard);
+                 animal-detalhe/ (página PÚBLICA, sem guard): detalhe + form "Quero adotar";
                  animal-detalhe-conteudo/ (conteúdo compartilhado, galeria em `app-carrossel` — uma
                  slide por foto, principal primeiro); animal-detalhe-dialog/ (modal aberto pelo card
-                 da home — ver `AnimalCardComponent`)
-    quiz/        quiz público de match (5 perguntas → melhor animal disponível, sem backend)
+                 da home/`/adotar` — ver `AnimalCardComponent`)
     styleguide/  catálogo de componentes
     auth/        login (única tela de auth — não há mais auto-cadastro público)
     admin/       admin-layout/ (sidenav + guard), dashboard/,
@@ -598,14 +760,23 @@ src/app/
                  adocoes/ (lista paginada + form p/ funcionário registrar manualmente +
                  diálogo de alterar status — ver "Adotante × Usuário"),
                  vacinas/ (lista paginada + form de registrar/editar — animal fixo na edição),
-                 usuarios/ (lista paginada + form de cadastrar/editar funcionário),
+                 usuarios/ (lista paginada com linha clicável → usuario-ficha-dialog/ (modal com
+                 edição in-place/Resetar senha/Excluir) + form só de cadastro),
                  perfil/ (autoatendimento do funcionário logado — dados pessoais + troca de senha,
-                 no sidenav junto dos demais módulos e também no menu do usuário no header)
+                 no sidenav junto dos demais módulos e também no menu do usuário no header),
+                 configuracoes/ (Admin: identidade/contato e conteúdo da home — ver
+                 "Configurações da ONG" em "O que já existe")
   shared/
     components/  carrossel/, animal-card/, status-animal-badge/, status-adocao-badge/,
-                 confirm-dialog/, upload-imagens/, stat-tile/, loading/  (componentes próprios,
+                 confirm-dialog/, upload-imagens/, stat-tile/, loading/, selo/, avatar-iniciais/,
+                 foto-responsiva/ (diretiva `appFoto`),
+                 mascara-telefone/ (diretiva `appTelefone` + `telefoneValidator` + `formatarTelefone`
+                 — máscara enquanto digita; **todo campo de telefone usa**),
+                 logo-ong/ (`app-logo-ong` — logo da ONG ou símbolo padrão)
+                 (componentes próprios,
                  catalogados no /styleguide)
-  styles/        _tokens.scss, _base.scss   (design system, mobile-first)
+  styles/        _tokens.scss, _base.scss, _padroes.scss   (design system + classes globais de
+                 tela, mobile-first)
   environments/
 ```
 
@@ -647,6 +818,15 @@ this.animalService.animalListar({ pagina: 1, tamanhoPagina: 20, especie: Especie
 - Datas vêm como string ISO; converta para `Date` só na exibição.
 - UI com **Angular Material**; só criar componente próprio quando o Material não cobrir (ex.: carrossel).
   Mobile-first, usando os tokens SCSS de `src/styles/`.
+- **Sempre use o que está no `/styleguide`** antes de escrever UI nova: componentes de
+  `shared/components/` (badges, `app-selo`, `app-avatar-iniciais`, `app-stat-tile`, `app-loading`,
+  `app-confirm-dialog`, ...), classes utilitárias (`.etiqueta`, `.hover-elevar`, `.botao-perigo`),
+  as classes de padrão de tela de `_padroes.scss` (`.pagina`, `.pagina-cabecalho`, `.filtros`,
+  `.tabela-clicavel`, `.mensagem-erro`, `.form-acoes`... — ver "Padrões de tela") e os padrões
+  documentados (ex.: tabela com linha clicável + instrução "Toque em..." no cabeçalho).
+  **Não** recrie em CSS local algo que o catálogo já tem. Se faltar uma peça reutilizável, crie-a
+  em `shared/components/`, exporte no barrel e catalogue no `/styleguide` na mesma tarefa — não
+  deixe como CSS solto num componente de feature.
 - **Styleguide é catálogo vivo**: ao **adicionar ou alterar** um componente/padrão de UI reutilizável
   (em `shared/components/` ou um novo componente Material do design system — ex.: snackbar, textarea)
   ou um token de cor/tipografia, **atualize a página `/styleguide` na mesma tarefa**. Componentes de
@@ -677,9 +857,11 @@ this.animalService.animalListar({ pagina: 1, tamanhoPagina: 20, especie: Especie
   `castrado`/`vermifugado` booleanos (default false).
 - Usuário (extra da Fase 14): `perfil` obrigatório no registrar/atualizar administrativo.
 - Adoção: `animalId` ≥1; `nomeAdotante` obrigatório ≤150; `emailAdotante` obrigatório/válido ≤255;
-  `telefoneAdotante` obrigatório ≤20; `status` obrigatório no update.
+  `telefoneAdotante` obrigatório ≤20; `status` obrigatório no update. No front o telefone usa a
+  máscara `appTelefone` e o `telefoneValidator` (10–15 dígitos — mais rígido que o backend, que só
+  limita a 20 caracteres) e vai **formatado** para a API (ex.: `(11) 98765-4321`).
 - Vacina: `animalId` ≥1; `nome` obrigatório ≤150; `dataAplicacao` obrigatória; `veterinario` ≤150.
-- Foto: `animalId` ≥1; `arquivo` obrigatório (imagem `.jpg/.jpeg/.png/.webp/.gif`, até 5MB — mesmas
+- Foto: `animalId` ≥1; `arquivo` obrigatório (imagem `.jpg/.jpeg/.png/.webp/.gif`, até 15MB — mesmas
   regras validadas no `UploadImagensComponent` antes de enviar); `descricao` ≤255.
 
 > O backend valida tudo de novo e devolve `400` com `mensagem` — espelhar no front é só para UX.

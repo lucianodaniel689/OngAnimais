@@ -9,7 +9,7 @@ export type StatTileCor = 'primaria' | 'secundaria' | 'alerta' | 'info';
 
 /**
  * Tile de KPI para dashboards: rótulo + valor em destaque + ícone.
- * Enquanto `carregando` é true, mostra um spinner no lugar do valor.
+ * Enquanto `carregando` é true, mostra um spinner no lugar do valor; com `erro`, mostra "—".
  * Uso: `<app-stat-tile titulo="Adoções pendentes" [valor]="5" icone="volunteer_activism" cor="alerta" />`
  */
 @Component({
@@ -36,6 +36,13 @@ export class StatTileComponent {
   readonly rota = input<string | undefined>(undefined);
   /** Query params opcionais do link — ex.: abrir a lista de destino já filtrada. */
   readonly queryParams = input<Record<string, string> | undefined>(undefined);
+  /**
+   * Falha ao obter o valor: mostra "—" + aviso em vez do número. Não use `valor = 0` para
+   * erro — um zero falso ("0 adoções pendentes") é pior do que admitir que não carregou.
+   */
+  readonly erro = input(false);
 
-  readonly carregando = computed(() => this.valor() === null || this.valor() === undefined);
+  readonly carregando = computed(
+    () => !this.erro() && (this.valor() === null || this.valor() === undefined),
+  );
 }

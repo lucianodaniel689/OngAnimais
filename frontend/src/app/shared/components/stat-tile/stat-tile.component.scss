@@ -36,6 +36,15 @@
   // é só para colunas de tabela, não para um valor de destaque isolado.
 }
 
+.stat-tile__valor--erro {
+  color: var(--cor-texto-suave);
+}
+
+.stat-tile__erro {
+  font-size: var(--texto-xs);
+  color: var(--cor-perigo);
+}
+
 .stat-tile mat-progress-spinner {
   margin-top: var(--esp-1);
 }

@@ -1,71 +1,21 @@
-.animal-lista {
-  max-width: 1100px;
-  margin-inline: auto;
-}
+// Estrutura da página (cabeçalho, card, filtros, tabela clicável, erro, vazio) vem das
+// classes globais de `styles/_padroes.scss`. Aqui fica só o que é desta lista.
 
-.animal-lista__cabecalho {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--esp-3);
-  margin-bottom: var(--esp-4);
-}
-
-.animal-lista__cabecalho h1 {
-  margin: 0 0 var(--esp-1);
-  font-size: var(--texto-xl);
-}
-
-.animal-lista__cabecalho p {
-  margin: 0;
-  color: var(--cor-texto-suave);
-}
-
-.animal-lista__card {
-  padding: var(--esp-4);
-}
-
+// Filtros em grade (busca larga + 3 selects + Limpar) em vez do fluxo padrão de `.filtros`.
 .animal-lista__filtros {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--esp-2) var(--esp-3);
-  margin-bottom: var(--esp-3);
 }
 
 .animal-lista__filtros mat-form-field {
   width: 100%;
 }
 
-.animal-lista__filtros-toggle {
-  width: 100%;
-  margin-bottom: var(--esp-3);
-}
-
 @media (min-width: 720px) {
   .animal-lista__filtros {
     grid-template-columns: 2fr 1fr 1fr 1fr auto;
-    align-items: center;
   }
-}
-
-.animal-lista__tabela-wrapper {
-  overflow-x: auto;
-}
-
-.animal-lista__tabela {
-  width: 100%;
-}
-
-// Coluna de ações fixa à direita (stickyEnd): precisa de fundo opaco para
-// não deixar o conteúdo aparecer por baixo durante o scroll lateral.
-.animal-lista__tabela .mat-mdc-table-sticky {
-  background-color: var(--cor-superficie);
-}
-
-.animal-lista__tabela .mat-column-acoes {
-  white-space: nowrap;
-  width: 1%;
 }
 
 // Miniatura da foto principal (já vem na listagem, sem chamada extra).
@@ -89,6 +39,13 @@
   font-size: 22px;
   width: 22px;
   height: 22px;
+}
+
+@media (max-width: 768px) {
+  .animal-lista__miniatura {
+    width: 48px;
+    height: 48px;
+  }
 }
 
 .animal-lista__tabela .mat-column-foto {
@@ -135,20 +92,6 @@
 .animal-lista__link-ficha:focus-visible {
   text-decoration: underline;
   color: var(--cor-primaria-escura);
-}
-
-.animal-lista__erro {
-  padding: var(--esp-3);
-  border-radius: var(--raio-sm);
-  background-color: var(--cor-perigo-bg);
-  color: var(--cor-perigo);
-  font-size: var(--texto-sm);
-}
-
-.animal-lista__vazio {
-  padding: var(--esp-6) 0;
-  text-align: center;
-  color: var(--cor-texto-suave);
 }
 
 .animal-lista__ativo {

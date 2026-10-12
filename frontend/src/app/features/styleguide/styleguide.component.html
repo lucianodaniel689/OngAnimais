@@ -21,6 +21,48 @@
         </div>
       }
     </div>
+
+    <h3>Paletas da ONG</h3>
+    <p class="sg__dica">
+      As amostras acima mostram a paleta <strong>em uso</strong>: a ONG escolhe uma das paletas abaixo em
+      <code>/admin/configuracoes</code> → Aparência, e ela redefine os tokens <code>--cor-*</code> e as
+      variáveis do Material (<code>--mat-sys-*</code>) no <code>&lt;html&gt;</code> — ver
+      <code>core/config/paletas.ts</code>. <strong>Kraft</strong> é a identidade original (não sobrescreve
+      nada). Por isso, <strong>nunca</strong> use hex fixo em componente: só <code>var(--cor-*)</code>
+      acompanha a troca. Ao criar/ajustar uma paleta, confira o contraste (regras no topo de
+      <code>paletas.ts</code>).
+    </p>
+    <div class="sg__paletas">
+      @for (paleta of paletas; track paleta.valor) {
+        <div class="sg__paleta">
+          <span class="sg__paleta-amostras" aria-hidden="true">
+            <span [style.background-color]="paleta.amostras.primaria"></span>
+            <span [style.background-color]="paleta.amostras.secundaria"></span>
+            <span [style.background-color]="paleta.amostras.fundo"></span>
+            <span [style.background-color]="paleta.amostras.superficie"></span>
+          </span>
+          <strong>{{ paleta.nome }}</strong>
+          <span>{{ paleta.descricao }}</span>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- LOGO DA ONG -->
+  <section class="sg__secao">
+    <h2>Logo da ONG (<code>app-logo-ong</code>)</h2>
+    <p class="sg__dica">
+      O logo enviado em Configurações → Aparência (com <code>srcset</code>, como as fotos) ou, sem logo,
+      o símbolo padrão 🐾. Usado no cabeçalho (32px), no painel (28px) e no rodapé (20px), sempre ao lado
+      do nome — por isso é decorativo por padrão (<code>[decorativo]="false"</code> quando aparece
+      sozinho). O favicon da aba do navegador é gerado do mesmo logo pelo backend.
+    </p>
+    <div class="sg__linha">
+      <app-logo-ong [altura]="20" />
+      <app-logo-ong [altura]="28" />
+      <app-logo-ong [altura]="40" [decorativo]="false" />
+    </div>
+    <pre class="sg__codigo"><code>&lt;app-logo-ong [altura]="32" /&gt;</code></pre>
   </section>
 
   <!-- TIPOGRAFIA -->
@@ -82,6 +124,18 @@
       <code>.botao-perigo</code> num <code>mat-flat-button</code> (regra em <code>_base.scss</code>,
       tokens <code>--cor-perigo</code>). Sempre acompanhada do diálogo de confirmação.
     </p>
+    <p class="sg__dica">
+      Chamada principal (CTA): classe global <code>.botao-cta</code> num
+      <code>mat-flat-button</code> — framboesa (<code>--cor-secundaria</code>), 56px de altura e
+      texto maior. Reservada para a ação mais importante de uma página pública (hoje: "Quero
+      adotar" no hero da home); no máximo um por tela.
+    </p>
+    <div class="sg__linha">
+      <button mat-flat-button class="botao-cta">
+        <mat-icon>pets</mat-icon>
+        Quero adotar
+      </button>
+    </div>
     <p class="sg__dica">Com ícone</p>
     <div class="sg__linha">
       <button mat-raised-button color="primary">
@@ -122,6 +176,68 @@
         <app-status-adocao-badge [status]="status" />
       }
     </div>
+    <p class="sg__dica">
+      Selo genérico <code>app-selo</code> (mesmo visual dos badges, com <code>cor</code> e
+      <code>icone</code> opcional) para atributos que não são status de animal/adoção — ex.: perfil
+      e situação do funcionário na ficha. Para status de animal/adoção, use os badges acima.
+    </p>
+    <div class="sg__linha">
+      <app-selo cor="primaria" icone="admin_panel_settings">Administrador</app-selo>
+      <app-selo cor="neutro" icone="person">Comum</app-selo>
+      <app-selo cor="sucesso" icone="check_circle">Ativo</app-selo>
+      <app-selo cor="perigo" icone="block">Inativo</app-selo>
+      <app-selo cor="alerta">Alerta</app-selo>
+      <app-selo cor="info">Info</app-selo>
+    </div>
+  </section>
+
+  <!-- AVATAR -->
+  <section class="sg__secao">
+    <h2>Avatar de iniciais</h2>
+    <p class="sg__dica">
+      Componente próprio <code>app-avatar-iniciais</code> — círculo com as iniciais (primeiro +
+      último nome) para pessoas sem foto, como funcionários. <code>tamanho</code> em px (padrão 56)
+      e <code>inativo</code> para o tom neutro de conta desativada. Usado na ficha do funcionário.
+    </p>
+    <div class="sg__linha">
+      <app-avatar-iniciais nome="Maria da Silva" />
+      <app-avatar-iniciais nome="João" [tamanho]="40" />
+      <app-avatar-iniciais nome="Ana Paula Souza" [inativo]="true" />
+    </div>
+  </section>
+
+  <!-- FOTO RESPONSIVA -->
+  <section class="sg__secao">
+    <h2>Foto responsiva (diretiva <code>appFoto</code>)</h2>
+    <p class="sg__dica">
+      <strong>Toda foto de animal usa esta diretiva</strong>, aplicada numa <code>&lt;img&gt;</code>
+      comum (o CSS da tela continua mirando a própria imagem). Ela monta <code>src</code> +
+      <code>srcset</code> com a URL e as larguras que a API devolve (<code>larguras</code>,
+      <code>fotoPrincipalLarguras</code>, <code>fotoAnimalLarguras</code> — o backend grava cada foto
+      em 480/800/1200/1600/2048px) e o <strong>navegador</strong> baixa a versão certa para a tela.
+      Sempre informe <code>sizes</code>: a largura que a imagem ocupa. Sem ele o navegador assume a
+      tela inteira e baixa uma versão grande demais para miniaturas. Foto sem escada (externa) usa só
+      o <code>src</code>; sem foto, usa <code>fotoPadrao</code>.
+    </p>
+    <pre class="sg__codigo"><code>&lt;img [appFoto]="animal.fotoPrincipalUrl"
+     [larguras]="animal.fotoPrincipalLarguras"
+     sizes="(min-width: 1024px) 270px, (min-width: 480px) 50vw, calc(100vw - 32px)"
+     alt="Foto do Thor" /&gt;</code></pre>
+    <p class="sg__dica">
+      <code>sizes</code> em uso: carrossel da home <code>(min-width: 1120px) 1072px, …, 100vw</code>;
+      card de <code>/adotar</code> acima; listas do admin <code>48px</code>; ficha do animal
+      <code>96px</code>. Foto visível na abertura da página (a maior da tela) leva
+      <code>fetchpriority="high"</code> e não leva <code>loading="lazy"</code>.
+    </p>
+    <div class="sg__linha">
+      <img
+        class="sg__foto-exemplo"
+        [appFoto]="null"
+        fotoPadrao="https://placehold.co/400x300/f7e4c1/b97d1f?text=fotoPadrao"
+        sizes="200px"
+        alt="Exemplo sem foto: usa fotoPadrao"
+      />
+    </div>
   </section>
 
   <!-- FORM FIELDS -->
@@ -158,6 +274,47 @@
       Datepicker do Material (<code>provideNativeDateAdapter()</code> em <code>app.config.ts</code>).
       Usado em <code>VacinaFormComponent</code> (data de aplicação / próxima dose).
     </p>
+
+    <h3>Escolha única (<code>mat-radio-group</code>)</h3>
+    <mat-radio-group class="sg__radios" aria-label="Exemplo de escolha única" [value]="'b'">
+      <mat-radio-button value="a">Opção A</mat-radio-button>
+      <mat-radio-button value="b">Opção B</mat-radio-button>
+      <mat-radio-button value="c">Opção C</mat-radio-button>
+    </mat-radio-group>
+    <p class="sg__dica">
+      Para escolher <strong>uma</strong> entre poucas opções visíveis de uma vez (até ~6). Em uso: seletor
+      de paleta em Configurações → Aparência, onde cada radio vira um cartão com amostras de cor.
+    </p>
+
+    <h3>Telefone (diretiva <code>appTelefone</code>)</h3>
+    <div class="sg__form">
+      <mat-form-field appearance="outline">
+        <mat-label>Telefone</mat-label>
+        <input
+          matInput
+          [formControl]="telefoneExemplo"
+          appTelefone
+          maxlength="20"
+          placeholder="(11) 91234-5678"
+        />
+        @if (telefoneExemplo.hasError('telefone')) {
+          <mat-error>Informe o telefone completo, com DDD.</mat-error>
+        }
+      </mat-form-field>
+    </div>
+    <p class="sg__dica">
+      <strong>Todo campo de telefone usa esta diretiva</strong> + o <code>telefoneValidator</code>
+      (10 a 15 dígitos; vazio passa — junte com <code>Validators.required</code> se for
+      obrigatório). Formata enquanto digita: <code>(11) 9999-9999</code> /
+      <code>(11) 99999-9999</code>; começando com <code>+</code>, <code>+55 (11) 99999-9999</code> ou
+      <code>+</code> e os dígitos para outros países. Mantém o cursor no lugar, aceita colar o número
+      e o Backspace sobre "(", ")" ou "-" apaga o dígito vizinho. O form control guarda o valor
+      <strong>formatado</strong> — quem precisa só dos dígitos (ex.: link <code>wa.me</code>) tira a
+      máscara ao enviar. Em uso: formulário de adoção (público e do painel) e WhatsApp das
+      configurações.
+    </p>
+    <pre class="sg__codigo"><code>&lt;input matInput formControlName="telefone" appTelefone maxlength="20" /&gt;
+telefone: ['', [Validators.required, telefoneValidator]]</code></pre>
   </section>
 
   <!-- SNACKBAR -->
@@ -236,15 +393,128 @@
     </div>
   </section>
 
+  <!-- PADRÕES DE TELA -->
+  <section class="sg__secao">
+    <h2>Padrões de tela (classes globais)</h2>
+    <p class="sg__dica">
+      Estrutura comum das listas e formulários do painel, em <code>styles/_padroes.scss</code>. Use
+      estas classes no template em vez de recriar o CSS no componente — o SCSS do componente fica
+      só com o que é da tela. Regras locais vencem as globais (especificidade do encapsulamento), e
+      algumas leem variáveis com padrão (ex.: <code>--filtro-largura</code> em
+      <code>.filtros</code>).
+    </p>
+
+    <p class="sg__dica">
+      <code>.pagina</code> (largura máxima centralizada: padrão 1100px, <code>--larga</code> 1200,
+      <code>--media</code> 720, <code>--estreita</code> 560) +
+      <code>.pagina-cabecalho</code> (título/subtítulo + ação) e
+      <code>.instrucao-toque</code> (obrigatória em lista com linha clicável):
+    </p>
+    <div class="sg__exemplo">
+      <header class="pagina-cabecalho">
+        <div>
+          <h1>Animais cadastrados</h1>
+          <p class="instrucao-toque">
+            <mat-icon>touch_app</mat-icon>
+            Toque em um animal da lista para ver e editar a ficha completa.
+          </p>
+        </div>
+        <button mat-flat-button color="primary">
+          <mat-icon>add</mat-icon>
+          Cadastrar animal
+        </button>
+      </header>
+      <header class="pagina-cabecalho pagina-cabecalho--voltar">
+        <button mat-icon-button aria-label="Voltar"><mat-icon>arrow_back</mat-icon></button>
+        <h1>Variante de formulário (<code>--voltar</code>)</h1>
+      </header>
+    </div>
+
+    <p class="sg__dica">
+      <code>.card-conteudo</code> (padding do card da lista; <code>--form</code> para formulários) com
+      <code>.filtros</code> (<code>.filtros__principal</code> no campo de busca, que cresce) e
+      <code>.filtros-toggle</code> (botão "Filtros" do celular):
+    </p>
+    <mat-card appearance="outlined" class="card-conteudo">
+      <div class="filtros">
+        <mat-form-field appearance="outline" class="filtros__principal">
+          <mat-label>Buscar por nome</mat-label>
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput placeholder="Ex: Thor" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Situação</mat-label>
+          <input matInput placeholder="Todas" />
+        </mat-form-field>
+        <button mat-stroked-button type="button">
+          <mat-icon>filter_alt_off</mat-icon>
+          Limpar
+        </button>
+      </div>
+      <p class="estado-vazio">
+        <code>.estado-vazio</code> — Nenhum animal encontrado com esses filtros.
+      </p>
+    </mat-card>
+
+    <p class="sg__dica">
+      <code>.mensagem-erro</code> (com <code>role="alert"</code>) para falha ao carregar/salvar:
+    </p>
+    <p class="mensagem-erro" role="alert">Não foi possível carregar os animais agora.</p>
+
+    <p class="sg__dica">
+      Formulários: <code>.form-coluna</code> (campos empilhados) ou <code>.form-grade</code> (2
+      colunas a partir de 600px; <code>.form-grade__inteiro</code> ocupa a linha) +
+      <code>.form-acoes</code> (Cancelar/Salvar à direita; <code>.form-acoes__excluir</code> isola o
+      botão destrutivo à esquerda). Spinner dentro de botão já sai centralizado e na cor do texto
+      (regra global em <code>_base.scss</code>).
+    </p>
+    <mat-card appearance="outlined" class="card-conteudo card-conteudo--form">
+      <div class="form-grade">
+        <mat-form-field appearance="outline" class="form-grade__inteiro">
+          <mat-label>Nome da vacina</mat-label>
+          <input matInput />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Data de aplicação</mat-label>
+          <input matInput />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Próxima dose</mat-label>
+          <input matInput />
+        </mat-form-field>
+        <div class="form-acoes">
+          <button mat-flat-button type="button" class="botao-perigo form-acoes__excluir">
+            <mat-icon>delete</mat-icon>
+            Excluir
+          </button>
+          <button mat-stroked-button type="button">Cancelar</button>
+          <button mat-flat-button color="primary" type="button">
+            <mat-progress-spinner mode="indeterminate" diameter="20" />
+          </button>
+        </div>
+      </div>
+    </mat-card>
+  </section>
+
   <!-- TABELA -->
   <section class="sg__secao">
     <h2>Tabela</h2>
     <p class="sg__dica">
-      `mat-table` + `mat-paginator` (Material). Usado nas telas de manutenção/listagem
-      (ex.: <code>/admin/animais</code>) com paginação, ordenação e ações por linha.
+      `mat-table` + `mat-paginator` (Material). Usado nas telas de manutenção/listagem, com
+      paginação e ordenação. Padrão do painel: **sem** coluna de ícones — a `<tr>` inteira é clicável (`(click)`) e abre
+      a ficha, seja como página (animais, adoções) ou como modal (funcionários, quando há poucos dados
+      e nenhuma aba). A linha ganha `(click)` e a tabela, a classe global <code>.tabela-clicavel</code>
+      (cursor/hover e linhas maiores no celular), dentro de um <code>.tabela-wrapper</code> (rolagem
+      horizontal) — ver "Padrões de tela" acima
+      (ex.: <code>/admin/animais</code>, <code>/admin/adocoes</code>, <code>/admin/usuarios</code> — mais confortável no celular,
+      onde ícones pequenos competem por espaço com o resto da linha). Nesse segundo caso, avise no
+      cabeçalho da lista que é para tocar/clicar na linha (não deixe isso implícito), e cuidado pra
+      não colocar `(click)="$event.stopPropagation()"` na `<td>` inteira de um link interno — só no
+      próprio link/botão, senão a área da célula sem o link vira uma "zona morta" que engole o
+      clique da linha (bug já visto em <code>AnimalListaComponent</code>/<code>AdocaoListaComponent</code>).
     </p>
-    <div class="sg__tabela-wrapper">
-      <table mat-table [dataSource]="animaisTabela" class="sg__tabela">
+    <div class="tabela-wrapper sg__tabela-wrapper">
+      <table mat-table [dataSource]="animaisTabela" class="tabela-clicavel">
         <ng-container matColumnDef="nome">
           <th mat-header-cell *matHeaderCellDef>Nome</th>
           <td mat-cell *matCellDef="let a">{{ a.nome }}</td>
@@ -275,10 +545,21 @@
       Componente próprio <code>app-confirm-dialog</code> (o Material só fornece o container
       <code>MatDialog</code>) para confirmar ações irreversíveis, como exclusões.
     </p>
-    <button mat-stroked-button color="warn" (click)="abrirConfirmacao()">
-      <mat-icon>delete</mat-icon>
-      Abrir diálogo de exclusão
-    </button>
+    <p class="sg__dica">
+      Com <code>itens</code> (ícone + texto) e <code>rodape</code>, o mesmo componente lista o que a
+      ação afeta antes de confirmar — usado ao excluir um animal que tem adoções, vacinas ou fotos
+      vinculadas. Mostre só os itens que realmente existem.
+    </p>
+    <div class="sg__linha">
+      <button mat-stroked-button color="warn" (click)="abrirConfirmacao()">
+        <mat-icon>delete</mat-icon>
+        Abrir diálogo de exclusão
+      </button>
+      <button mat-stroked-button color="warn" (click)="abrirConfirmacaoComVinculos()">
+        <mat-icon>delete_sweep</mat-icon>
+        Com vínculos listados
+      </button>
+    </div>
   </section>
 
   <!-- CARROSSEL -->
@@ -299,6 +580,21 @@
         <div class="sg__slide" style="background: var(--cor-info)">Slide 3</div>
       </ng-template>
     </app-carrossel>
+    <p class="sg__dica">
+      <code>variante="destaque"</code> — carrossel de página inteira (hero da home): indicadores
+      numa pílula sobre a imagem (canto inferior direito, deixando o esquerdo para a legenda do
+      slide) e setas maiores. O arredondamento é ajustável por <code>--carrossel-raio</code> (a home
+      usa <code>0</code> no celular, de borda a borda). O autoplay desliga sozinho para quem ativou
+      "reduzir movimento" no sistema.
+    </p>
+    <app-carrossel [intervalo]="0" variante="destaque" rotulo="Exemplo de carrossel destaque">
+      <ng-template appCarrosselSlide>
+        <div class="sg__slide sg__slide--alto" style="background: var(--cor-sucesso)">Slide 1</div>
+      </ng-template>
+      <ng-template appCarrosselSlide>
+        <div class="sg__slide sg__slide--alto" style="background: var(--cor-primaria-escura)">Slide 2</div>
+      </ng-template>
+    </app-carrossel>
   </section>
 
   <!-- STAT TILE -->
@@ -309,13 +605,16 @@
       variantes de cor (mesmos tokens dos badges de status). Usado no dashboard administrativo.
       Passe <code>rota</code> para o tile inteiro virar um link — e, opcionalmente,
       <code>queryParams</code> para a lista de destino abrir já filtrada (é assim que os KPIs do
-      dashboard abrem cada lista com o mesmo filtro que gerou o número).
+      dashboard abrem cada lista com o mesmo filtro que gerou o número). Se a chamada falhar,
+      passe <code>[erro]="true"</code> — o tile mostra "—" e um aviso, nunca um <code>0</code>
+      falso.
     </p>
     <div class="sg__grade-cards">
       <app-stat-tile titulo="Animais disponíveis" [valor]="12" icone="pets" cor="secundaria" />
       <app-stat-tile titulo="Adoções pendentes" [valor]="3" icone="volunteer_activism" cor="alerta" />
       <app-stat-tile titulo="Vacinas registradas" [valor]="47" icone="vaccines" cor="info" />
       <app-stat-tile titulo="Carregando..." [valor]="null" icone="badge" cor="primaria" />
+      <app-stat-tile titulo="Com erro" [valor]="null" [erro]="true" icone="badge" cor="primaria" />
     </div>
   </section>
 

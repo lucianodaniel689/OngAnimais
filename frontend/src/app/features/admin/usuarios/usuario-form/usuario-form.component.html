@@ -1,104 +1,67 @@
-<div class="usuario-form">
-  <header class="usuario-form__cabecalho">
+<div class="pagina pagina--estreita">
+  <header class="pagina-cabecalho pagina-cabecalho--voltar">
     <a mat-icon-button routerLink="/admin/usuarios" aria-label="Voltar">
       <mat-icon>arrow_back</mat-icon>
     </a>
-    <h1>{{ editando() ? 'Editar funcionário' : 'Cadastrar funcionário' }}</h1>
+    <h1>Cadastrar funcionário</h1>
   </header>
 
-  <mat-card appearance="outlined" class="usuario-form__card">
-    @if (carregandoDados()) {
-      <app-loading [tamanho]="36" />
-    } @else {
-      @if (erro(); as msg) {
-        <p class="usuario-form__erro" role="alert">{{ msg }}</p>
-      }
-
-      <form [formGroup]="form" (ngSubmit)="enviar()" class="usuario-form__form">
-        <mat-form-field appearance="outline">
-          <mat-label>Nome</mat-label>
-          <input matInput formControlName="nome" maxlength="150" />
-          @if (form.controls.nome.hasError('required')) {
-            <mat-error>Informe o nome.</mat-error>
-          } @else if (form.controls.nome.hasError('maxlength')) {
-            <mat-error>Máximo de 150 caracteres.</mat-error>
-          }
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Email</mat-label>
-          <input matInput type="email" formControlName="email" maxlength="255" />
-          @if (form.controls.email.hasError('required')) {
-            <mat-error>Informe o email.</mat-error>
-          } @else if (form.controls.email.hasError('email')) {
-            <mat-error>Email inválido.</mat-error>
-          }
-        </mat-form-field>
-
-        @if (!editando()) {
-          <mat-form-field appearance="outline">
-            <mat-label>Senha</mat-label>
-            <input matInput type="password" formControlName="senha" />
-            @if (form.controls.senha.hasError('required')) {
-              <mat-error>Informe a senha.</mat-error>
-            } @else if (form.controls.senha.hasError('minlength')) {
-              <mat-error>Mínimo de 6 caracteres.</mat-error>
-            }
-          </mat-form-field>
-        }
-
-        <mat-form-field
-          appearance="outline"
-          [matTooltip]="editandoAPropriaConta() ? 'Você não pode alterar o próprio perfil' : ''"
-        >
-          <mat-label>Perfil de acesso</mat-label>
-          <mat-select formControlName="perfil" [disabled]="editandoAPropriaConta()">
-            @for (p of perfis; track p) {
-              <mat-option [value]="p">{{ rotuloPerfil[p] }}</mat-option>
-            }
-          </mat-select>
-          <mat-hint>Administrador também gerencia funcionários</mat-hint>
-        </mat-form-field>
-
-        @if (editando()) {
-          <mat-checkbox
-            formControlName="ativo"
-            [disabled]="editandoAPropriaConta()"
-            [matTooltip]="editandoAPropriaConta() ? 'Você não pode desativar a própria conta' : ''"
-          >
-            Funcionário ativo (permite login)
-          </mat-checkbox>
-        }
-
-        <div class="usuario-form__acoes">
-          @if (editando()) {
-            <button
-              mat-flat-button
-              type="button"
-              class="botao-perigo usuario-form__excluir"
-              [disabled]="carregando() || excluindo() || editandoAPropriaConta()"
-              [matTooltip]="editandoAPropriaConta() ? 'Você não pode excluir a própria conta' : ''"
-              (click)="confirmarExclusao()"
-            >
-              <mat-icon>delete</mat-icon>
-              Excluir
-            </button>
-          }
-          <a mat-stroked-button routerLink="/admin/usuarios" type="button">Cancelar</a>
-          <button
-            mat-flat-button
-            color="primary"
-            type="submit"
-            [disabled]="carregando() || excluindo()"
-          >
-            @if (carregando()) {
-              <mat-progress-spinner mode="indeterminate" diameter="20" />
-            } @else {
-              {{ editando() ? 'Salvar' : 'Cadastrar' }}
-            }
-          </button>
-        </div>
-      </form>
+  <mat-card appearance="outlined" class="card-conteudo card-conteudo--form">
+    @if (erro(); as msg) {
+      <p class="mensagem-erro" role="alert">{{ msg }}</p>
     }
+
+    <form [formGroup]="form" (ngSubmit)="enviar()" class="form-coluna">
+      <mat-form-field appearance="outline">
+        <mat-label>Nome</mat-label>
+        <input matInput formControlName="nome" maxlength="150" />
+        @if (form.controls.nome.hasError('required')) {
+          <mat-error>Informe o nome.</mat-error>
+        } @else if (form.controls.nome.hasError('maxlength')) {
+          <mat-error>Máximo de 150 caracteres.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email" maxlength="255" />
+        @if (form.controls.email.hasError('required')) {
+          <mat-error>Informe o email.</mat-error>
+        } @else if (form.controls.email.hasError('email')) {
+          <mat-error>Email inválido.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Senha</mat-label>
+        <input matInput type="password" formControlName="senha" autocomplete="new-password" />
+        @if (form.controls.senha.hasError('required')) {
+          <mat-error>Informe a senha.</mat-error>
+        } @else if (form.controls.senha.hasError('minlength')) {
+          <mat-error>Mínimo de 6 caracteres.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Perfil de acesso</mat-label>
+        <mat-select formControlName="perfil">
+          @for (p of perfis; track p) {
+            <mat-option [value]="p">{{ rotuloPerfil[p] }}</mat-option>
+          }
+        </mat-select>
+        <mat-hint>Administrador também gerencia funcionários</mat-hint>
+      </mat-form-field>
+
+      <div class="form-acoes">
+        <a mat-stroked-button routerLink="/admin/usuarios" type="button">Cancelar</a>
+        <button mat-flat-button color="primary" type="submit" [disabled]="carregando()">
+          @if (carregando()) {
+            <mat-progress-spinner mode="indeterminate" diameter="20" />
+          } @else {
+            Cadastrar
+          }
+        </button>
+      </div>
+    </form>
   </mat-card>
 </div>

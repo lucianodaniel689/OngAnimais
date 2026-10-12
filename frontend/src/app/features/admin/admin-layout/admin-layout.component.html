@@ -7,8 +7,8 @@
     [fixedInViewport]="modo() === 'over'"
   >
     <div class="admin__marca">
-      <span class="admin__logo" aria-hidden="true">🐾</span>
-      <span>OngAnimais</span>
+      <app-logo-ong [altura]="28" />
+      <span>{{ nomeOng() }}</span>
     </div>
 
     <mat-nav-list>
@@ -16,8 +16,8 @@
         <a
           mat-list-item
           [routerLink]="item.rota"
-          routerLinkActive="ativo"
-          [routerLinkActiveOptions]="{ exact: !!item.exato }"
+          [class.ativo]="rotaAtiva() === item.rota"
+          [attr.aria-current]="rotaAtiva() === item.rota ? 'page' : null"
           (click)="aoNavegar()"
         >
           <mat-icon matListItemIcon>{{ item.icone }}</mat-icon>

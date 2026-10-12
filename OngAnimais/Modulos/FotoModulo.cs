@@ -53,7 +53,7 @@ namespace OngAnimais.Modulos
             if (animalExiste == 0)
                 throw new RegraDeNegocioException("Animal não encontrado ou inativo.");
 
-            var url = await _armazenamento.SalvarAsync(dto.Arquivo, "animais");
+            var salva = await _armazenamento.SalvarAsync(dto.Arquivo, "animais");
 
             using var transacao = connection.BeginTransaction();
             try
@@ -62,14 +62,16 @@ namespace OngAnimais.Modulos
                     await DesmarcarPrincipaisAsync(connection, transacao, dto.AnimalId);
 
                 const string sql = @"
-                    INSERT INTO fotos (animal_id, url, descricao, principal, created_at, updated_at)
-                    VALUES (@AnimalId, @Url, @Descricao, @Principal, NOW(), NOW())
-                    RETURNING id, animal_id, url, descricao, principal, created_at";
+                    INSERT INTO fotos (animal_id, url, larguras, descricao, principal, created_at, updated_at)
+                    VALUES (@AnimalId, @Url, @Larguras, @Descricao, @Principal, NOW(), NOW())
+                    RETURNING id, animal_id, url, larguras, descricao, principal, created_at";
 
+                // int[] vai como INTEGER[] nativo: o Dapper não expande arrays em lista com Npgsql.
                 var foto = await connection.QueryFirstAsync<FotoModel>(sql, new
                 {
                     dto.AnimalId,
-                    Url = url,
+                    salva.Url,
+                    salva.Larguras,
                     dto.Descricao,
                     dto.Principal
                 }, transacao);
@@ -80,7 +82,7 @@ namespace OngAnimais.Modulos
             catch
             {
                 transacao.Rollback();
-                _armazenamento.Excluir(url);
+                _armazenamento.Excluir(salva.Url);
                 throw;
             }
         }
@@ -118,7 +120,7 @@ namespace OngAnimais.Modulos
             var sql = $@"
                 SELECT COUNT(*) FROM fotos {where};
 
-                SELECT id, animal_id, url, descricao, principal, created_at
+                SELECT id, animal_id, url, larguras, descricao, principal, created_at
                 FROM fotos
                 {where}
                 ORDER BY {coluna} {direcao}
@@ -143,7 +145,7 @@ namespace OngAnimais.Modulos
             using var connection = _dbFactory.CreateConnection();
 
             const string sql = @"
-                SELECT id, animal_id, url, descricao, principal, created_at
+                SELECT id, animal_id, url, larguras, descricao, principal, created_at
                 FROM fotos
                 WHERE animal_id = @AnimalId
                 ORDER BY principal DESC, created_at DESC";
@@ -162,7 +164,7 @@ namespace OngAnimais.Modulos
             using var connection = _dbFactory.CreateConnection();
 
             const string sql = @"
-                SELECT id, animal_id, url, descricao, principal, created_at
+                SELECT id, animal_id, url, larguras, descricao, principal, created_at
                 FROM fotos
                 WHERE id = @Id";
 
@@ -200,7 +202,7 @@ namespace OngAnimais.Modulos
                         principal  = @Principal,
                         updated_at = NOW()
                     WHERE id = @Id
-                    RETURNING id, animal_id, url, descricao, principal, created_at";
+                    RETURNING id, animal_id, url, larguras, descricao, principal, created_at";
 
                 var atualizada = await connection.QueryFirstAsync<FotoModel>(sql, new
                 {
@@ -268,6 +270,62 @@ namespace OngAnimais.Modulos
         }
 
         /// <summary>
+        /// Converte as fotos salvas em formatos anteriores (arquivo original da Fase 10, ou
+        /// principal + miniatura da Fase 22) para a escada responsiva: gera as larguras a partir do
+        /// arquivo existente, atualiza <c>fotos.url</c>/<c>fotos.larguras</c> e só então apaga os
+        /// arquivos antigos. Idempotente — só pega foto local com <c>larguras</c> vazio; URLs externas
+        /// (seed em placehold.co) são ignoradas. Uma foto com problema não interrompe as demais.
+        /// </summary>
+        /// <returns>Quantas foram convertidas e a descrição das que falharam.</returns>
+        public async Task<(int Convertidas, IReadOnlyList<string> Falhas)> OtimizarFotosAntigasAsync()
+        {
+            using var connection = _dbFactory.CreateConnection();
+
+            var fotos = await connection.QueryAsync<FotoModel>(
+                "SELECT id, url FROM fotos WHERE url LIKE '/uploads/%' AND cardinality(larguras) = 0 ORDER BY id");
+
+            var convertidas = 0;
+            var falhas = new List<string>();
+
+            foreach (var foto in fotos)
+            {
+                string? novaUrl = null;
+                try
+                {
+                    var nova = await _armazenamento.OtimizarExistenteAsync(foto.Url);
+                    if (nova is null)
+                        continue;
+                    novaUrl = nova.Url;
+
+                    // Guard: só troca se a URL ainda é a mesma (a foto pode ter sido excluída ou
+                    // trocada enquanto convertia).
+                    var linhas = await connection.ExecuteAsync(
+                        @"UPDATE fotos SET url = @NovaUrl, larguras = @Larguras, updated_at = NOW()
+                          WHERE id = @Id AND url = @UrlAntiga",
+                        new { NovaUrl = nova.Url, nova.Larguras, foto.Id, UrlAntiga = foto.Url });
+
+                    if (linhas == 1)
+                    {
+                        _armazenamento.Excluir(foto.Url);
+                        convertidas++;
+                    }
+                    else
+                    {
+                        _armazenamento.Excluir(novaUrl);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (novaUrl is not null)
+                        _armazenamento.Excluir(novaUrl);
+                    falhas.Add($"Foto {foto.Id} ({foto.Url}): {ex.Message}");
+                }
+            }
+
+            return (convertidas, falhas);
+        }
+
+        /// <summary>
         /// Remove o indicador de principal de todas as fotos de um animal.
         /// </summary>
         private static async Task DesmarcarPrincipaisAsync(
@@ -288,6 +346,7 @@ namespace OngAnimais.Modulos
                 Id = foto.Id,
                 AnimalId = foto.AnimalId,
                 Url = foto.Url,
+                Larguras = foto.Larguras,
                 Descricao = foto.Descricao,
                 Principal = foto.Principal,
                 CreatedAt = foto.CreatedAt

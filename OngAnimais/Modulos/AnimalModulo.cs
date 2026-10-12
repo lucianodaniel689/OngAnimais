@@ -1,4 +1,5 @@
 using Dapper;
+using OngAnimais.Common.Armazenamento;
 using OngAnimais.Common.Auditoria;
 using OngAnimais.Common.Exceptions;
 using OngAnimais.Common.Paginacao;
@@ -16,6 +17,7 @@ namespace OngAnimais.Modulos
     {
         private readonly DbConnectionFactory _dbFactory;
         private readonly AuditoriaModulo _auditoria;
+        private readonly IArmazenamentoArquivos _armazenamento;
 
         /// <summary>
         /// Colunas permitidas para ordenação (nome amigável → coluna real).
@@ -29,14 +31,30 @@ namespace OngAnimais.Modulos
         };
 
         /// <summary>
+        /// Foto de capa do animal (a marcada como principal, senão a mais recente) com a URL e as
+        /// larguras disponíveis — um LATERAL para trazer as duas colunas da mesma linha numa busca só
+        /// (duas subconsultas escalares repetiriam a ordenação). Expõe só <c>fp.url</c> e
+        /// <c>fp.larguras</c>, então as colunas de <c>animais</c> continuam sem ambiguidade.
+        /// </summary>
+        private const string JoinFotoPrincipal = @"
+                LEFT JOIN LATERAL (
+                    SELECT f.url, f.larguras FROM fotos f
+                    WHERE f.animal_id = animais.id
+                    ORDER BY f.principal DESC, f.created_at DESC
+                    LIMIT 1
+                ) fp ON TRUE";
+
+        /// <summary>
         /// Inicializa o módulo com as dependências necessárias.
         /// </summary>
         /// <param name="dbFactory">Fábrica de conexão com o banco.</param>
         /// <param name="auditoria">Módulo de auditoria (cadastro e exclusão de animais).</param>
-        public AnimalModulo(DbConnectionFactory dbFactory, AuditoriaModulo auditoria)
+        /// <param name="armazenamento">Armazenamento de arquivos (remove as fotos do disco na exclusão em cascata).</param>
+        public AnimalModulo(DbConnectionFactory dbFactory, AuditoriaModulo auditoria, IArmazenamentoArquivos armazenamento)
         {
             _dbFactory = dbFactory;
             _auditoria = auditoria;
+            _armazenamento = armazenamento;
         }
 
         /// <summary>
@@ -134,11 +152,11 @@ namespace OngAnimais.Modulos
                 SELECT COUNT(*) FROM animais {where};
 
                 SELECT id, nome, especie, sexo, idade_aproximada, porte, descricao, status, castrado, vermifugado, data_cadastro, ativo,
-                    (SELECT f.url FROM fotos f WHERE f.animal_id = animais.id
-                     ORDER BY f.principal DESC, f.created_at DESC LIMIT 1) AS foto_principal_url,
+                    fp.url AS foto_principal_url, fp.larguras AS foto_principal_larguras,
                     (SELECT COUNT(*) FROM adocoes ad WHERE ad.animal_id = animais.id
                      AND ad.status = @StatusAdocaoPendente) AS candidaturas_pendentes
                 FROM animais
+                {JoinFotoPrincipal}
                 {where}
                 ORDER BY {coluna} {direcao}
                 LIMIT @TamanhoPagina OFFSET @Offset;";
@@ -161,9 +179,9 @@ namespace OngAnimais.Modulos
 
             const string sql = @"
                 SELECT id, nome, especie, sexo, idade_aproximada, porte, descricao, status, castrado, vermifugado, data_cadastro, ativo,
-                    (SELECT f.url FROM fotos f WHERE f.animal_id = animais.id
-                     ORDER BY f.principal DESC, f.created_at DESC LIMIT 1) AS foto_principal_url
+                    fp.url AS foto_principal_url, fp.larguras AS foto_principal_larguras
                 FROM animais
+                " + JoinFotoPrincipal + @"
                 WHERE id = @Id";
 
             return await connection.QueryFirstOrDefaultAsync<AnimalRespostaDto>(sql, new { Id = id });
@@ -231,9 +249,9 @@ namespace OngAnimais.Modulos
 
             const string sql = @"
                 SELECT id, nome, especie, sexo, idade_aproximada, porte, descricao, status, castrado, vermifugado, data_cadastro, ativo,
-                    (SELECT f.url FROM fotos f WHERE f.animal_id = animais.id
-                     ORDER BY f.principal DESC, f.created_at DESC LIMIT 1) AS foto_principal_url
+                    fp.url AS foto_principal_url, fp.larguras AS foto_principal_larguras
                 FROM animais
+                " + JoinFotoPrincipal + @"
                 WHERE status = @Status AND ativo = TRUE
                 ORDER BY nome";
 
@@ -244,37 +262,90 @@ namespace OngAnimais.Modulos
         }
 
         /// <summary>
-        /// Exclui um animal do sistema.
+        /// Conta os registros de outras tabelas vinculados ao animal (adoções, vacinas e fotos).
+        /// Usado pelo painel para avisar o que também será apagado antes de confirmar a exclusão.
         /// </summary>
-        /// <param name="id">ID do animal a ser excluído.</param>
-        /// <returns>True se o animal foi excluído, false se não encontrado.</returns>
-        public async Task<bool> ExcluirAsync(int id)
+        /// <param name="id">ID do animal.</param>
+        /// <returns>Contagens dos vínculos, ou null se o animal não existir.</returns>
+        public async Task<AnimalVinculosDto?> ObterVinculosAsync(int id)
         {
             using var connection = _dbFactory.CreateConnection();
 
-            // Impede a violação de FK (adocoes/vacinas/fotos referenciam animais) com uma
-            // mensagem de negócio clara, em vez de deixar o Postgres estourar um erro 500.
-            const string sqlVinculos = @"
+            const string sql = @"
                 SELECT
-                    EXISTS (SELECT 1 FROM adocoes WHERE animal_id = @Id) OR
-                    EXISTS (SELECT 1 FROM vacinas WHERE animal_id = @Id) OR
-                    EXISTS (SELECT 1 FROM fotos   WHERE animal_id = @Id)";
-            var possuiVinculos = await connection.ExecuteScalarAsync<bool>(sqlVinculos, new { Id = id });
+                    (SELECT COUNT(*) FROM adocoes WHERE animal_id = @Id) AS adocoes,
+                    (SELECT COUNT(*) FROM vacinas WHERE animal_id = @Id) AS vacinas,
+                    (SELECT COUNT(*) FROM fotos   WHERE animal_id = @Id) AS fotos
+                WHERE EXISTS (SELECT 1 FROM animais WHERE id = @Id)";
 
-            if (possuiVinculos)
+            return await connection.QueryFirstOrDefaultAsync<AnimalVinculosDto>(sql, new { Id = id });
+        }
+
+        /// <summary>
+        /// Exclui um animal do sistema. Se houver adoções, vacinas ou fotos vinculadas, só exclui
+        /// quando <paramref name="excluirVinculos"/> for true — aí apaga tudo numa transação
+        /// (adoções, vacinas, fotos e o animal) e remove os arquivos das fotos do disco.
+        /// </summary>
+        /// <param name="id">ID do animal a ser excluído.</param>
+        /// <param name="excluirVinculos">Confirmação explícita para apagar também os registros vinculados.</param>
+        /// <returns>True se o animal foi excluído, false se não encontrado.</returns>
+        /// <exception cref="RegraDeNegocioException">Se houver vínculos e a exclusão deles não foi confirmada.</exception>
+        public async Task<bool> ExcluirAsync(int id, bool excluirVinculos = false)
+        {
+            using var connection = _dbFactory.CreateConnection();
+
+            var vinculos = await ObterVinculosAsync(id);
+            if (vinculos is null)
+                return false;
+
+            // Sem a confirmação explícita, mantém o bloqueio com mensagem de negócio clara
+            // (em vez de deixar o Postgres estourar a violação de FK como erro 500).
+            if (vinculos.PossuiVinculos && !excluirVinculos)
                 throw new RegraDeNegocioException(
-                    "Não é possível excluir este animal: existem adoções, vacinas ou fotos vinculadas a ele.");
+                    "Não é possível excluir este animal: existem adoções, vacinas ou fotos vinculadas a ele. " +
+                    "Confirme a exclusão dos vínculos para apagar tudo.");
 
-            // RETURNING preserva o nome para a auditoria (snapshot pós-exclusão)
-            const string sql = "DELETE FROM animais WHERE id = @Id RETURNING nome";
-            var nomeExcluido = await connection.QueryFirstOrDefaultAsync<string>(sql, new { Id = id });
+            string? nomeExcluido;
+            IReadOnlyList<string> urlsFotos;
+
+            using (var transacao = connection.BeginTransaction())
+            {
+                try
+                {
+                    // URLs lidas antes do DELETE: os arquivos só saem do disco depois do commit.
+                    urlsFotos = (await connection.QueryAsync<string>(
+                        "SELECT url FROM fotos WHERE animal_id = @Id", new { Id = id }, transacao)).ToList();
+
+                    // Ordem respeita as FKs: filhos primeiro, animal por último.
+                    await connection.ExecuteAsync("DELETE FROM adocoes WHERE animal_id = @Id", new { Id = id }, transacao);
+                    await connection.ExecuteAsync("DELETE FROM vacinas WHERE animal_id = @Id", new { Id = id }, transacao);
+                    await connection.ExecuteAsync("DELETE FROM fotos WHERE animal_id = @Id", new { Id = id }, transacao);
+
+                    // RETURNING preserva o nome para a auditoria (snapshot pós-exclusão)
+                    nomeExcluido = await connection.QueryFirstOrDefaultAsync<string>(
+                        "DELETE FROM animais WHERE id = @Id RETURNING nome", new { Id = id }, transacao);
+
+                    transacao.Commit();
+                }
+                catch
+                {
+                    transacao.Rollback();
+                    throw;
+                }
+            }
 
             if (nomeExcluido is null)
                 return false;
 
+            foreach (var url in urlsFotos)
+                _armazenamento.Excluir(url);
+
+            var detalhe = vinculos.PossuiVinculos
+                ? $"Nome: {nomeExcluido} (com vínculos: {vinculos.Adocoes} adoção(ões), {vinculos.Vacinas} vacina(s), {vinculos.Fotos} foto(s))"
+                : $"Nome: {nomeExcluido}";
+
             await _auditoria.RegistrarSeguroAsync(
-                CategoriaAuditoria.Animal, AcoesAuditoria.AnimalExcluido, id,
-                $"Nome: {nomeExcluido}");
+                CategoriaAuditoria.Animal, AcoesAuditoria.AnimalExcluido, id, detalhe);
 
             return true;
         }

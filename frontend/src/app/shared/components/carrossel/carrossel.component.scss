@@ -8,7 +8,8 @@
 
 .carrossel__janela {
   overflow: hidden;
-  border-radius: var(--raio-lg);
+  // Arredondamento ajustável por quem usa (ex.: hero sangrando até a borda no celular).
+  border-radius: var(--carrossel-raio, var(--raio-lg));
   touch-action: pan-y; // permite scroll vertical da página, swipe horizontal aqui
 }
 
@@ -89,5 +90,38 @@
   }
   .carrossel__seta--proximo {
     right: var(--esp-4);
+  }
+}
+
+// --- Variante "destaque" (hero) ------------------------------------------------
+// Indicadores sobre a imagem, no canto inferior direito, numa pílula de papel — assim a foto
+// usa toda a altura. O canto esquerdo fica livre para a legenda do slide (ex.: a etiqueta).
+:host(.carrossel--destaque) .carrossel__indicadores {
+  position: absolute;
+  right: var(--esp-3);
+  bottom: var(--esp-3);
+  margin: 0;
+  padding: var(--esp-2) var(--esp-3);
+  border-radius: var(--raio-full);
+  background-color: color-mix(in srgb, var(--cor-superficie) 88%, transparent);
+  box-shadow: var(--sombra-sm);
+}
+
+:host(.carrossel--destaque) .carrossel__seta {
+  width: 44px;
+  height: 44px;
+  font-size: 2rem;
+}
+
+@media (min-width: 768px) {
+  :host(.carrossel--destaque) .carrossel__indicadores {
+    right: var(--esp-5);
+    bottom: var(--esp-5);
+  }
+
+  :host(.carrossel--destaque) .carrossel__seta {
+    width: 56px;
+    height: 56px;
+    font-size: 2.5rem;
   }
 }

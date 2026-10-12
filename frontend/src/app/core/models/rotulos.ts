@@ -56,6 +56,7 @@ export const ROTULO_CATEGORIA_AUDITORIA: Record<CategoriaAuditoria, string> = {
   [CategoriaAuditoria.Adocao]: 'Adoção',
   [CategoriaAuditoria.Animal]: 'Animal',
   [CategoriaAuditoria.Usuario]: 'Funcionário',
+  [CategoriaAuditoria.Configuracao]: 'Configuração',
 };
 
 export const ROTULO_STATUS_ADOCAO: Record<StatusAdocao, string> = {

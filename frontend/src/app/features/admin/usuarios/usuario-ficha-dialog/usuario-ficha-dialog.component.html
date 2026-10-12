@@ -1,0 +1,164 @@
+<div class="usuario-ficha__topo">
+  <h2 mat-dialog-title>{{ editando() ? 'Editar funcionário' : 'Ficha do funcionário' }}</h2>
+  @if (!editando()) {
+    <button mat-icon-button type="button" aria-label="Fechar" (click)="fechar()">
+      <mat-icon>close</mat-icon>
+    </button>
+  }
+</div>
+
+@if (!editando()) {
+  <!-- LEITURA -->
+  <mat-dialog-content class="usuario-ficha__conteudo">
+    @if (erro(); as msg) {
+      <p class="mensagem-erro" role="alert">{{ msg }}</p>
+    }
+
+    @if (usuario(); as u) {
+      <section class="usuario-ficha__cartao etiqueta">
+        <div class="usuario-ficha__identidade">
+          <app-avatar-iniciais [nome]="u.nome" [inativo]="!u.ativo" />
+          <div class="usuario-ficha__nome-bloco">
+            <h3 class="usuario-ficha__nome">
+              {{ u.nome }}
+              @if (data.ehVoce) {
+                <span class="usuario-ficha__voce">(você)</span>
+              }
+            </h3>
+            <p class="usuario-ficha__email">{{ u.email }}</p>
+          </div>
+        </div>
+
+        <div class="usuario-ficha__selos">
+          <app-selo
+            [cor]="ehAdmin() ? 'primaria' : 'neutro'"
+            [icone]="ehAdmin() ? 'admin_panel_settings' : 'person'"
+          >
+            {{ rotuloPerfil() }}
+          </app-selo>
+          <app-selo [cor]="u.ativo ? 'sucesso' : 'perigo'" [icone]="u.ativo ? 'check_circle' : 'block'">
+            {{ u.ativo ? 'Ativo' : 'Inativo' }}
+          </app-selo>
+        </div>
+
+        <hr class="etiqueta__separador" />
+
+        <dl class="usuario-ficha__detalhes">
+          <div>
+            <dt>Cadastrado em</dt>
+            <dd>{{ u.createdAt | date: 'dd/MM/yyyy' }}</dd>
+          </div>
+          <div>
+            <dt>Acesso ao painel</dt>
+            <dd>{{ u.ativo ? 'Liberado' : 'Bloqueado (não consegue entrar)' }}</dd>
+          </div>
+        </dl>
+      </section>
+    }
+
+    @if (data.ehVoce) {
+      <p class="usuario-ficha__dica">
+        <mat-icon>info</mat-icon>
+        Para trocar a sua própria senha, use "Meu perfil" — lá é exigida a senha atual.
+      </p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="usuario-ficha__acoes">
+    <button mat-stroked-button type="button" [disabled]="data.ehVoce" (click)="resetarSenha()">
+      <mat-icon>lock_reset</mat-icon>
+      Resetar senha
+    </button>
+    <button mat-flat-button color="primary" type="button" (click)="iniciarEdicao()">
+      <mat-icon>edit</mat-icon>
+      Editar
+    </button>
+  </mat-dialog-actions>
+} @else {
+  <!-- EDIÇÃO -->
+  <form [formGroup]="form" (ngSubmit)="salvar()">
+    <mat-dialog-content class="usuario-ficha__conteudo">
+      @if (erro(); as msg) {
+        <p class="mensagem-erro" role="alert">{{ msg }}</p>
+      }
+
+      <section class="usuario-ficha__cartao usuario-ficha__cartao--form etiqueta">
+        <mat-form-field appearance="outline">
+          <mat-label>Nome</mat-label>
+          <input matInput formControlName="nome" maxlength="150" />
+          @if (form.controls.nome.hasError('required')) {
+            <mat-error>Informe o nome.</mat-error>
+          } @else if (form.controls.nome.hasError('maxlength')) {
+            <mat-error>Máximo de 150 caracteres.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" maxlength="255" />
+          @if (form.controls.email.hasError('required')) {
+            <mat-error>Informe o email.</mat-error>
+          } @else if (form.controls.email.hasError('email')) {
+            <mat-error>Email inválido.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Perfil de acesso</mat-label>
+          <mat-select formControlName="perfil">
+            @for (p of perfis; track p) {
+              <mat-option [value]="p">{{ rotulosPerfil[p] }}</mat-option>
+            }
+          </mat-select>
+          <mat-hint>
+            {{
+              data.ehVoce
+                ? 'Você não pode alterar o próprio perfil'
+                : 'Administrador também gerencia funcionários'
+            }}
+          </mat-hint>
+        </mat-form-field>
+
+        <div class="usuario-ficha__checkbox">
+          <mat-checkbox formControlName="ativo">Funcionário ativo (permite login)</mat-checkbox>
+          @if (data.ehVoce) {
+            <span class="usuario-ficha__hint">Você não pode desativar a própria conta.</span>
+          }
+        </div>
+      </section>
+    </mat-dialog-content>
+
+    <mat-dialog-actions class="usuario-ficha__acoes usuario-ficha__acoes--edicao">
+      <button
+        mat-flat-button
+        type="button"
+        class="botao-perigo usuario-ficha__excluir"
+        [disabled]="salvando() || excluindo() || data.ehVoce"
+        (click)="confirmarExclusao()"
+      >
+        <mat-icon>delete</mat-icon>
+        {{ excluindo() ? 'Excluindo...' : 'Excluir' }}
+      </button>
+      <button
+        mat-stroked-button
+        type="button"
+        [disabled]="salvando() || excluindo()"
+        (click)="cancelarEdicao()"
+      >
+        Cancelar
+      </button>
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        [disabled]="salvando() || excluindo()"
+      >
+        @if (salvando()) {
+          <mat-progress-spinner mode="indeterminate" diameter="20" />
+        } @else {
+          Salvar
+        }
+      </button>
+    </mat-dialog-actions>
+  </form>
+}

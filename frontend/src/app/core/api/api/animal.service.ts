@@ -23,6 +23,8 @@ import { AnimalUpdateDto } from '../model/animal-update-dto';
 // @ts-ignore
 import { ApiResponseOfAnimalRespostaDto } from '../model/api-response-of-animal-resposta-dto';
 // @ts-ignore
+import { ApiResponseOfAnimalVinculosDto } from '../model/api-response-of-animal-vinculos-dto';
+// @ts-ignore
 import { ApiResponseOfIEnumerableOfAnimalRespostaDto } from '../model/api-response-of-i-enumerable-of-animal-resposta-dto';
 // @ts-ignore
 import { ApiResponseOfObject } from '../model/api-response-of-object';
@@ -47,7 +49,8 @@ import {
     AnimalCriarRequestParams,
     AnimalExcluirRequestParams,
     AnimalListarRequestParams,
-    AnimalObterPorIdRequestParams
+    AnimalObterPorIdRequestParams,
+    AnimalObterVinculosRequestParams
 } from './animal.serviceInterface';
 
 
@@ -202,7 +205,7 @@ export class AnimalService extends BaseService implements AnimalServiceInterface
     }
 
     /**
-     * Exclui um animal do sistema.
+     * Exclui um animal do sistema. Com adoções, vacinas ou fotos vinculadas, só exclui se  &#x60;excluirVinculos&#x3D;true&#x60; (confirmação explícita) — nesse caso apaga também esses registros.
      * @param requestParameters
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
@@ -215,6 +218,11 @@ export class AnimalService extends BaseService implements AnimalServiceInterface
         if (id === null || id === undefined) {
             throw new Error('Required parameter id was null or undefined when calling animalExcluir.');
         }
+        const excluirVinculos = requestParameters?.excluirVinculos;
+
+        let localVarQueryParameters = new HttpParams({encoder: this.encoder});
+        localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
+          <any>excluirVinculos, 'excluirVinculos');
 
         let localVarHeaders = this.defaultHeaders;
 
@@ -250,6 +258,7 @@ export class AnimalService extends BaseService implements AnimalServiceInterface
         return this.httpClient.request<ApiResponseOfObject>('delete', `${this.configuration.basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
+                params: localVarQueryParameters,
                 responseType: <any>responseType_,
                 withCredentials: this.configuration.withCredentials,
                 headers: localVarHeaders,
@@ -456,6 +465,65 @@ export class AnimalService extends BaseService implements AnimalServiceInterface
 
         let localVarPath = `/api/animal/${this.configuration.encodeParam({name: "id", value: id, in: "path", style: "simple", explode: false, dataType: "number", dataFormat: "int32"})}`;
         return this.httpClient.request<ApiResponseOfAnimalRespostaDto>('get', `${this.configuration.basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                responseType: <any>responseType_,
+                withCredentials: this.configuration.withCredentials,
+                headers: localVarHeaders,
+                observe: observe,
+                transferCache: localVarTransferCache,
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Lista o que está vinculado a um animal (adoções, vacinas e fotos) — ou seja, o que  também seria apagado ao excluí-lo com confirmação.
+     * @param requestParameters
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public animalObterVinculos(requestParameters: AnimalObterVinculosRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/plain' | 'application/json' | 'text/json', context?: HttpContext, transferCache?: boolean}): Observable<ApiResponseOfAnimalVinculosDto>;
+    public animalObterVinculos(requestParameters: AnimalObterVinculosRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/plain' | 'application/json' | 'text/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ApiResponseOfAnimalVinculosDto>>;
+    public animalObterVinculos(requestParameters: AnimalObterVinculosRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/plain' | 'application/json' | 'text/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ApiResponseOfAnimalVinculosDto>>;
+    public animalObterVinculos(requestParameters: AnimalObterVinculosRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'text/plain' | 'application/json' | 'text/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        const id = requestParameters?.id;
+        if (id === null || id === undefined) {
+            throw new Error('Required parameter id was null or undefined when calling animalObterVinculos.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (Bearer) required
+        localVarHeaders = this.configuration.addCredentialToHeaders('Bearer', 'Authorization', localVarHeaders, 'Bearer ');
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'text/plain',
+            'application/json',
+            'text/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/animal/${this.configuration.encodeParam({name: "id", value: id, in: "path", style: "simple", explode: false, dataType: "number", dataFormat: "int32"})}/vinculos`;
+        return this.httpClient.request<ApiResponseOfAnimalVinculosDto>('get', `${this.configuration.basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 responseType: <any>responseType_,

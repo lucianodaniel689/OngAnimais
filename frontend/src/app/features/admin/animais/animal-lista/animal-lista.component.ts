@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, debounceTime, map, of } from 'rxjs';
 import { MatTableModule } from '@angular/material/table';
@@ -32,7 +32,7 @@ import {
 } from '@app/core/models';
 import { LoadingComponent, StatusAnimalBadgeComponent } from '@app/shared/components';
 import { telaPequena } from '@app/core/layout/breakpoint.util';
-import { urlMidia } from '@app/core/http/media-url.util';
+import { FotoResponsivaDirective } from '@app/shared/components/foto-responsiva/foto-responsiva.directive';
 
 const TAMANHOS_PAGINA = [10, 20, 50];
 
@@ -42,6 +42,7 @@ const TAMANHOS_PAGINA = [10, 20, 50];
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    FotoResponsivaDirective,
     RouterLink,
     DatePipe,
     ReactiveFormsModule,
@@ -65,6 +66,7 @@ export class AnimalListaComponent {
   private fb = inject(FormBuilder);
   private animalService = inject(AnimalService);
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   /** True em telas pequenas (≤ 768px). */
   protected readonly mobile = telaPequena();
@@ -72,15 +74,17 @@ export class AnimalListaComponent {
   /** No celular os filtros começam recolhidos — a tabela aparece primeiro. */
   readonly filtrosAbertos = signal(false);
 
-  /** No celular a tabela mostra só o essencial — os demais campos ficam na ficha do animal. */
+  /**
+   * No celular a tabela mostra só o essencial — os demais campos ficam na ficha do animal.
+   * Sem coluna de ações: a linha inteira é clicável e leva direto à ficha (ver `abrirFicha`).
+   */
   readonly colunas = computed(() =>
     this.mobile()
-      ? ['foto', 'nome', 'status', 'acoes']
-      : ['foto', 'nome', 'especie', 'sexo', 'porte', 'status', 'dataCadastro', 'ativo', 'acoes'],
+      ? ['foto', 'nome', 'status']
+      : ['foto', 'nome', 'especie', 'sexo', 'porte', 'status', 'dataCadastro', 'ativo'],
   );
 
   /** Resolve a URL da miniatura (foto principal já vem na listagem, sem N+1). */
-  readonly urlFoto = urlMidia;
   readonly tamanhosPagina = TAMANHOS_PAGINA;
   readonly especies = ESPECIES;
   readonly statusOpcoes = STATUS_ANIMAL;
@@ -147,6 +151,13 @@ export class AnimalListaComponent {
 
   limparFiltros(): void {
     this.filtros.reset({ busca: '', especie: null, status: null, ativo: null });
+  }
+
+  /** Linha inteira é clicável — abre a ficha completa do animal. */
+  abrirFicha(id: number | undefined): void {
+    if (id) {
+      this.router.navigate(['/admin/animais', id]);
+    }
   }
 
   especieRotulo(especie: EspecieAnimal | undefined): string {

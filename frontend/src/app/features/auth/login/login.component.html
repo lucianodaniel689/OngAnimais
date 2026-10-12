@@ -3,14 +3,14 @@
     <div class="login__marca">
       <span class="login__logo" aria-hidden="true">🐾</span>
       <h1>Entrar</h1>
-      <p>Acesse a área administrativa do OngAnimais.</p>
+      <p>Acesse a área administrativa da ONG.</p>
     </div>
 
     @if (erro(); as msg) {
-      <p class="login__erro" role="alert">{{ msg }}</p>
+      <p class="mensagem-erro" role="alert">{{ msg }}</p>
     }
 
-    <form [formGroup]="form" (ngSubmit)="enviar()" class="login__form">
+    <form [formGroup]="form" (ngSubmit)="enviar()" class="form-coluna">
       <mat-form-field appearance="outline">
         <mat-label>Email</mat-label>
         <input

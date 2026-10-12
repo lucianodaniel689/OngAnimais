@@ -7,8 +7,11 @@
             <ng-template appCarrosselSlide>
               <img
                 class="animal-detalhe-conteudo__imagem"
-                [src]="urlFoto(foto.url)"
+                [appFoto]="foto.url"
+            [larguras]="foto.larguras"
+            sizes="(min-width: 1120px) 540px, (min-width: 640px) 50vw, 100vw"
                 [alt]="foto.descricao || ('Foto de ' + a.nome)"
+                loading="lazy"
               />
             </ng-template>
           }
@@ -83,10 +86,12 @@
             <mat-icon>pets</mat-icon>
             Quero adotar
           </button>
-          <a mat-stroked-button color="primary" [href]="linkWhatsapp()" target="_blank" rel="noopener">
-            <mat-icon>chat</mat-icon>
-            Falar no WhatsApp
-          </a>
+          @if (linkWhatsapp(); as link) {
+            <a mat-stroked-button color="primary" [href]="link" target="_blank" rel="noopener">
+              <mat-icon>chat</mat-icon>
+              Falar no WhatsApp
+            </a>
+          }
         </div>
       }
     </div>
@@ -100,10 +105,10 @@
       </p>
 
       @if (erroEnvio(); as msg) {
-        <p class="animal-detalhe-conteudo__erro" role="alert">{{ msg }}</p>
+        <p class="mensagem-erro" role="alert">{{ msg }}</p>
       }
 
-      <form [formGroup]="form" (ngSubmit)="enviar()" class="animal-detalhe-conteudo__form">
+      <form [formGroup]="form" (ngSubmit)="enviar()" class="form-coluna">
         <mat-form-field appearance="outline">
           <mat-label>Nome completo</mat-label>
           <input matInput formControlName="nome" maxlength="150" />
@@ -124,9 +129,18 @@
 
         <mat-form-field appearance="outline">
           <mat-label>Telefone</mat-label>
-          <input matInput formControlName="telefone" placeholder="(11) 91234-5678" maxlength="20" />
+          <input
+            matInput
+            formControlName="telefone"
+            appTelefone
+            autocomplete="tel"
+            placeholder="(11) 91234-5678"
+            maxlength="20"
+          />
           @if (form.controls.telefone.hasError('required')) {
             <mat-error>Informe seu telefone.</mat-error>
+          } @else if (form.controls.telefone.hasError('telefone')) {
+            <mat-error>Informe o telefone completo, com DDD.</mat-error>
           }
         </mat-form-field>
 
@@ -144,7 +158,7 @@
           }
         </mat-form-field>
 
-        <div class="animal-detalhe-conteudo__form-acoes">
+        <div class="form-acoes">
           <button mat-button type="button" (click)="mostrarForm.set(false)">Cancelar</button>
           <button mat-flat-button color="primary" type="submit" [disabled]="enviando()">
             @if (enviando()) {

@@ -724,7 +724,7 @@
         "tags": [
           "Animal"
         ],
-        "summary": "Exclui um animal do sistema.",
+        "summary": "Exclui um animal do sistema. Com adoções, vacinas ou fotos vinculadas, só exclui se\r\n`excluirVinculos=true` (confirmação explícita) — nesse caso apaga também esses registros.",
         "operationId": "Animal_Excluir",
         "parameters": [
           {
@@ -735,6 +735,15 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "excluirVinculos",
+            "in": "query",
+            "description": "Confirma a exclusão dos registros vinculados (adoções, vacinas e fotos).",
+            "schema": {
+              "type": "boolean",
+              "default": false
             }
           }
         ],
@@ -755,6 +764,89 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Há registros vinculados e a exclusão deles não foi confirmada.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Animal não encontrado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/animal/{id}/vinculos": {
+      "get": {
+        "tags": [
+          "Animal"
+        ],
+        "summary": "Lista o que está vinculado a um animal (adoções, vacinas e fotos) — ou seja, o que\r\ntambém seria apagado ao excluí-lo com confirmação.",
+        "operationId": "Animal_ObterVinculos",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID do animal.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vínculos retornados com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfAnimalVinculosDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfAnimalVinculosDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfAnimalVinculosDto"
                 }
               }
             }
@@ -898,8 +990,343 @@
               }
             }
           },
-          "403": {
-            "description": "Usuário autenticado não é Admin."
+          "404": {
+            "description": "Usuário autenticado não é Admin (o 403 é respondido como 404 para não revelar o recurso)."
+          }
+        }
+      }
+    },
+    "/api/configuracao/publica": {
+      "get": {
+        "tags": [
+          "Configuracao"
+        ],
+        "summary": "Obtém as configurações que o site precisa para montar as páginas (identidade,\r\ncontato, conteúdo da home, espécies atendidas, formulário de adoção e módulos).\r\nPúblico — não traz as regras internas de adoção.",
+        "operationId": "Configuracao_ObterPublica",
+        "responses": {
+          "200": {
+            "description": "Configurações retornadas com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfConfiguracaoOngPublicaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfConfiguracaoOngPublicaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfConfiguracaoOngPublicaDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Configuração da ONG não encontrada (script 011 não executado).",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/configuracao": {
+      "get": {
+        "tags": [
+          "Configuracao"
+        ],
+        "summary": "Obtém a configuração completa da ONG para a tela de edição do painel.",
+        "operationId": "Configuracao_Obter",
+        "responses": {
+          "200": {
+            "description": "Configuração retornada com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfConfiguracaoOngRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfConfiguracaoOngRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfConfiguracaoOngRespostaDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuário não é Admin (o 403 é respondido como 404 para não revelar o recurso) ou configuração não encontrada.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Configuracao"
+        ],
+        "summary": "Atualiza a configuração inteira da ONG. A alteração fica registrada na auditoria\r\n(categoria Configuracao) com os campos que mudaram.",
+        "operationId": "Configuracao_Atualizar",
+        "requestBody": {
+          "description": "Nova configuração completa.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfiguracaoOngUpdateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfiguracaoOngUpdateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfiguracaoOngUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Configuração atualizada com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfConfiguracaoOngRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfConfiguracaoOngRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfConfiguracaoOngRespostaDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuário não é Admin (o 403 é respondido como 404 para não revelar o recurso) ou configuração não encontrada.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/configuracao/logo": {
+      "post": {
+        "tags": [
+          "Configuracao"
+        ],
+        "summary": "Envia (ou troca) o logo da ONG. A imagem vira o logo do site e, a partir dela, o\r\nbackend gera o favicon da aba do navegador e o ícone de atalho do celular. Salvo na\r\nhora — não depende do `PUT` da configuração. Fica registrado na auditoria.",
+        "operationId": "Configuracao_AtualizarLogo",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "Arquivo"
+                ],
+                "type": "object",
+                "properties": {
+                  "Arquivo": {
+                    "type": "string",
+                    "description": "Imagem do logo (.jpg, .jpeg, .png, .webp ou .gif). PNG com fundo transparente fica melhor.",
+                    "format": "binary"
+                  }
+                }
+              },
+              "encoding": {
+                "Arquivo": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Logo salvo com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfConfiguracaoOngRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfConfiguracaoOngRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfConfiguracaoOngRespostaDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Arquivo inválido (tipo, tamanho ou resolução).",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuário não é Admin (o 403 é respondido como 404 para não revelar o recurso) ou configuração não encontrada.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Configuracao"
+        ],
+        "summary": "Remove o logo da ONG — o site volta ao símbolo e ao favicon padrão. Fica registrado na auditoria.",
+        "operationId": "Configuracao_RemoverLogo",
+        "responses": {
+          "200": {
+            "description": "Logo removido com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfConfiguracaoOngRespostaDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfConfiguracaoOngRespostaDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfConfiguracaoOngRespostaDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuário não é Admin (o 403 é respondido como 404 para não revelar o recurso) ou configuração não encontrada.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
           }
         }
       }
@@ -1413,8 +1840,8 @@
               }
             }
           },
-          "403": {
-            "description": "Usuário autenticado não é Admin."
+          "404": {
+            "description": "Usuário autenticado não é Admin (o 403 é respondido como 404 para não revelar o recurso)."
           }
         }
       }
@@ -1582,8 +2009,8 @@
               }
             }
           },
-          "403": {
-            "description": "Usuário autenticado não é Admin."
+          "404": {
+            "description": "Usuário autenticado não é Admin (o 403 é respondido como 404 para não revelar o recurso)."
           }
         }
       }
@@ -1629,7 +2056,7 @@
             }
           },
           "404": {
-            "description": "Usuário não encontrado.",
+            "description": "Usuário não encontrado (ou usuário autenticado não é Admin — o 403 é respondido como 404).",
             "content": {
               "text/plain": {
                 "schema": {
@@ -1647,9 +2074,6 @@
                 }
               }
             }
-          },
-          "403": {
-            "description": "Usuário autenticado não é Admin."
           }
         }
       },
@@ -1733,7 +2157,7 @@
             }
           },
           "404": {
-            "description": "Usuário não encontrado.",
+            "description": "Usuário não encontrado (ou usuário autenticado não é Admin — o 403 é respondido como 404).",
             "content": {
               "text/plain": {
                 "schema": {
@@ -1751,9 +2175,6 @@
                 }
               }
             }
-          },
-          "403": {
-            "description": "Usuário autenticado não é Admin."
           }
         }
       },
@@ -1797,7 +2218,7 @@
             }
           },
           "404": {
-            "description": "Usuário não encontrado.",
+            "description": "Usuário não encontrado (ou usuário autenticado não é Admin — o 403 é respondido como 404).",
             "content": {
               "text/plain": {
                 "schema": {
@@ -1815,9 +2236,6 @@
                 }
               }
             }
-          },
-          "403": {
-            "description": "Usuário autenticado não é Admin."
           }
         }
       }
@@ -2012,6 +2430,109 @@
           },
           "400": {
             "description": "Senha atual incorreta ou dados inválidos.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/usuario/{id}/senha": {
+      "put": {
+        "tags": [
+          "Usuario"
+        ],
+        "summary": "Reseta a senha de um funcionário (uso administrativo — para quem esqueceu a\r\nprópria senha e não consegue logar). Não exige a senha atual; a operação\r\nfica registrada na auditoria. Não vale para a própria conta do admin —\r\nessa troca passa por `PUT /api/usuario/me/senha`, que exige a senha atual.",
+        "operationId": "Usuario_ResetarSenha",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID do funcionário que terá a senha resetada.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Nova senha.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioResetSenhaDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioResetSenhaDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioResetSenhaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Senha resetada com sucesso.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou tentativa de resetar a própria senha.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuário não encontrado (ou usuário autenticado não é Admin — o 403 é respondido como 404).",
             "content": {
               "text/plain": {
                 "schema": {
@@ -2526,6 +3047,20 @@
             "description": "Nome do animal solicitado.",
             "nullable": true
           },
+          "fotoAnimalUrl": {
+            "type": "string",
+            "description": "URL da foto principal do animal (ou a mais recente, se nenhuma marcada como\r\nprincipal) — mesma regra de `AnimalRespostaDto.FotoPrincipalUrl`. Nulo se o\r\nanimal não tiver foto.",
+            "nullable": true
+          },
+          "fotoAnimalLarguras": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "Larguras (px) disponíveis da foto do animal — ver OngAnimais.DTOs.FotoRespostaDto.Larguras.\r\n`null` sem foto.",
+            "nullable": true
+          },
           "adotanteId": {
             "type": "integer",
             "description": "Identificador do adotante solicitante.",
@@ -2699,6 +3234,15 @@
             "description": "URL da foto principal do animal (ou a mais recente, se nenhuma foto estiver\r\nmarcada como principal); `null` se o animal não tiver fotos cadastradas.\r\nNão populado nas respostas de `Criar`/`Atualizar` (o card/carrossel\r\nbusca a galeria separadamente via `GET /api/foto/animal/{id}`).",
             "nullable": true
           },
+          "fotoPrincipalLarguras": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "Larguras (px) disponíveis da foto principal — ver OngAnimais.DTOs.FotoRespostaDto.Larguras.\r\nPopulado junto com OngAnimais.DTOs.AnimalRespostaDto.FotoPrincipalUrl; `null` sem foto.",
+            "nullable": true
+          },
           "candidaturasPendentes": {
             "type": "integer",
             "description": "Quantidade de candidaturas de adoção pendentes do animal. Populado apenas\r\nna listagem administrativa (`ListarPaginadoAsync`) — ajuda a equipe a\r\npriorizar quais animais têm interessados aguardando; `0` nas demais\r\nrespostas (detalhe público, vitrine, criar/atualizar).",
@@ -2764,6 +3308,33 @@
         "additionalProperties": false,
         "description": "DTO para atualização dos dados de um animal."
       },
+      "AnimalVinculosDto": {
+        "type": "object",
+        "properties": {
+          "adocoes": {
+            "type": "integer",
+            "description": "Quantidade de adoções (candidaturas, em qualquer status) do animal.",
+            "format": "int32"
+          },
+          "vacinas": {
+            "type": "integer",
+            "description": "Quantidade de vacinas registradas para o animal.",
+            "format": "int32"
+          },
+          "fotos": {
+            "type": "integer",
+            "description": "Quantidade de fotos do animal.",
+            "format": "int32"
+          },
+          "possuiVinculos": {
+            "type": "boolean",
+            "description": "Indica se existe ao menos um registro vinculado.",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Registros de outras tabelas vinculados a um animal — o que também seria apagado\r\nse o animal fosse excluído com confirmação. Alimenta o diálogo de aviso do painel."
+      },
       "ApiResponseOfAdocaoRespostaDto": {
         "type": "object",
         "properties": {
@@ -2797,6 +3368,63 @@
           },
           "dados": {
             "$ref": "#/components/schemas/AnimalRespostaDto"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Modelo de resposta padrão da API."
+      },
+      "ApiResponseOfAnimalVinculosDto": {
+        "type": "object",
+        "properties": {
+          "sucesso": {
+            "type": "boolean",
+            "description": "Indica se a operação foi bem-sucedida."
+          },
+          "mensagem": {
+            "type": "string",
+            "description": "Mensagem descritiva do resultado.",
+            "nullable": true
+          },
+          "dados": {
+            "$ref": "#/components/schemas/AnimalVinculosDto"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Modelo de resposta padrão da API."
+      },
+      "ApiResponseOfConfiguracaoOngPublicaDto": {
+        "type": "object",
+        "properties": {
+          "sucesso": {
+            "type": "boolean",
+            "description": "Indica se a operação foi bem-sucedida."
+          },
+          "mensagem": {
+            "type": "string",
+            "description": "Mensagem descritiva do resultado.",
+            "nullable": true
+          },
+          "dados": {
+            "$ref": "#/components/schemas/ConfiguracaoOngPublicaDto"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Modelo de resposta padrão da API."
+      },
+      "ApiResponseOfConfiguracaoOngRespostaDto": {
+        "type": "object",
+        "properties": {
+          "sucesso": {
+            "type": "boolean",
+            "description": "Indica se a operação foi bem-sucedida."
+          },
+          "mensagem": {
+            "type": "string",
+            "description": "Mensagem descritiva do resultado.",
+            "nullable": true
+          },
+          "dados": {
+            "$ref": "#/components/schemas/ConfiguracaoOngRespostaDto"
           }
         },
         "additionalProperties": false,
@@ -3122,10 +3750,590 @@
           "Seguranca",
           "Adocao",
           "Animal",
-          "Usuario"
+          "Usuario",
+          "Configuracao"
         ],
         "type": "string",
         "description": "Categoria de um evento de auditoria — agrupa os eventos por área do sistema.\r\nOs valores precisam bater com o CHECK constraint da coluna 'auditoria.categoria'."
+      },
+      "ConfiguracaoOngPublicaDto": {
+        "type": "object",
+        "properties": {
+          "nomeOng": {
+            "type": "string",
+            "description": "Nome da ONG.",
+            "nullable": true
+          },
+          "logoUrl": {
+            "type": "string",
+            "description": "URL da maior versão do logo (nulo = símbolo padrão). Exibir com as OngAnimais.DTOs.ConfiguracaoOngPublicaDto.LogoLarguras\r\n(srcset), igual às fotos de animal.",
+            "nullable": true
+          },
+          "logoLarguras": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "Larguras (px) das versões do logo disponíveis.",
+            "nullable": true
+          },
+          "faviconUrl": {
+            "type": "string",
+            "description": "Ícone da aba do navegador (PNG 64px), gerado do logo. Nulo = ícone padrão do site.",
+            "nullable": true
+          },
+          "iconeAppUrl": {
+            "type": "string",
+            "description": "Ícone de atalho na tela inicial do celular (PNG 180px), gerado do logo.",
+            "nullable": true
+          },
+          "paleta": {
+            "$ref": "#/components/schemas/PaletaCores"
+          },
+          "imagemPadraoUrl": {
+            "type": "string",
+            "description": "URL da foto de reserva (animal sem foto / vitrine vazia).",
+            "nullable": true
+          },
+          "whatsapp": {
+            "type": "string",
+            "description": "WhatsApp em formato internacional, só dígitos (o front formata para exibir).",
+            "nullable": true
+          },
+          "instagram": {
+            "type": "string",
+            "description": "Usuário do Instagram, sem \"@\".",
+            "nullable": true
+          },
+          "emailContato": {
+            "type": "string",
+            "description": "Email público de contato.",
+            "nullable": true
+          },
+          "endereco": {
+            "type": "string",
+            "description": "Endereço do abrigo.",
+            "nullable": true
+          },
+          "horarioAtendimento": {
+            "type": "string",
+            "description": "Horário de atendimento.",
+            "nullable": true
+          },
+          "textoContato": {
+            "type": "string",
+            "description": "Parágrafo da seção de contato da home.",
+            "nullable": true
+          },
+          "mensagemWhatsapp": {
+            "type": "string",
+            "description": "Mensagem pré-preenchida dos links do WhatsApp.",
+            "nullable": true
+          },
+          "heroTitulo": {
+            "type": "string",
+            "description": "Título principal da home.",
+            "nullable": true
+          },
+          "heroSubtitulo": {
+            "type": "string",
+            "description": "Subtítulo da home.",
+            "nullable": true
+          },
+          "quantidadeDestaque": {
+            "type": "integer",
+            "description": "Quantidade de animais no carrossel da home.",
+            "format": "int32"
+          },
+          "passosAdocao": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PassoAdocaoDto"
+            },
+            "description": "Passos de \"Como adotar\", na ordem.",
+            "nullable": true
+          },
+          "formasAjudar": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FormaAjudarDto"
+            },
+            "description": "Cards de \"Formas de ajudar\", na ordem. Na resposta pública vêm só os ativos;\r\nna resposta de Admin, todos (para edição).",
+            "nullable": true
+          },
+          "doacaoPixChave": {
+            "type": "string",
+            "description": "Chave PIX para doações (nulo = card de doação não aparece).",
+            "nullable": true
+          },
+          "doacaoTexto": {
+            "type": "string",
+            "description": "Instruções de doação / dados bancários.",
+            "nullable": true
+          },
+          "especiesHabilitadas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EspecieAnimal"
+            },
+            "description": "Espécies atendidas pela ONG — as únicas oferecidas no cadastro e nos filtros.",
+            "nullable": true
+          },
+          "especiesComPorte": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EspecieAnimal"
+            },
+            "description": "Espécies em que o campo \"porte\" é usado.",
+            "nullable": true
+          },
+          "exibirCastrado": {
+            "type": "boolean",
+            "description": "Exibe o selo \"castrado\" na página pública."
+          },
+          "exibirVermifugado": {
+            "type": "boolean",
+            "description": "Exibe o selo \"vermifugado\" na página pública."
+          },
+          "aceitarCandidaturas": {
+            "type": "boolean",
+            "description": "Se o site aceita novas candidaturas (falso = mostrar OngAnimais.DTOs.ConfiguracaoOngPublicaDto.AvisoCandidaturasPausadas)."
+          },
+          "avisoCandidaturasPausadas": {
+            "type": "string",
+            "description": "Aviso exibido quando as candidaturas estão pausadas.",
+            "nullable": true
+          },
+          "telefoneObrigatorio": {
+            "type": "boolean",
+            "description": "Se o telefone é obrigatório no formulário de candidatura."
+          },
+          "textoConsentimento": {
+            "type": "string",
+            "description": "Texto de consentimento (LGPD) do formulário de candidatura (nulo = sem aviso).",
+            "nullable": true
+          },
+          "exibirWhatsappAnimal": {
+            "type": "boolean",
+            "description": "Exibe o botão \"Falar no WhatsApp\" na página do animal."
+          },
+          "moduloVacinas": {
+            "type": "boolean",
+            "description": "Se o módulo de vacinas está ligado (o painel esconde menu, aba e KPIs quando falso)."
+          },
+          "diasAlertaVacina": {
+            "type": "integer",
+            "description": "Janela (dias) do alerta de próximas doses no dashboard.",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Configurações da ONG que o site precisa para montar as páginas — devolvidas pelo\r\nendpoint público (sem login) e também usadas pelo painel de qualquer perfil (ex.:\r\nesconder o menu de vacinas). Não traz as regras internas de adoção, que só o\r\nOngAnimais.DTOs.ConfiguracaoOngRespostaDto (Admin) expõe."
+      },
+      "ConfiguracaoOngRespostaDto": {
+        "type": "object",
+        "properties": {
+          "nomeOng": {
+            "type": "string",
+            "description": "Nome da ONG.",
+            "nullable": true
+          },
+          "logoUrl": {
+            "type": "string",
+            "description": "URL da maior versão do logo (nulo = símbolo padrão). Exibir com as OngAnimais.DTOs.ConfiguracaoOngPublicaDto.LogoLarguras\r\n(srcset), igual às fotos de animal.",
+            "nullable": true
+          },
+          "logoLarguras": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "Larguras (px) das versões do logo disponíveis.",
+            "nullable": true
+          },
+          "faviconUrl": {
+            "type": "string",
+            "description": "Ícone da aba do navegador (PNG 64px), gerado do logo. Nulo = ícone padrão do site.",
+            "nullable": true
+          },
+          "iconeAppUrl": {
+            "type": "string",
+            "description": "Ícone de atalho na tela inicial do celular (PNG 180px), gerado do logo.",
+            "nullable": true
+          },
+          "paleta": {
+            "$ref": "#/components/schemas/PaletaCores"
+          },
+          "imagemPadraoUrl": {
+            "type": "string",
+            "description": "URL da foto de reserva (animal sem foto / vitrine vazia).",
+            "nullable": true
+          },
+          "whatsapp": {
+            "type": "string",
+            "description": "WhatsApp em formato internacional, só dígitos (o front formata para exibir).",
+            "nullable": true
+          },
+          "instagram": {
+            "type": "string",
+            "description": "Usuário do Instagram, sem \"@\".",
+            "nullable": true
+          },
+          "emailContato": {
+            "type": "string",
+            "description": "Email público de contato.",
+            "nullable": true
+          },
+          "endereco": {
+            "type": "string",
+            "description": "Endereço do abrigo.",
+            "nullable": true
+          },
+          "horarioAtendimento": {
+            "type": "string",
+            "description": "Horário de atendimento.",
+            "nullable": true
+          },
+          "textoContato": {
+            "type": "string",
+            "description": "Parágrafo da seção de contato da home.",
+            "nullable": true
+          },
+          "mensagemWhatsapp": {
+            "type": "string",
+            "description": "Mensagem pré-preenchida dos links do WhatsApp.",
+            "nullable": true
+          },
+          "heroTitulo": {
+            "type": "string",
+            "description": "Título principal da home.",
+            "nullable": true
+          },
+          "heroSubtitulo": {
+            "type": "string",
+            "description": "Subtítulo da home.",
+            "nullable": true
+          },
+          "quantidadeDestaque": {
+            "type": "integer",
+            "description": "Quantidade de animais no carrossel da home.",
+            "format": "int32"
+          },
+          "passosAdocao": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PassoAdocaoDto"
+            },
+            "description": "Passos de \"Como adotar\", na ordem.",
+            "nullable": true
+          },
+          "formasAjudar": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FormaAjudarDto"
+            },
+            "description": "Cards de \"Formas de ajudar\", na ordem. Na resposta pública vêm só os ativos;\r\nna resposta de Admin, todos (para edição).",
+            "nullable": true
+          },
+          "doacaoPixChave": {
+            "type": "string",
+            "description": "Chave PIX para doações (nulo = card de doação não aparece).",
+            "nullable": true
+          },
+          "doacaoTexto": {
+            "type": "string",
+            "description": "Instruções de doação / dados bancários.",
+            "nullable": true
+          },
+          "especiesHabilitadas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EspecieAnimal"
+            },
+            "description": "Espécies atendidas pela ONG — as únicas oferecidas no cadastro e nos filtros.",
+            "nullable": true
+          },
+          "especiesComPorte": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EspecieAnimal"
+            },
+            "description": "Espécies em que o campo \"porte\" é usado.",
+            "nullable": true
+          },
+          "exibirCastrado": {
+            "type": "boolean",
+            "description": "Exibe o selo \"castrado\" na página pública."
+          },
+          "exibirVermifugado": {
+            "type": "boolean",
+            "description": "Exibe o selo \"vermifugado\" na página pública."
+          },
+          "aceitarCandidaturas": {
+            "type": "boolean",
+            "description": "Se o site aceita novas candidaturas (falso = mostrar OngAnimais.DTOs.ConfiguracaoOngPublicaDto.AvisoCandidaturasPausadas)."
+          },
+          "avisoCandidaturasPausadas": {
+            "type": "string",
+            "description": "Aviso exibido quando as candidaturas estão pausadas.",
+            "nullable": true
+          },
+          "telefoneObrigatorio": {
+            "type": "boolean",
+            "description": "Se o telefone é obrigatório no formulário de candidatura."
+          },
+          "textoConsentimento": {
+            "type": "string",
+            "description": "Texto de consentimento (LGPD) do formulário de candidatura (nulo = sem aviso).",
+            "nullable": true
+          },
+          "exibirWhatsappAnimal": {
+            "type": "boolean",
+            "description": "Exibe o botão \"Falar no WhatsApp\" na página do animal."
+          },
+          "moduloVacinas": {
+            "type": "boolean",
+            "description": "Se o módulo de vacinas está ligado (o painel esconde menu, aba e KPIs quando falso)."
+          },
+          "diasAlertaVacina": {
+            "type": "integer",
+            "description": "Janela (dias) do alerta de próximas doses no dashboard.",
+            "format": "int32"
+          },
+          "multiplasCandidaturas": {
+            "type": "boolean",
+            "description": "Se o animal aceita várias candidaturas pendentes (falso = a 1ª já reserva o animal)."
+          },
+          "recusarPendentesAoConcluir": {
+            "type": "boolean",
+            "description": "Se as demais candidaturas pendentes são recusadas automaticamente ao concluir uma adoção."
+          },
+          "statusAnimalDevolvido": {
+            "$ref": "#/components/schemas/StatusAnimal"
+          },
+          "dataAtualizacao": {
+            "type": "string",
+            "description": "Data e hora da última alteração.",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Configuração completa da ONG para a tela de edição do painel (exclusivo de Admin):\r\ntudo o que a resposta pública traz (com todas as formas de ajudar, inclusive as\r\ninativas) + as regras internas de adoção e a data da última alteração."
+      },
+      "ConfiguracaoOngUpdateDto": {
+        "required": [
+          "aceitarCandidaturas",
+          "diasAlertaVacina",
+          "especiesComPorte",
+          "especiesHabilitadas",
+          "exibirCastrado",
+          "exibirVermifugado",
+          "exibirWhatsappAnimal",
+          "formasAjudar",
+          "heroSubtitulo",
+          "heroTitulo",
+          "moduloVacinas",
+          "multiplasCandidaturas",
+          "nomeOng",
+          "paleta",
+          "passosAdocao",
+          "quantidadeDestaque",
+          "recusarPendentesAoConcluir",
+          "statusAnimalDevolvido",
+          "telefoneObrigatorio"
+        ],
+        "type": "object",
+        "properties": {
+          "nomeOng": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string",
+            "description": "Nome da ONG exibido no cabeçalho, rodapé e títulos das páginas."
+          },
+          "paleta": {
+            "$ref": "#/components/schemas/PaletaCores"
+          },
+          "imagemPadraoUrl": {
+            "maxLength": 500,
+            "minLength": 0,
+            "pattern": "^(https://\\S+|/uploads/[A-Za-z0-9/_.-]+)$",
+            "type": "string",
+            "description": "URL da foto de reserva (animal sem foto / vitrine vazia).",
+            "nullable": true
+          },
+          "whatsapp": {
+            "pattern": "^[0-9]{10,15}$",
+            "type": "string",
+            "description": "WhatsApp em formato internacional, só dígitos — DDI + DDD + número (ex.: 5511999999999).",
+            "nullable": true
+          },
+          "instagram": {
+            "pattern": "^@?[A-Za-z0-9._]{1,30}$",
+            "type": "string",
+            "description": "Usuário do Instagram (com ou sem \"@\" — é gravado sem).",
+            "nullable": true
+          },
+          "emailContato": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string",
+            "description": "Email público de contato. O formato é validado no módulo depois de normalizar\r\n(`[EmailAddress]` recusaria a string vazia que um campo em branco envia).",
+            "nullable": true
+          },
+          "endereco": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string",
+            "description": "Endereço do abrigo, em uma linha.",
+            "nullable": true
+          },
+          "horarioAtendimento": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string",
+            "description": "Horário de atendimento (ex.: \"Terça a domingo, das 9h às 17h\").",
+            "nullable": true
+          },
+          "textoContato": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "description": "Parágrafo da seção de contato da home.",
+            "nullable": true
+          },
+          "mensagemWhatsapp": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "Mensagem pré-preenchida dos links do WhatsApp.",
+            "nullable": true
+          },
+          "heroTitulo": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string",
+            "description": "Título principal da home."
+          },
+          "heroSubtitulo": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "Subtítulo da home."
+          },
+          "quantidadeDestaque": {
+            "maximum": 20,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Quantidade de animais no carrossel da home (1–20).",
+            "format": "int32"
+          },
+          "passosAdocao": {
+            "maxItems": 6,
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PassoAdocaoDto"
+            },
+            "description": "Passos de \"Como adotar\", na ordem de exibição (1 a 6)."
+          },
+          "formasAjudar": {
+            "maxItems": 8,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FormaAjudarDto"
+            },
+            "description": "Cards de \"Formas de ajudar\", na ordem de exibição (até 8; inativos não aparecem no site)."
+          },
+          "doacaoPixChave": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string",
+            "description": "Chave PIX para doações (vazio = card de doação não aparece).",
+            "nullable": true
+          },
+          "doacaoTexto": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "description": "Instruções de doação / dados bancários.",
+            "nullable": true
+          },
+          "especiesHabilitadas": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EspecieAnimal"
+            },
+            "description": "Espécies atendidas pela ONG (pelo menos uma)."
+          },
+          "especiesComPorte": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EspecieAnimal"
+            },
+            "description": "Espécies em que o campo \"porte\" é usado (pode ser vazia — ex.: ONG só de gatos)."
+          },
+          "exibirCastrado": {
+            "type": "boolean",
+            "description": "Exibe o selo \"castrado\" na página pública."
+          },
+          "exibirVermifugado": {
+            "type": "boolean",
+            "description": "Exibe o selo \"vermifugado\" na página pública."
+          },
+          "aceitarCandidaturas": {
+            "type": "boolean",
+            "description": "Se o site aceita novas candidaturas (falso = adoções pausadas)."
+          },
+          "avisoCandidaturasPausadas": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "description": "Aviso exibido quando as candidaturas estão pausadas.",
+            "nullable": true
+          },
+          "multiplasCandidaturas": {
+            "type": "boolean",
+            "description": "Se o animal aceita várias candidaturas pendentes (falso = a 1ª já reserva o animal)."
+          },
+          "recusarPendentesAoConcluir": {
+            "type": "boolean",
+            "description": "Se as demais candidaturas pendentes são recusadas automaticamente ao concluir uma adoção."
+          },
+          "statusAnimalDevolvido": {
+            "$ref": "#/components/schemas/StatusAnimal"
+          },
+          "telefoneObrigatorio": {
+            "type": "boolean",
+            "description": "Se o telefone é obrigatório no formulário de candidatura."
+          },
+          "textoConsentimento": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "description": "Texto de consentimento (LGPD) exibido no formulário de candidatura (vazio = sem aviso).",
+            "nullable": true
+          },
+          "exibirWhatsappAnimal": {
+            "type": "boolean",
+            "description": "Exibe o botão \"Falar no WhatsApp\" na página do animal."
+          },
+          "moduloVacinas": {
+            "type": "boolean",
+            "description": "Se o módulo de vacinas está ligado."
+          },
+          "diasAlertaVacina": {
+            "maximum": 365,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Janela (dias) do alerta de próximas doses no dashboard (1–365).",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "DTO para atualização das configurações da ONG (uso administrativo — exige perfil Admin).\r\nSubstitui a configuração inteira (PUT): todos os campos obrigatórios precisam vir —\r\nbooleanos e números são `Nullable` + `[Required]` de propósito, para que um\r\ncampo esquecido dê 400 em vez de virar `false`/`0` (ex.: pausar as adoções).\r\nTextos opcionais vazios são gravados como nulo (o item some do site)."
       },
       "EspecieAnimal": {
         "enum": [
@@ -3138,6 +4346,63 @@
         ],
         "type": "string",
         "description": "Espécies de animais aceitas pelo sistema."
+      },
+      "FormaAjudarDto": {
+        "required": [
+          "descricao",
+          "icone",
+          "rotuloAcao",
+          "titulo"
+        ],
+        "type": "object",
+        "properties": {
+          "icone": {
+            "minLength": 1,
+            "pattern": "^[a-z0-9_]{1,50}$",
+            "type": "string",
+            "description": "Nome do ícone do Material Icons (ex.: \"pets\", \"volunteer_activism\")."
+          },
+          "titulo": {
+            "maxLength": 60,
+            "minLength": 0,
+            "type": "string",
+            "description": "Título do card."
+          },
+          "descricao": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string",
+            "description": "Descrição do card."
+          },
+          "rotuloAcao": {
+            "maxLength": 60,
+            "minLength": 0,
+            "type": "string",
+            "description": "Texto do link do card (ex.: \"Quero ser voluntário\")."
+          },
+          "rota": {
+            "maxLength": 100,
+            "minLength": 0,
+            "pattern": "^/([a-z0-9-]+(/[a-z0-9-]+)*)?$",
+            "type": "string",
+            "description": "Rota interna do site (ex.: \"/adotar\"). Só caminhos internos — o padrão barra URL\r\nexterna, \"javascript:\" e \"//host\" (que o navegador trata como URL externa).",
+            "nullable": true
+          },
+          "ancora": {
+            "maxLength": 50,
+            "minLength": 0,
+            "pattern": "^#[a-z0-9-]+$",
+            "type": "string",
+            "description": "Âncora na própria página (ex.: \"#contato\").",
+            "nullable": true
+          },
+          "ativo": {
+            "type": "boolean",
+            "description": "Se o card aparece no site. A resposta pública só traz os cards ativos."
+          }
+        },
+        "additionalProperties": false,
+        "description": "Um card da seção \"Formas de ajudar\" da home (usado no update e nas respostas da configuração).\r\nO link do card é uma OngAnimais.DTOs.FormaAjudarDto.Rota interna do site ou uma OngAnimais.DTOs.FormaAjudarDto.Ancora da\r\nprópria página — exatamente um dos dois (validado no módulo)."
       },
       "FotoRespostaDto": {
         "type": "object",
@@ -3154,7 +4419,16 @@
           },
           "url": {
             "type": "string",
-            "description": "URL/caminho da imagem.",
+            "description": "URL/caminho da imagem — a maior largura gerada.",
+            "nullable": true
+          },
+          "larguras": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "Larguras (px) disponíveis, crescente: cada uma é o arquivo `{guid}-{largura}.webp`\r\nao lado de OngAnimais.DTOs.FotoRespostaDto.Url. O front monta o `srcset` com elas. Vazio = só existe\r\nOngAnimais.DTOs.FotoRespostaDto.Url (foto ainda não convertida).",
             "nullable": true
           },
           "descricao": {
@@ -3192,6 +4466,47 @@
         },
         "additionalProperties": false,
         "description": "DTO para atualização dos dados de uma foto."
+      },
+      "PaletaCores": {
+        "enum": [
+          "Kraft",
+          "Floresta",
+          "Oceano",
+          "Lavanda",
+          "Terra"
+        ],
+        "type": "string",
+        "description": "Paleta de cores do site, escolhida pela ONG no painel de configurações. Os valores de cada\r\npaleta (tons, contraste) ficam no frontend; o backend só guarda qual está em uso.\r\nOs valores precisam bater com o CHECK constraint da coluna 'configuracoes_ong.paleta'."
+      },
+      "PassoAdocaoDto": {
+        "required": [
+          "descricao",
+          "icone",
+          "titulo"
+        ],
+        "type": "object",
+        "properties": {
+          "icone": {
+            "minLength": 1,
+            "pattern": "^[a-z0-9_]{1,50}$",
+            "type": "string",
+            "description": "Nome do ícone do Material Icons (ex.: \"search\", \"favorite\", \"home\")."
+          },
+          "titulo": {
+            "maxLength": 60,
+            "minLength": 0,
+            "type": "string",
+            "description": "Título curto do passo."
+          },
+          "descricao": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string",
+            "description": "Descrição do passo."
+          }
+        },
+        "additionalProperties": false,
+        "description": "Um passo da seção \"Como adotar\" da home (usado no update e nas respostas da configuração)."
       },
       "PerfilUsuario": {
         "enum": [
@@ -3596,6 +4911,22 @@
         "additionalProperties": false,
         "description": "DTO para registro de um novo usuário."
       },
+      "UsuarioResetSenhaDto": {
+        "required": [
+          "novaSenha"
+        ],
+        "type": "object",
+        "properties": {
+          "novaSenha": {
+            "maxLength": 100,
+            "minLength": 6,
+            "type": "string",
+            "description": "Nova senha do funcionário (mínimo 6 caracteres)."
+          }
+        },
+        "additionalProperties": false,
+        "description": "DTO para um Admin resetar (definir) a senha de outro funcionário.\r\nNão exige a senha atual — o cenário é justamente o funcionário que a esqueceu\r\ne não consegue logar; a confirmação de identidade é o perfil Admin de quem opera."
+      },
       "UsuarioRespostaDto": {
         "type": "object",
         "properties": {
@@ -3844,6 +5175,9 @@
     },
     {
       "name": "Auditoria"
+    },
+    {
+      "name": "Configuracao"
     },
     {
       "name": "Foto"

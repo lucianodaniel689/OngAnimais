@@ -1,29 +1,32 @@
-.adocao-lista {
-  max-width: 1200px;
-  margin-inline: auto;
+// Estrutura da página (cabeçalho, card, filtros, tabela clicável, erro, vazio) vem das
+// classes globais de `styles/_padroes.scss`. Aqui fica só o que é desta lista.
+
+// Miniatura da foto do animal — ajuda a identificar de cara na lista.
+.adocao-lista__miniatura {
+  display: block;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--raio-full);
+  object-fit: cover;
+  border: 1px solid var(--cor-borda);
 }
 
-.adocao-lista__cabecalho {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--esp-3);
-  margin-bottom: var(--esp-4);
+.adocao-lista__miniatura--vazia {
+  display: grid;
+  place-items: center;
+  background: var(--cor-fundo);
+  color: var(--cor-borda);
 }
 
-.adocao-lista__cabecalho h1 {
-  margin: 0 0 var(--esp-1);
-  font-size: var(--texto-xl);
+.adocao-lista__miniatura--vazia mat-icon {
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
 }
 
-.adocao-lista__cabecalho p {
-  margin: 0;
-  color: var(--cor-texto-suave);
-}
-
-.adocao-lista__card {
-  padding: var(--esp-4);
+.adocao-lista__tabela .mat-column-foto {
+  width: 56px;
+  padding-right: var(--esp-2);
 }
 
 // Nome do animal linka para a ficha (aba Candidaturas).
@@ -39,82 +42,9 @@
   color: var(--cor-primaria-escura);
 }
 
-// Botão com cara de link (abre o histórico do adotante em diálogo, não navega).
-.adocao-lista__link-adotante {
-  padding: 0;
-  border: none;
-  background: none;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-}
-
-.adocao-lista__link-adotante:hover,
-.adocao-lista__link-adotante:focus-visible {
-  text-decoration: underline;
-  color: var(--cor-primaria-escura);
-}
-
-.adocao-lista__filtros {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--esp-3);
-  margin-bottom: var(--esp-3);
-}
-
-// No celular os campos ocupam a linha toda; a largura fixa é só para desktop.
-.adocao-lista__filtros mat-form-field {
-  width: 100%;
-}
-
-@media (min-width: 720px) {
-  .adocao-lista__filtros mat-form-field {
-    width: 220px;
-  }
-}
-
-.adocao-lista__filtros-toggle {
-  width: 100%;
-  margin-bottom: var(--esp-3);
-}
-
-.adocao-lista__tabela-wrapper {
-  overflow-x: auto;
-}
-
-.adocao-lista__tabela {
-  width: 100%;
-}
-
-// Coluna de ações fixa à direita (stickyEnd): precisa de fundo opaco para
-// não deixar o conteúdo aparecer por baixo durante o scroll lateral.
-.adocao-lista__tabela .mat-mdc-table-sticky {
-  background-color: var(--cor-superficie);
-}
-
-.adocao-lista__tabela .mat-column-acoes {
-  white-space: nowrap;
-  width: 1%;
-}
-
 .adocao-lista__observacoes {
   max-width: 220px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.adocao-lista__erro {
-  padding: var(--esp-3);
-  border-radius: var(--raio-sm);
-  background-color: var(--cor-perigo-bg);
-  color: var(--cor-perigo);
-  font-size: var(--texto-sm);
-}
-
-.adocao-lista__vazio {
-  padding: var(--esp-6) 0;
-  text-align: center;
-  color: var(--cor-texto-suave);
 }

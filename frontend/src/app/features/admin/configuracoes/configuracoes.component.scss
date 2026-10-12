@@ -1,0 +1,235 @@
+// Largura, cabeçalho, card, grade de campos, erro e ações vêm das classes globais de
+// `styles/_padroes.scss`. Aqui fica só o que é desta tela: seções dentro das abas, a lista
+// editável de passos/cards e a barra de salvar fixa no rodapé.
+
+// Celular: as 3 abas cabem sem rolagem lateral (com o padding padrão de 24px a última ficava
+// escondida atrás da seta de paginação).
+@media (max-width: 599px) {
+  .configuracoes ::ng-deep .mat-mdc-tab {
+    padding-inline: var(--esp-3);
+    min-width: 0;
+  }
+}
+
+.configuracoes__aba-erro {
+  margin-left: var(--esp-1);
+  color: var(--cor-perigo);
+  font-size: 1.1rem;
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.configuracoes__secao + .configuracoes__secao {
+  margin-top: var(--esp-6);
+  padding-top: var(--esp-5);
+  border-top: 1px solid var(--cor-borda);
+}
+
+.configuracoes__secao h2 {
+  margin: 0;
+  font-size: var(--texto-lg);
+}
+
+.configuracoes__ajuda {
+  margin: var(--esp-1) 0 var(--esp-4);
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+}
+
+.configuracoes__campo {
+  width: 100%;
+}
+
+// Campos lado a lado alinhados pelo topo: sem isso, o campo sem dica estica para acompanhar a
+// altura do vizinho que tem `mat-hint` de 2 linhas (ex.: Instagram ao lado do WhatsApp).
+.configuracoes .form-grade {
+  align-items: start;
+}
+
+// --- Lista editável (passos e cards) ---------------------------------------------------
+.configuracoes__lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  margin-bottom: var(--esp-3);
+}
+
+.configuracoes__item {
+  padding: var(--esp-3) var(--esp-3) var(--esp-1);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-md);
+  background-color: var(--cor-superficie);
+}
+
+// Card escondido do site: fica esmaecido, mas continua editável.
+.configuracoes__item--inativo {
+  background-color: var(--cor-superficie-alt);
+}
+
+.configuracoes__item--inativo .configuracoes__item-cabecalho {
+  opacity: 0.6;
+}
+
+.configuracoes__item-cabecalho {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  margin-bottom: var(--esp-2);
+}
+
+.configuracoes__item-cabecalho strong {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.configuracoes__item-icone {
+  color: var(--cor-primaria-escura);
+  flex-shrink: 0;
+}
+
+.configuracoes__item-acoes {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.configuracoes__item mat-checkbox {
+  display: block;
+  margin-bottom: var(--esp-2);
+}
+
+// Ícone dentro da opção do select (o Material não alinha sozinho com o texto).
+mat-option mat-icon {
+  vertical-align: middle;
+  margin-right: var(--esp-2);
+}
+
+// --- Aparência: logo ------------------------------------------------------------------------
+.configuracoes__logo-previa {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--esp-4);
+  margin-bottom: var(--esp-4);
+}
+
+// Como o logo aparece no cabeçalho (logo + nome).
+.configuracoes__logo-marca {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-2);
+  padding: var(--esp-2) var(--esp-3);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-md);
+  background-color: var(--cor-superficie);
+  font-size: var(--texto-lg);
+}
+
+// Imitação da aba do navegador, para ver o favicon gerado no tamanho real (16px).
+.configuracoes__aba-navegador {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-2);
+  max-width: 220px;
+  padding: var(--esp-1) var(--esp-3);
+  border: 1px solid var(--cor-borda);
+  border-bottom: none;
+  border-radius: var(--raio-sm) var(--raio-sm) 0 0;
+  background-color: var(--cor-superficie);
+  font-size: var(--texto-xs);
+}
+
+.configuracoes__aba-navegador span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.configuracoes__remover-logo {
+  margin-top: var(--esp-3);
+}
+
+// --- Aparência: paletas (um mat-radio-button por paleta, desenhado como cartão) ------------
+.configuracoes__paletas {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--esp-3);
+}
+
+@media (min-width: 600px) {
+  .configuracoes__paletas {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.configuracoes__paleta {
+  padding: var(--esp-2);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-md);
+  background-color: var(--cor-superficie);
+}
+
+.configuracoes__paleta--selecionada {
+  border-color: var(--cor-primaria-escura);
+  box-shadow: 0 0 0 1px var(--cor-primaria-escura);
+}
+
+// O rótulo do radio vira a área clicável inteira (amostras + nome + descrição).
+.configuracoes__paleta ::ng-deep label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  padding-block: var(--esp-1);
+  cursor: pointer;
+}
+
+.configuracoes__amostras {
+  display: flex;
+  gap: var(--esp-1);
+}
+
+.configuracoes__amostras span {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--raio-full);
+  border: 1px solid rgb(0 0 0 / 0.12);
+}
+
+.configuracoes__paleta-texto {
+  display: flex;
+  flex-direction: column;
+}
+
+.configuracoes__paleta-texto span {
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+}
+
+// --- Barra de salvar --------------------------------------------------------------------
+// Fixa no rodapé da área rolável: a aba "Página inicial" é longa e o Salvar vale para as duas.
+.configuracoes__barra {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  margin-top: var(--esp-4);
+  padding: var(--esp-3) 0;
+  background-color: var(--cor-fundo);
+  border-top: 1px solid var(--cor-borda);
+}
+
+.configuracoes__barra .mensagem-erro {
+  margin: 0 0 var(--esp-2);
+}
+
+.configuracoes__acoes {
+  align-items: center;
+  margin-top: 0;
+}
+
+// No cabeçalho (fora da barra fixa, que no celular precisa ser só os botões).
+.pagina-cabecalho .configuracoes__atualizado {
+  margin-top: var(--esp-1);
+  font-size: var(--texto-sm);
+}

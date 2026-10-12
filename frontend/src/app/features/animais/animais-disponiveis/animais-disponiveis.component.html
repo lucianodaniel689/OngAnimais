@@ -1,0 +1,114 @@
+<section class="pagina-adotar">
+  <div class="container">
+    <header class="pagina-adotar__cabecalho">
+      <h1>Quero adotar</h1>
+      <p>Conheça quem está pronto para ganhar um novo lar.</p>
+    </header>
+
+    @if (carregando()) {
+      <app-loading [tamanho]="44" mensagem="Carregando animais..." />
+    } @else if (erro()) {
+      <p class="pagina-adotar__estado pagina-adotar__estado--erro">{{ erro() }}</p>
+    } @else if (animais().length === 0) {
+      <p class="pagina-adotar__estado">
+        Nenhum animal disponível no momento. Volte em breve! 🐾
+      </p>
+    } @else {
+      <div class="pagina-adotar__filtros-grupos">
+        @if (especiesDisponiveis().length > 1) {
+          <div class="pagina-adotar__filtro-grupo">
+            <span class="pagina-adotar__filtro-rotulo">Espécie</span>
+            <mat-chip-set class="pagina-adotar__filtros" aria-label="Filtrar por espécie">
+              <mat-chip
+                [highlighted]="especieSelecionada() === null"
+                color="primary"
+                (click)="filtrarPorEspecie(null)"
+              >
+                Todos
+              </mat-chip>
+              @for (especie of especiesDisponiveis(); track especie) {
+                <mat-chip
+                  [highlighted]="especieSelecionada() === especie"
+                  color="primary"
+                  (click)="filtrarPorEspecie(especie)"
+                >
+                  {{ rotuloEspecie[especie] }}
+                </mat-chip>
+              }
+            </mat-chip-set>
+          </div>
+        }
+
+        @if (portesDisponiveis().length > 1) {
+          <div class="pagina-adotar__filtro-grupo">
+            <span class="pagina-adotar__filtro-rotulo">Porte</span>
+            <mat-chip-set class="pagina-adotar__filtros" aria-label="Filtrar por porte">
+              <mat-chip
+                [highlighted]="porteSelecionado() === null"
+                color="primary"
+                (click)="filtrarPorPorte(null)"
+              >
+                Todos
+              </mat-chip>
+              @for (porte of portesDisponiveis(); track porte) {
+                <mat-chip
+                  [highlighted]="porteSelecionado() === porte"
+                  color="primary"
+                  (click)="filtrarPorPorte(porte)"
+                >
+                  {{ rotuloPorte[porte] }}
+                </mat-chip>
+              }
+            </mat-chip-set>
+          </div>
+        }
+
+        @if (sexosDisponiveis().length > 1) {
+          <div class="pagina-adotar__filtro-grupo">
+            <span class="pagina-adotar__filtro-rotulo">Sexo</span>
+            <mat-chip-set class="pagina-adotar__filtros" aria-label="Filtrar por sexo">
+              <mat-chip
+                [highlighted]="sexoSelecionado() === null"
+                color="primary"
+                (click)="filtrarPorSexo(null)"
+              >
+                Todos
+              </mat-chip>
+              @for (sexo of sexosDisponiveis(); track sexo) {
+                <mat-chip
+                  [highlighted]="sexoSelecionado() === sexo"
+                  color="primary"
+                  (click)="filtrarPorSexo(sexo)"
+                >
+                  {{ rotuloSexo[sexo] }}
+                </mat-chip>
+              }
+            </mat-chip-set>
+          </div>
+        }
+      </div>
+
+      @if (animaisFiltrados().length === 0) {
+        <p class="pagina-adotar__estado">Nenhum animal encontrado com esse filtro.</p>
+      } @else {
+        <div class="pagina-adotar__grade">
+          @for (animal of animaisExibidos(); track animal.id; let i = $index) {
+            <!-- Só o 1º card com prioridade (é o LCP no celular); os demais `lazy` — os que já estão
+                 na tela no desktop carregam mesmo assim, e no celular não disputam banda com o 1º
+                 (medido: carregar os 4 primeiros na hora piorava o LCP no celular). -->
+            <app-animal-card [animal]="animal" [prioridade]="i === 0 ? 'alta' : 'adiada'" />
+          }
+        </div>
+
+        @if (temMaisParaMostrar()) {
+          <div class="pagina-adotar__mais">
+            <button mat-stroked-button color="primary" (click)="mostrarMais()">
+              Mostrar mais animais
+              <mat-icon>expand_more</mat-icon>
+            </button>
+          </div>
+        }
+      }
+    }
+  </div>
+</section>

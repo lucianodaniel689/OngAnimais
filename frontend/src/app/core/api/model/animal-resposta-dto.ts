@@ -58,6 +58,10 @@ export interface AnimalRespostaDto {
      */
     fotoPrincipalUrl?: string | null;
     /**
+     * Larguras (px) disponíveis da foto principal — ver OngAnimais.DTOs.FotoRespostaDto.Larguras.  Populado junto com OngAnimais.DTOs.AnimalRespostaDto.FotoPrincipalUrl; `null` sem foto.
+     */
+    fotoPrincipalLarguras?: Array<number> | null;
+    /**
      * Quantidade de candidaturas de adoção pendentes do animal. Populado apenas  na listagem administrativa (`ListarPaginadoAsync`) — ajuda a equipe a  priorizar quais animais têm interessados aguardando; `0` nas demais  respostas (detalhe público, vitrine, criar/atualizar).
      */
     candidaturasPendentes?: number;

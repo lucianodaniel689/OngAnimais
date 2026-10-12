@@ -32,8 +32,11 @@ export class LoginComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
 
-  /** URL para voltar após o login (vinda de ?returnUrl=, via componentInputBinding). */
-  readonly returnUrl = input('/');
+  /**
+   * URL para voltar após o login (vinda de ?returnUrl=, via componentInputBinding). Pode vir
+   * `undefined` — o binding sobrescreve o default quando o query param não existe.
+   */
+  readonly returnUrl = input<string | undefined>(undefined);
 
   readonly carregando = signal(false);
   readonly erro = signal<string | null>(null);
@@ -60,12 +63,23 @@ export class LoginComponent {
     this.auth.login(this.form.getRawValue()).subscribe({
       next: () => {
         this.carregando.set(false);
-        this.router.navigateByUrl(this.returnUrl());
+        this.router.navigateByUrl(this.destinoAposLogin());
       },
       error: (err) => {
         this.carregando.set(false);
         this.erro.set(mensagemErro(err, 'Não foi possível entrar. Verifique suas credenciais.'));
       },
     });
+  }
+
+  /**
+   * Para onde ir depois de logar: o painel (`/admin`), ou a tela do admin que a pessoa tentava
+   * abrir quando a sessão expirou (`returnUrl`). Qualquer `returnUrl` fora do `/admin` (home,
+   * o próprio `/login`, URL externa forjada no link) é ignorado — login é só de funcionário,
+   * então o destino natural é sempre o painel.
+   */
+  private destinoAposLogin(): string {
+    const url = this.returnUrl();
+    return url && /^\/admin(?:[/?#]|$)/.test(url) ? url : '/admin';
   }
 }

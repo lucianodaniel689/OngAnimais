@@ -1,8 +1,8 @@
 <mat-toolbar class="cabecalho">
   <div class="container cabecalho__interno">
     <a routerLink="/" class="cabecalho__marca">
-      <span class="cabecalho__logo" aria-hidden="true">🐾</span>
-      <span class="cabecalho__nome">OngAnimais</span>
+      <app-logo-ong [altura]="32" />
+      <span class="cabecalho__nome">{{ nomeOng() }}</span>
     </a>
 
     <!-- Desktop: links inline -->
@@ -15,7 +15,6 @@
       >
         Início
       </a>
-      <a mat-button routerLink="/quiz" routerLinkActive="ativo">Encontre seu match</a>
       <a mat-button routerLink="/styleguide" routerLinkActive="ativo">Styleguide</a>
 
       @if (usuario(); as u) {
@@ -51,10 +50,6 @@
     <mat-menu #menu="matMenu">
       <a mat-menu-item routerLink="/" routerLinkActive="ativo" [routerLinkActiveOptions]="{ exact: true }">
         Início
-      </a>
-      <a mat-menu-item routerLink="/quiz" routerLinkActive="ativo">
-        <mat-icon>favorite</mat-icon>
-        Encontre seu match
       </a>
       <a mat-menu-item routerLink="/styleguide" routerLinkActive="ativo">Styleguide</a>
       @if (usuario(); as u) {

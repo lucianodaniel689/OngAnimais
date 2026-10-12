@@ -38,6 +38,13 @@ export interface UsuarioAutenticado {
 export class AuthService {
   private usuarioApi = inject(UsuarioService);
 
+  /**
+   * True quando o navegador tinha um token que já expirou (funcionário cuja sessão venceu).
+   * O `authGuard` usa isso para mandar essa pessoa ao login em vez da página 404 que
+   * visitantes sem sessão veem. Declarado antes de `_token`, que o preenche ao inicializar.
+   */
+  private _sessaoExpirada = false;
+
   /** Estado reativo do token. */
   private readonly _token = signal<string | null>(this.lerTokenValido());
 
@@ -87,10 +94,22 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem(CHAVE_TOKEN);
     this._token.set(null);
+    this._sessaoExpirada = false;
+  }
+
+  /** Encerra a sessão por expiração (401 da API) — o próximo acesso ao admin leva ao login. */
+  expirarSessao(): void {
+    this.logout();
+    this._sessaoExpirada = true;
   }
 
   get token(): string | null {
     return this._token();
+  }
+
+  /** Ver `_sessaoExpirada`. */
+  get sessaoExpirada(): boolean {
+    return this._sessaoExpirada;
   }
 
   // --- internos -------------------------------------------------------------
@@ -98,6 +117,7 @@ export class AuthService {
   private guardarToken(token: string): void {
     localStorage.setItem(CHAVE_TOKEN, token);
     this._token.set(token);
+    this._sessaoExpirada = false;
   }
 
   /** Lê o token do storage só se ainda for válido; senão limpa. */
@@ -109,6 +129,7 @@ export class AuthService {
     const payload = this.decodificar(token);
     if (!payload || payload.exp * 1000 <= Date.now()) {
       localStorage.removeItem(CHAVE_TOKEN);
+      this._sessaoExpirada = !!payload;
       return null;
     }
     return token;

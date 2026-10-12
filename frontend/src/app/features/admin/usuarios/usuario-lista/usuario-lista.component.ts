@@ -14,11 +14,24 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { PerfilUsuario, UsuarioRespostaDto, UsuarioService } from '@app/core/api';
 import { ROTULO_PERFIL_USUARIO } from '@app/core/models';
 import { AuthService } from '@app/core/auth/auth.service';
+import { mensagemErro } from '@app/core/http/error.interceptor';
 import { LoadingComponent } from '@app/shared/components';
 import { telaPequena } from '@app/core/layout/breakpoint.util';
+import {
+  UsuarioFichaDialogComponent,
+  UsuarioFichaDialogData,
+  UsuarioFichaDialogResultado,
+} from '../usuario-ficha-dialog/usuario-ficha-dialog.component';
+import {
+  UsuarioResetSenhaDialogComponent,
+  UsuarioResetSenhaDialogData,
+  UsuarioResetSenhaDialogResultado,
+} from '../usuario-reset-senha-dialog/usuario-reset-senha-dialog.component';
 
 const TAMANHOS_PAGINA = [10, 20, 50];
 
@@ -51,6 +64,8 @@ export class UsuarioListaComponent {
   private usuarioService = inject(UsuarioService);
   private route = inject(ActivatedRoute);
   private auth = inject(AuthService);
+  private dialog = inject(MatDialog);
+  private snackbar = inject(MatSnackBar);
 
   /** True em telas pequenas (≤ 768px). */
   protected readonly mobile = telaPequena();
@@ -58,11 +73,15 @@ export class UsuarioListaComponent {
   /** No celular os filtros começam recolhidos — a tabela aparece primeiro. */
   readonly filtrosAbertos = signal(false);
 
-  /** No celular a tabela mostra só o essencial — email, situação e data ficam na tela de edição. */
+  /**
+   * No celular a tabela mostra só o essencial — email, situação e data ficam na ficha.
+   * Sem coluna de ações: a linha inteira é clicável e abre a ficha em modal (ver `abrirFicha`),
+   * mesmo padrão das listas de animais e adoções.
+   */
   readonly colunas = computed(() =>
     this.mobile()
-      ? ['nome', 'perfil', 'acoes']
-      : ['nome', 'email', 'perfil', 'ativo', 'dataCriacao', 'acoes'],
+      ? ['nome', 'perfil']
+      : ['nome', 'email', 'perfil', 'ativo', 'dataCriacao'],
   );
   readonly tamanhosPagina = TAMANHOS_PAGINA;
 
@@ -121,6 +140,70 @@ export class UsuarioListaComponent {
 
   limparFiltros(): void {
     this.filtros.reset({ busca: '', ativo: null });
+  }
+
+  /**
+   * Abre a ficha do funcionário em modal (clique na linha). Edição e exclusão acontecem dentro
+   * da própria modal; aqui só recarregamos a lista se algo mudou e abrimos o reset de senha
+   * quando essa for a ação escolhida.
+   */
+  abrirFicha(usuario: UsuarioRespostaDto): void {
+    const ref = this.dialog.open<
+      UsuarioFichaDialogComponent,
+      UsuarioFichaDialogData,
+      UsuarioFichaDialogResultado
+    >(UsuarioFichaDialogComponent, {
+      data: { usuario, ehVoce: usuario.id === this.meuId() },
+      width: 'min(480px, 92vw)',
+      autoFocus: false,
+      // A ficha trata Esc/clique fora sozinha (não fecha durante a edição) e sempre devolve
+      // um resultado — ver UsuarioFichaDialogComponent.
+      disableClose: true,
+    });
+
+    ref.afterClosed().subscribe((resultado) => {
+      if (resultado?.alterado) {
+        this.carregar();
+      }
+      if (resultado?.resetarSenha) {
+        this.resetarSenha(resultado.usuario ?? usuario);
+      }
+    });
+  }
+
+  /**
+   * Abre o diálogo de reset de senha (Admin define uma nova senha sem a atual —
+   * cenário de senha esquecida). Para a própria conta a ação fica desabilitada na ficha:
+   * o caminho é "Meu perfil", que exige a senha atual.
+   */
+  private resetarSenha(usuario: UsuarioRespostaDto): void {
+    const ref = this.dialog.open(UsuarioResetSenhaDialogComponent, {
+      data: { usuario } satisfies UsuarioResetSenhaDialogData,
+      width: 'min(420px, 92vw)',
+    });
+
+    ref.afterClosed().subscribe((resultado: UsuarioResetSenhaDialogResultado | undefined) => {
+      if (!resultado) {
+        return;
+      }
+      this.usuarioService
+        .usuarioResetarSenha({
+          id: usuario.id!,
+          usuarioResetSenhaDto: { novaSenha: resultado.novaSenha },
+        })
+        .subscribe({
+          next: () => {
+            this.snackbar.open(`Senha de "${usuario.nome}" resetada com sucesso.`, 'Fechar', {
+              duration: 4000,
+            });
+          },
+          error: (err) => {
+            this.snackbar.open(mensagemErro(err, 'Não foi possível resetar a senha.'), 'Fechar', {
+              duration: 5000,
+            });
+          },
+        });
+    });
   }
 
   private carregar(): void {

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, debounceTime, map, of } from 'rxjs';
 import { MatTableModule } from '@angular/material/table';
@@ -13,18 +13,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCardModule } from '@angular/material/card';
-import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { AdocaoRespostaDto, AdocaoService, StatusAdocao } from '@app/core/api';
 import { ROTULO_STATUS_ADOCAO, STATUS_ADOCAO } from '@app/core/models';
 import { LoadingComponent, StatusAdocaoBadgeComponent } from '@app/shared/components';
-import { mensagemErro } from '@app/core/http/error.interceptor';
 import { telaPequena } from '@app/core/layout/breakpoint.util';
-import {
-  AdocaoStatusDialogComponent,
-  AdocaoStatusDialogResultado,
-} from '../adocao-status-dialog/adocao-status-dialog.component';
-import { AdotanteHistoricoDialogComponent } from '../adotante-historico-dialog/adotante-historico-dialog.component';
+import { FotoResponsivaDirective } from '@app/shared/components/foto-responsiva/foto-responsiva.directive';
 
 const TAMANHOS_PAGINA = [10, 20, 50];
 
@@ -34,6 +27,7 @@ const TAMANHOS_PAGINA = [10, 20, 50];
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    FotoResponsivaDirective,
     RouterLink,
     DatePipe,
     ReactiveFormsModule,
@@ -56,8 +50,7 @@ export class AdocaoListaComponent {
   private fb = inject(FormBuilder);
   private adocaoService = inject(AdocaoService);
   private route = inject(ActivatedRoute);
-  private dialog = inject(MatDialog);
-  private snackbar = inject(MatSnackBar);
+  private router = inject(Router);
 
   /** True em telas pequenas (≤ 768px). */
   protected readonly mobile = telaPequena();
@@ -65,20 +58,24 @@ export class AdocaoListaComponent {
   /** No celular os filtros começam recolhidos — a tabela aparece primeiro. */
   readonly filtrosAbertos = signal(false);
 
-  /** No celular a tabela mostra só o essencial — o restante aparece no diálogo de status. */
+  /**
+   * No celular a tabela mostra só o essencial — o restante fica na ficha.
+   * Sem coluna de ações: a linha inteira é clicável e leva à ficha da candidatura.
+   */
   readonly colunas = computed(() =>
     this.mobile()
-      ? ['nomeAnimal', 'status', 'acoes']
+      ? ['foto', 'nomeAnimal', 'status']
       : [
+          'foto',
           'nomeAnimal',
           'nomeAdotante',
           'status',
           'dataSolicitacao',
           'dataConclusao',
           'observacoes',
-          'acoes',
         ],
   );
+  /** Resolve a URL da miniatura (foto do animal já vem na listagem, sem N+1). */
   readonly tamanhosPagina = TAMANHOS_PAGINA;
   readonly statusOpcoes = STATUS_ADOCAO;
   readonly rotuloStatus = ROTULO_STATUS_ADOCAO;
@@ -131,46 +128,11 @@ export class AdocaoListaComponent {
     this.filtros.reset({ status: null });
   }
 
-  /** Abre o histórico de candidaturas do adotante (todas, de qualquer animal). */
-  abrirHistorico(adocao: AdocaoRespostaDto): void {
-    this.dialog.open(AdotanteHistoricoDialogComponent, {
-      data: {
-        adotanteId: adocao.adotanteId!,
-        nome: adocao.nomeAdotante ?? '',
-        email: adocao.emailAdotante,
-        telefone: adocao.telefoneAdotante,
-      },
-      width: 'min(480px, 92vw)',
-    });
-  }
-
-  alterarStatus(adocao: AdocaoRespostaDto): void {
-    const ref = this.dialog.open(AdocaoStatusDialogComponent, {
-      data: { adocao },
-      width: 'min(420px, 92vw)',
-    });
-
-    ref.afterClosed().subscribe((resultado: AdocaoStatusDialogResultado | undefined) => {
-      if (!resultado) {
-        return;
-      }
-      this.adocaoService
-        .adocaoAtualizar({
-          id: adocao.id!,
-          adocaoUpdateDto: { status: resultado.status, observacoes: resultado.observacoes },
-        })
-        .subscribe({
-          next: () => {
-            this.snackbar.open('Status da adoção atualizado.', 'Fechar', { duration: 4000 });
-            this.carregar();
-          },
-          error: (err) => {
-            this.snackbar.open(mensagemErro(err, 'Não foi possível atualizar o status.'), 'Fechar', {
-              duration: 5000,
-            });
-          },
-        });
-    });
+  /** Linha inteira é clicável — abre a ficha completa da candidatura. */
+  abrirFicha(id: number | undefined): void {
+    if (id) {
+      this.router.navigate(['/admin/adocoes', id]);
+    }
   }
 
   private carregar(): void {

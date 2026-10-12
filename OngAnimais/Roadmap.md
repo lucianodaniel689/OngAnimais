@@ -490,9 +490,8 @@ token, backend respondia 401). Corrigido removendo `/registrar` da lista de excl
 
 ### Pendências conscientes (não resolvidas nesta fase)
 - ~~Sem reset de senha~~ — resolvido na Fase 12 (`PUT /api/usuario/me/senha`, autoatendimento).
-  Segue sem um fluxo de **admin resetar a senha de outro funcionário** (ex.: se ele esquecer a
-  própria senha e não conseguir logar) — precisaria de um endpoint separado, sem exigir a senha
-  atual, se isso virar necessidade real.
+  ~~Segue sem um fluxo de **admin resetar a senha de outro funcionário**~~ — resolvido na Fase 18
+  (`PUT /api/usuario/{id}/senha`, Admin-only, sem exigir a senha atual).
 
 ---
 
@@ -595,7 +594,7 @@ tela nenhuma consumindo esses endpoints antes desta fase. Corrigido em duas part
 - Atualizar nome/email aqui não atualiza o nome exibido no cabeçalho até o próximo login (não há
   refresh token — o nome vem decodificado do JWT antigo). O usuário é avisado disso no snackbar de
   sucesso.
-- Sem fluxo de admin resetar a senha de outro funcionário (ver Fase 9).
+- ~~Sem fluxo de admin resetar a senha de outro funcionário~~ — resolvido na Fase 18.
 
 ---
 
@@ -861,6 +860,284 @@ psql -U postgres -d onganimais_dev -f Scripts/009_criar_tabela_auditoria.sql
 
 ---
 
+## Fase 18 - Reset de senha por admin ✅ CONCLUÍDA
+
+### Objetivos
+- ✅ Fechar a pendência das Fases 9/12: um funcionário que esquecesse a própria senha ficava
+  trancado para sempre (o autoatendimento `PUT /me/senha` exige a senha atual, e não havia
+  alternativa administrativa).
+
+### Entregáveis
+- ✅ **`PUT /api/usuario/{id}/senha`** (`[Authorize(Roles = Admin)]`) — Admin define uma nova senha
+  para outro funcionário **sem exigir a senha atual** (a confirmação de identidade é o perfil Admin
+  de quem opera). `UsuarioResetSenhaDto` (só `NovaSenha`, 6–100) + `UsuarioModulo.ResetarSenhaAsync`
+  (`UPDATE ... RETURNING nome, email` — o RETURNING identifica o alvo para a auditoria).
+- ✅ **Auditoria**: nova ação `SenhaResetada` (categoria `Usuario`) — registra quem resetou a senha
+  de quem (operador vem do `ContextoOperador`, alvo vai nos detalhes). Distinta de `SenhaAlterada`
+  (autoatendimento).
+- ✅ **Frontend**: botão "Resetar senha" (`lock_reset`) na coluna de ações da lista de funcionários
+  (`/admin/usuarios`, Admin-only por rota) abre o `UsuarioResetSenhaDialogComponent` — nova senha +
+  confirmação (validador de grupo `senhasIguais`), toggle de visibilidade, aviso para comunicar a
+  senha por canal seguro. Desabilitado na própria conta (o caminho é "Meu perfil", que exige a
+  senha atual). Rótulo "Senha resetada por admin" na tela de auditoria. Client regenerado
+  (`npm run api`).
+
+### Decisões de projeto
+- Sem senha temporária gerada nem troca obrigatória no primeiro login — o Admin digita a nova senha
+  e informa ao funcionário, que pode trocá-la em "Meu perfil". Simples e suficiente para o porte da
+  equipe; se virar necessidade, um flag `senha_temporaria` seria o próximo passo.
+
+### Endurecimento posterior
+- ✅ **Admin não reseta a própria senha pela API**: `ResetarSenhaAsync` recebe o id do operador
+  (claims do JWT) e recusa (400) `id == operador` — senão um token de admin roubado trocaria a
+  senha sem conhecer a atual, contornando o `PUT /me/senha`. A própria senha só muda por esse fluxo.
+- ✅ **Chave JWT de exemplo barrada fora de Development**: `AddJwtAuthentication` recebe o ambiente
+  e não sobe com `JwtSettings:SecretKey` começando em `SuaChave` (o placeholder do
+  `appsettings.json`, que é público no repositório). Em produção, definir `JwtSettings__SecretKey`.
+- ✅ **`Microsoft.OpenApi` fixado em 2.9.0** (corrige `GHSA-v5pm-xwqc-g5wc`, patch a partir da 2.7.5).
+  ⚠️ Não subir para 2.10+ sem conferir o spec: versões mais novas emitem `"enum": [null]` em campos
+  `object` anuláveis e o client gerado ganha um enum vazio em `api-response-of-object.ts`.
+
+---
+
+## Fase 19 - Exclusão de animal com vínculos ✅ CONCLUÍDA
+
+### Objetivos
+- ✅ Antes, excluir um animal com adoções, vacinas ou fotos vinculadas só dava erro (as FKs não
+  têm `CASCADE`) e não havia como concluir a exclusão. Agora o painel avisa o que existe vinculado
+  e, com confirmação, exclui tudo.
+
+### Entregáveis
+- ✅ **`GET /api/animal/{id}/vinculos`** — contagens de adoções/vacinas/fotos (`AnimalVinculosDto`,
+  `PossuiVinculos` calculado); 404 se o animal não existe.
+- ✅ **`DELETE /api/animal/{id}?excluirVinculos=true`** — sem a flag e com vínculos continua 400
+  (mensagem de negócio). Com a flag: transação apagando adoções → vacinas → fotos → animal;
+  arquivos das fotos removidos do disco **só após o commit** (`IArmazenamentoArquivos.Excluir`).
+- ✅ **Auditoria**: `AnimalExcluido` passa a registrar as contagens apagadas nos detalhes.
+- ✅ **Frontend**: `ConfirmDialogComponent` ganhou `itens` (ícone + texto) e `rodape`; a ficha do
+  animal consulta os vínculos antes de abrir a modal e lista só o que existe. Variante catalogada
+  no `/styleguide`. Client regenerado (`npm run api`).
+
+### Decisões de projeto
+- ⚠️ **Exceção ao "histórico de adoções é permanente" (Fase 14)**: excluir o animal apaga as
+  adoções dele. É deliberado (pedido do produto) e protegido pela modal de confirmação, que avisa
+  "o histórico será perdido". O adotante (tabela `adotantes`) permanece. Se o histórico voltar a
+  ser sensível, o caminho é bloquear a exclusão quando houver adoção `Aprovada`/`Concluida` e
+  oferecer só "desativar" (`ativo = false`) o animal.
+- Validado em banco descartável: sem flag → 400 e nada apagado; com flag num animal com 2 adoções,
+  2 vacinas e 2 fotos → 0 registros órfãos e auditoria com as contagens.
+
+---
+
+## Fase 20 - Revisão do tratamento de erros + ocultar áreas restritas ✅ CONCLUÍDA
+
+### Entregáveis
+- ✅ **Login com exceção própria** (`CredenciaisInvalidasException` → 401). `UnauthorizedAccessException`
+  (que o .NET também lança em falha de permissão de arquivo) deixa de virar 401 — cai no 500
+  genérico, sem expor caminho do disco nem derrubar a sessão do usuário no front.
+- ✅ **401/403 do JWT no formato `ApiResponse`** (`JwtBearerEvents` em `AuthConfig`); o **403 vira
+  404** "Recurso não encontrado." — quem não tem o perfil não descobre que o endpoint existe.
+- ✅ **`UNIQUE` violado por corrida** (`PostgresException 23505`) → 400 em vez de 500.
+- ✅ **Frontend**: página 404 (`NaoEncontradoComponent`) para URL desconhecida **e** para `/admin/**`
+  sem acesso (guards com `skipLocationChange`; token expirado ainda vai ao login); 401 de senha
+  errada não aciona mais o fluxo de sessão expirada (aninhava o `returnUrl`); KPIs do dashboard
+  mostram "—" em erro (antes 0); fichas distinguem "não encontrado" de erro do servidor.
+
+---
+
+## Fase 21 - Telemetria com OpenTelemetry ✅ CONCLUÍDA
+
+### Entregáveis
+- ✅ **`TelemetriaConfig`** (`Configurations/`): traces (requisições HTTP + queries do PostgreSQL via
+  `Npgsql.OpenTelemetry`), métricas (ASP.NET Core/Kestrel/rate limiter, pool do Npgsql, runtime) e
+  logs correlacionados ao trace, exportados por **OTLP**. Liga só se `OTEL_EXPORTER_OTLP_ENDPOINT`
+  estiver configurado. `/uploads`, `/swagger` e favicon não geram trace (continuam nas métricas).
+- ✅ Erros 500 registram a exceção na span da requisição (`ExceptionHandlingMiddleware`).
+- ✅ **Aspire Dashboard** no `docker-compose.yml` (`http://localhost:18888`, OTLP gRPC no host em
+  `4317`) para desenvolvimento; `appsettings.Development.json` já aponta para ele.
+- ✅ Validado: traces por template de rota, SQL com placeholders (sem valores), métricas e logs
+  chegando ao painel.
+
+### Decisões de projeto
+- Variáveis padrão `OTEL_*` em vez de seção própria no appsettings: trocar de destino (Grafana
+  Cloud, Azure Monitor, SigNoz) é só configurar endpoint/protocolo/headers, sem mudar código.
+- O Aspire Dashboard guarda tudo em memória e roda sem login — **só para dev**. Produção precisa de
+  um backend persistente (sugestão: Grafana Cloud, plano grátis).
+- LGPD: nada de email/telefone na telemetria — mantenha logs e tags novas sem dado pessoal.
+
+---
+
+## Fase 22 - Otimização das fotos ✅ CONCLUÍDA
+
+### Entregáveis
+- ✅ **`OtimizadorImagens`** (SixLabors.ImageSharp 3.1.x): todo upload vira WebP principal
+  (≤ 1600px) + miniatura `-mini` (≤ 480px); original nunca é guardado. Corrige rotação do EXIF,
+  remove EXIF/XMP/IPTC (GPS), mantém o perfil ICC, recusa não-imagem e resolução > 50 MP.
+- ✅ Limite de envio 5MB → **15MB** (foto de celular era recusada; o que fica salvo é bem menor).
+- ✅ **Fotos antigas** convertidas ao iniciar a API (`OtimizacaoFotosAntigasService`, idempotente).
+- ✅ **Cache longo** em `/uploads` (`max-age=31536000, immutable`).
+- ✅ Correção: `wwwroot` criado na subida (sem ele, fotos enviadas davam 404 até reiniciar).
+- ✅ **Frontend**: `urlMiniatura()` em cards, listas, cabeçalhos de ficha e grade do admin; upload
+  aceita 15MB.
+
+### Ganho medido (benchmark com o código de produção)
+- 14 fotos reais já enviadas: **3,03 MB → 558 KB** nas principais (−82%) e **237 KB** nas
+  miniaturas (−92%) — é o peso das fotos da página `/adotar` com esse acervo.
+- Fotos de câmera de celular (12 MP, JPEG q95 + EXIF): **11,3 MB → 935 KB** (−92%) nas
+  principais e **113 KB** nas miniaturas (−99%). ~0,6 s de processamento por foto de 12 MP.
+- Ponta a ponta via API: upload de 4 MB salvo como 222 KB + 26 KB, servido como `image/webp` com o
+  cache longo; GPS removido e rotação aplicada conferidos; conversão de fotos antigas testada em
+  banco descartável (14 convertidas, externa ignorada, 2ª execução sem alterações).
+
+### Decisões de projeto
+- ImageSharp **3.1.x, não 4.x**: a 4.x exige chave de licença validada no build (Release falha sem
+  ela). A 3.1.x é Apache 2.0 para organização sem fins lucrativos.
+- Miniatura por **convenção de nome**, sem coluna nova: banco e contrato da API intactos.
+- WebP já pequeno pode crescer um pouco ao ser reprocessado (visto: 42 → 49 KB numa foto de
+  601×510) — aceito, porque a remoção de metadados exige regravar o arquivo.
+
+### Ajuste pós-entrega (carrossel grande da home)
+- Fotos ficavam borradas no carrossel do desktop: o acervo atual é 800×600 (originais já
+  pequenos) e o carrossel pede ~1600px reais em tela com escala de 150%. Principal das fotos novas
+  passou para **2048px / WebP q85** (~290 KB médio numa foto de 12 MP, ainda −84% do original). Fotos
+  antigas não recuperam detalhe: no desktop, a home detecta a falta de resolução e mostra a foto
+  inteira sobre um fundo desfocado dela mesma, em vez de esticar. Recomendado: reenviar as fotos
+  originais do celular.
+- ⚠️ **Segurança:** a ImageSharp 3.1.12 tem 5 vulnerabilidades conhecidas (3 altas, 2 médias),
+  corrigidas só na 4.1.2. Exposição real: HistogramEqualization e codificadores TIFF não são usados;
+  BigTIFF bloqueado restringindo a decodificação a JPEG/PNG/WebP/GIF; **resta** ICC malicioso (média,
+  DoS por memória), só por funcionário logado. Pendente decidir: ImageSharp 4.x com chave de
+  licença da Six Labors, ou trocar de biblioteca (ex.: SkiaSharp, MIT).
+
+### Troca para NetVips (libvips) ✅
+- ✅ `OtimizadorImagens` reescrito com **NetVips 3.2 / libvips 8.18** (MIT + LGPL, open source);
+  ImageSharp removida — `dotnet list package --vulnerable` sem nenhum pacote vulnerável.
+- ✅ Mesmo comportamento: 2 versões WebP, rotação, sem metadados (GPS), cor convertida para sRGB
+  (antes só preservava o ICC), GIF estático, limite de megapixels, só JPEG/PNG/WebP/GIF (agora
+  bloqueado na própria libvips — o TIFF nem chega a ser interpretado).
+- ✅ **Novo:** JPEG truncado (upload interrompido) é recusado — a ImageSharp e a libvips padrão
+  aceitavam e completavam com cinza.
+- **Medido** (mesmas fotos e código): **2,3–2,8× mais rápida** (fotos reais 237 → 86 ms; 12 MP em
+  2048px 975 → 427 ms); tamanhos equivalentes (principal de 12 MP +8% em 2048/q85, miniaturas iguais).
+- ✅ Testado no **Docker** (imagem real, Release, Ubuntu 24.04): upload de 4 MB → 631 KB + 27 KB,
+  truncado e TIFF disfarçado recusados. Imagem da API: 346 → 404 MB (libvips nativa; ~19 MB são a
+  versão Windows, removível publicando com `-r linux-x64`).
+
+---
+
+## Fase 23 - Imagens responsivas (escada de larguras + srcset) ✅ CONCLUÍDA
+
+### Entregáveis
+- ✅ **Backend:** cada foto vira `{guid}-{largura}.webp` em **480/800/1200/1600/2048** (por largura,
+  só até a largura da original); coluna `fotos.larguras INTEGER[]` (script `010`, também no `000` e
+  no compose); DTOs com `Larguras`/`FotoPrincipalLarguras`/`FotoAnimalLarguras`; foto principal por
+  `LEFT JOIN LATERAL`; geração com **1 decodificação** (−24% de tempo em 12 MP); conversão
+  automática das fotos antigas (formatos das Fases 10 e 22) ao iniciar a API.
+- ✅ **Front:** diretiva `appFoto` (src + srcset; o navegador escolhe pela tela) em todas as fotos,
+  com `sizes` medido por tela; prioridade de carregamento só na imagem LCP; carrossel monta só o
+  slide atual e os vizinhos; rodapé estável (`min-height` no `<main>`). Catalogado no `/styleguide`.
+- ✅ **Infra:** Dockerfile publica `-r linux-x64` (só a libvips de Linux) e `.dockerignore` deixa
+  de embutir `wwwroot/uploads/` do desenvolvimento — imagem 404 → 374 MB. Compose monta 001–010
+  (antes faltavam 007–009).
+
+### Como foi medido
+Ambiente isolado (cópia do banco de dev em Postgres descartável + cópia das fotos + 6 fotos de
+câmera de 12 MP como foto principal), build de **produção** do front, **Lighthouse 12** (celular:
+Moto G simulado em 4G lento; computador: preset desktop), home e `/adotar`, média de 2 execuções.
+
+| Página / perfil | Nota antes → depois (→ c/ gzip) | LCP antes → depois (→ c/ gzip) | Fotos antes → depois | CLS antes → depois |
+|---|---|---|---|---|
+| Home / celular | 55 → 63 (→ 79) | 13,5 → 9,0 s (→ 4,8 s) | 1.632 → 251 KB | 0,20 → 0,01 |
+| Home / computador | 78 → 89 (→ 98) | 2,5 → 2,0 s (→ 1,2 s) | 1.195 → 523 KB | 0,15 → 0,00 |
+| /adotar / celular | 52 → 63 (→ 79) | 8,1 → 8,5 s (→ 4,5 s) | 134 → 203 KB* | 0,21 → 0,02 |
+| /adotar / computador | 88 → 92 (→ 98) | 1,5 → 1,7 s (→ 1,0 s) | 134 → 203 KB* | 0,15 → 0,00 |
+
+\* Mais KB que a miniatura antiga porque a foto agora é a certa para a tela (antes, 360px de largura
+em foto em pé, borrada no celular e no desktop). "c/ gzip" = mesmo build servido com compressão,
+como um servidor de produção faz — o JS cai de ~1 MB para ~350 KB e é o que mais pesa no celular.
+
+### Decisões de projeto
+- A 1ª versão da escada era por **lado maior** (480/960/1440/2048): numa foto em pé as larguras
+  viravam 360/720/1080 e o celular do teste (precisa de 721px) pulava para 1080 — o `/adotar` no
+  celular ficou **mais pesado** que antes (972 KB × 134 KB). Corrigido com a escada por largura e
+  mais degraus, `sizes` real do card e prioridade alta só no 1º card.
+- Mudar `TamanhosPx` não reprocessa fotos já convertidas (só `larguras` vazio).
+- Card de `/adotar` declara `sizes` 50vw na coluna única do celular (densidade efetiva ~1,5×):
+  com 100vw os 7 cards (todos dentro da distância de pré-carregamento) baixavam a de 800px cada
+  (~700 KB) e atrasavam o LCP no 4G. O carrossel da home mantém a densidade total.
+- **Pendente (deploy):** servir o front com compressão (gzip/brotli) — é o maior ganho restante no
+  celular (nota 63 → 79), configuração do servidor/CDN que hospedar o front.
+
+---
+
+## Fase 24 - Configurações da ONG (painel de customização) 🚧 EM ANDAMENTO
+
+Objetivo: cada ONG customiza o sistema sem mexer em código — ex.: ONG só de gatos (espécies
+atendidas, sem porte), dados reais de contato/identidade, textos da home, regras de adoção.
+
+### Entregáveis
+- ✅ **Banco:** script `011_criar_tabela_configuracoes_ong.sql` — tabela de **linha única**
+  (`id` fixo em 1 + `CHECK`), colunas tipadas com `CHECK` (espécies restritas ao enum, WhatsApp só
+  dígitos, status do devolvido `EmTratamento`/`Disponivel`), listas de conteúdo em `JSONB`; linha
+  inicial = comportamento atual. Categoria de auditoria `Configuracao` (CHECK recriado no `011`;
+  `009` atualizado para banco novo). No `000` e no compose.
+- ✅ **Backend:** `ConfiguracaoOngModel`, DTOs (`Publica`, `Resposta` (Admin), `Update`,
+  `PassoAdocaoDto`, `FormaAjudarDto`), `ConfiguracaoModulo`, `ConfiguracaoController`
+  (`GET /publica` público; `GET`/`PUT` Admin). Permissão em **duas camadas**: `[Authorize(Roles =
+  Admin)]` + revalidação do perfil **no banco** (`AcessoNegadoException` → 404, auditado como
+  `AcessoAdminNegado`). Alterações auditadas campo a campo (`ConfiguracaoAtualizada`).
+- ⏳ **Aplicar nas regras:** `AnimalModulo` recusar espécie desativada; `animais.porte` aceitar
+  `NULL` para espécies sem porte; `AdocaoModulo` respeitar `aceitar_candidaturas`,
+  `multiplas_candidaturas`, `recusar_pendentes_ao_concluir`, `status_animal_devolvido` e
+  `telefone_obrigatorio`.
+- ✅ **Frontend (1ª etapa — Identidade/contato + Página inicial):** client regenerado;
+  `ConfiguracaoOngService` carregado no `provideAppInitializer` (substitui o `ong.config.ts`,
+  removido) + `TituloOngStrategy` (nome da ONG no título das abas); home, cabeçalho, rodapé,
+  sidenav e página do animal leem a configuração (contato vazio some; bloco **"Doe"** com PIX e
+  botão copiar). Tela `/admin/configuracoes` (`adminGuard`, só Admin no menu) com abas,
+  listas editáveis de passos/cards e barra de Salvar fixa. Rótulos de auditoria novos.
+  Testado em ambiente isolado com Chrome headless (22 verificações: carregar, editar, salvar,
+  validação levando à aba com erro, desfazer, reflexo na home desktop/celular, sem erro de JS).
+- ✅ **Máscara de telefone** (`appTelefone` + `telefoneValidator`) nos 3 campos de telefone.
+- ✅ **Aparência (2ª etapa):** script `012` (`paleta`, `logo_larguras`, `favicon_url`,
+  `icone_app_url`); enum `PaletaCores`; logo por upload (`POST`/`DELETE /api/configuracao/logo`,
+  Admin + revalidação no banco antes de gravar arquivo) — escada WebP + favicon PNG 64 + ícone de
+  atalho PNG 180 gerados pela libvips (`GerarIconesAsync`: quadrado, fundo transparente, sem
+  cortar); arquivo antigo apagado só depois do commit. Front: aba "Aparência" com upload do logo
+  e 5 paletas prontas (`core/config/paletas.ts` — tokens `--cor-*` + variáveis `--mat-sys-*`,
+  contraste WCAG conferido) com **prévia ao vivo**; `app-logo-ong` no cabeçalho/painel/rodapé;
+  favicon e `theme-color` trocados em tempo real. Catalogado no `/styleguide`. Testado: 30
+  verificações na API (permissões, PNG 64×64 RGBA, troca/remoção limpam arquivos, inválidos sem
+  órfão, Admin rebaixado não grava arquivo) + 23 no navegador (upload, favicon, prévia e
+  descarte ao sair, salvar, recarregar, remover). Decisão: **paletas prontas** em vez de cor livre
+  (garante contraste e identidade); título do site = nome da ONG.
+- ⚠️ **Contraste da Kraft (anterior):** `--cor-primaria-escura` #b97d1f como texto tem 3,4:1 sobre o
+  fundo (mínimo 4,5) — não alterado para não mudar a identidade sem decisão.
+- ⏳ **Próximas abas:** página do animal (selos, WhatsApp, consentimento LGPD), painel (módulo de
+  vacinas, dias do alerta), animais/adoção (dependem do item "Aplicar nas regras"), imagem padrão
+  por upload.
+- ⚠️ **Fuso horário (problema anterior a esta fase):** colunas `TIMESTAMP` sem fuso + Postgres do
+  Docker em UTC → datas com hora aparecem 3h adiantadas no front (auditoria, "última alteração"
+  das configurações).
+
+### Como foi testado
+Postgres descartável (scripts 001–011) + API apontando para ele, 35 verificações ponta a ponta:
+sem token → 401; Comum → 404 no GET e no PUT (antes da validação); Admin → 200; resposta pública
+sem regras internas e só com cards ativos; normalizações; 13 casos de 400 (bool ausente, status
+`Adotado`, espécie vazia/inexistente, rota `//host` e `javascript:`, card com 0 ou 2 destinos,
+email/WhatsApp/URL inválidos, limites); Admin **rebaixado ou desativado no banco com token ainda
+válido** → 404 e configuração intacta, 3 eventos `AcessoAdminNegado` na auditoria.
+
+### Decisões de projeto
+- Linha única com colunas tipadas (não chave-valor): o banco valida cada opção com `CHECK` e o
+  Dapper mapeia direto para o Model.
+- Infraestrutura (JWT, CORS, rate limit, limites de upload, telemetria) **não** entra — fica no
+  `appsettings.json` com quem hospeda.
+- `og:*` do `index.html` são estáticas: trocar nome/imagem pelo painel não muda o preview de link
+  no WhatsApp/Facebook sem SSR.
+
+---
+
 ## 12. Padrões e Boas Práticas
 
 ### Código
@@ -955,4 +1232,4 @@ Ao final da fase inicial, o projeto deverá ter:
 - Migrations/versionamento de banco
 - Testes de integração
 - Cache
-- Observabilidade/telemetria
+- Observabilidade/telemetria — ✅ backend feito na Fase 21 (OpenTelemetry); falta analytics do site (Umami) e alertas de erro (Sentry)

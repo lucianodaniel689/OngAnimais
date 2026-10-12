@@ -38,8 +38,13 @@ import { FooterComponent } from '@app/layout/footer/footer.component';
         flex-direction: column;
         min-height: 100vh;
       }
+      // min-height de uma tela: enquanto a página (rota lazy) ainda está carregando, o <main> fica
+      // vazio e o rodapé apareceria no meio da tela, sendo empurrado para baixo quando o conteúdo
+      // chega — era 90% do CLS (deslocamento de layout) medido pelo Lighthouse. Assim o rodapé já
+      // nasce abaixo da dobra.
       .conteudo {
         flex: 1 0 auto;
+        min-height: 100vh;
       }
       // Fica acima do header (sticky, z-index: 50) para ser visível em qualquer
       // rota — inclusive nas trocas de aba dentro do /admin.

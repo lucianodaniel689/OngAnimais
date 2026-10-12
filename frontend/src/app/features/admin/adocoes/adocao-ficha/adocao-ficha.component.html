@@ -1,0 +1,156 @@
+<div class="adocao-ficha">
+  <header class="adocao-ficha__topo">
+    <a mat-icon-button [routerLink]="linkVoltar()" [queryParams]="queryParamsVoltar()" aria-label="Voltar">
+      <mat-icon>arrow_back</mat-icon>
+    </a>
+    <h1>Candidatura de adoção</h1>
+  </header>
+
+  @if (carregando()) {
+    <app-loading />
+  } @else if (erro()) {
+    <p class="mensagem-erro" role="alert">{{ erro() }}</p>
+  } @else {
+    @if (adocao(); as a) {
+      @if (a.status) {
+        <div class="adocao-ficha__status-faixa" [class]="classeStatus(a.status)">
+          <mat-icon>{{ iconeStatus(a.status) }}</mat-icon>
+          <span>{{ rotuloStatus[a.status] }}</span>
+        </div>
+      }
+
+      <mat-card appearance="outlined" class="adocao-ficha__cabecalho etiqueta">
+        @if (a.fotoAnimalUrl) {
+          <img
+            class="adocao-ficha__foto"
+            [appFoto]="a.fotoAnimalUrl"
+            [larguras]="a.fotoAnimalLarguras"
+            sizes="72px"
+            [alt]="'Foto de ' + a.nomeAnimal"
+          />
+        } @else {
+          <div class="adocao-ficha__foto adocao-ficha__foto--vazia" aria-hidden="true">
+            <mat-icon>pets</mat-icon>
+          </div>
+        }
+
+        <div class="adocao-ficha__identidade">
+          <div class="adocao-ficha__nome-linha">
+            <h2>{{ a.nomeAnimal }}</h2>
+          </div>
+          <p class="adocao-ficha__meta">
+            Solicitado em {{ a.dataSolicitacao | date: 'dd/MM/yyyy' }}
+            @if (a.dataConclusao) {
+              · Concluído em {{ a.dataConclusao | date: 'dd/MM/yyyy' }}
+            }
+          </p>
+        </div>
+
+        <div class="adocao-ficha__acoes">
+          <a
+            mat-stroked-button
+            [routerLink]="['/admin/animais', a.animalId]"
+            [queryParams]="{ aba: 'candidaturas' }"
+          >
+            <mat-icon>pets</mat-icon>
+            Ver animal
+          </a>
+          <button mat-flat-button color="primary" type="button" (click)="alterarStatus()">
+            <mat-icon>sync_alt</mat-icon>
+            Alterar status
+          </button>
+        </div>
+      </mat-card>
+
+      <mat-card appearance="outlined" class="adocao-ficha__card">
+        <mat-tab-group
+          [selectedIndex]="abaSelecionada()"
+          (selectedIndexChange)="aoTrocarAba($event)"
+          [mat-stretch-tabs]="false"
+        >
+          <mat-tab label="Candidatura">
+            <div class="adocao-ficha__aba">
+              <h3>Observações do adotante</h3>
+              @if (a.observacoes) {
+                <p class="adocao-ficha__observacoes">{{ a.observacoes }}</p>
+              } @else {
+                <p class="adocao-ficha__vazio">Nenhuma observação registrada.</p>
+              }
+
+              <hr class="etiqueta__separador" />
+
+              <dl class="adocao-ficha__detalhes">
+                <div>
+                  <dt>Solicitado em</dt>
+                  <dd>{{ a.dataSolicitacao | date: 'dd/MM/yyyy' }}</dd>
+                </div>
+                @if (a.dataConclusao) {
+                  <div>
+                    <dt>Concluído em</dt>
+                    <dd>{{ a.dataConclusao | date: 'dd/MM/yyyy' }}</dd>
+                  </div>
+                }
+                @if (a.foiDevolvida) {
+                  <div>
+                    <dt>Devolução</dt>
+                    <dd>Sim — animal devolvido após a conclusão</dd>
+                  </div>
+                }
+              </dl>
+            </div>
+          </mat-tab>
+
+          <mat-tab label="Adotante">
+            <div class="adocao-ficha__aba">
+              <h3>{{ a.nomeAdotante }}</h3>
+              <p class="adocao-ficha__contato">{{ a.emailAdotante }} · {{ a.telefoneAdotante }}</p>
+
+              <hr class="etiqueta__separador" />
+
+              <h4>Histórico de candidaturas</h4>
+
+              @if (devolucoes() > 0) {
+                <p class="adocao-ficha__alerta" role="alert">
+                  <mat-icon>warning</mat-icon>
+                  Este adotante já devolveu {{ devolucoes() }}
+                  {{ devolucoes() === 1 ? 'animal' : 'animais' }} após a adoção.
+                </p>
+              }
+
+              @if (historico().length === 0) {
+                <p class="adocao-ficha__vazio">Nenhuma candidatura registrada para este adotante.</p>
+              } @else {
+                <ul class="adocao-ficha__lista">
+                  @for (c of historico(); track c.id) {
+                    <li class="adocao-ficha__item">
+                      <div class="adocao-ficha__item-info">
+                        @if (c.id === a.id) {
+                          <span class="adocao-ficha__link-animal adocao-ficha__link-animal--atual">
+                            {{ c.nomeAnimal }} (esta candidatura)
+                          </span>
+                        } @else {
+                          <a class="adocao-ficha__link-animal" [routerLink]="['/admin/adocoes', c.id]">
+                            {{ c.nomeAnimal }}
+                          </a>
+                        }
+                        <span class="adocao-ficha__data">{{ c.dataSolicitacao | date: 'dd/MM/yyyy' }}</span>
+                      </div>
+                      <div class="adocao-ficha__item-status">
+                        @if (c.status) {
+                          <app-status-adocao-badge [status]="c.status" />
+                        }
+                        @if (c.foiDevolvida) {
+                          <span class="adocao-ficha__devolucao">Devolução</span>
+                        }
+                      </div>
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+          </mat-tab>
+        </mat-tab-group>
+      </mat-card>
+    }
+  }
+</div>

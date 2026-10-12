@@ -1,6 +1,7 @@
+// Largura, cards, erro, campos e ações vêm das classes globais de `styles/_padroes.scss`.
+// Aqui fica só o que é desta página: dois cards empilhados com o cabeçalho acima.
+
 .perfil {
-  max-width: 560px;
-  margin-inline: auto;
   display: flex;
   flex-direction: column;
   gap: var(--esp-5);
@@ -20,41 +21,7 @@
   color: var(--cor-texto-suave);
 }
 
-.perfil__card {
-  padding: var(--esp-5);
-}
-
 .perfil__card h2 {
   margin: 0 0 var(--esp-4);
   font-size: var(--texto-lg);
-}
-
-.perfil__erro {
-  margin: 0 0 var(--esp-4);
-  padding: var(--esp-2) var(--esp-3);
-  border-radius: var(--raio-sm);
-  background-color: var(--cor-perigo-bg);
-  color: var(--cor-perigo);
-  font-size: var(--texto-sm);
-}
-
-.perfil__form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--esp-2);
-}
-
-.perfil__form mat-form-field {
-  width: 100%;
-}
-
-.perfil__acoes {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: var(--esp-2);
-}
-
-.perfil__acoes mat-progress-spinner {
-  margin-inline: auto;
-  --mdc-circular-progress-active-indicator-color: currentColor;
 }

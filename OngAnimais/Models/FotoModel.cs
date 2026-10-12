@@ -18,9 +18,16 @@ namespace OngAnimais.Models
         public int AnimalId { get; set; }
 
         /// <summary>
-        /// URL/caminho da imagem.
+        /// URL/caminho da imagem — a maior largura gerada (<c>/uploads/animais/{guid}-{largura}.webp</c>).
         /// </summary>
         public string Url { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Larguras reais (px) disponíveis em disco, em ordem crescente — uma por arquivo
+        /// <c>{guid}-{largura}.webp</c>. Vazio = foto salva no formato antigo (antes da Fase 23).
+        /// Mapeado para a coluna 'larguras' (INTEGER[]) no banco.
+        /// </summary>
+        public int[] Larguras { get; set; } = [];
 
         /// <summary>
         /// Descrição/legenda da foto.

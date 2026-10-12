@@ -9,11 +9,21 @@
   (keydown.space)="$event.preventDefault(); abrirModal()"
 >
   <div class="animal-card__midia">
+    <!-- sizes = largura do card na grade de /adotar: 4 colunas (≥1024px, ~260px cada no container
+         de 1120px), 3 (≥768px), 2 (≥480px). Na coluna única do celular o card ocupa ~100vw, mas o
+         sizes declara 50vw DE PROPÓSITO: limita a densidade efetiva a ~1,5× — celular comum baixa a
+         de 480px em vez da de 800px. Medido: com 100vw os 7 cards (todos dentro da distância de
+         pré-carregamento numa coluna) somavam ~700 KB e atrasavam a 1ª foto (LCP) no 4G. Foto de
+         card não precisa da densidade total; o carrossel da home continua com ela. -->
     <img
       mat-card-image
-      [src]="imagem()"
+      [appFoto]="animal().fotoPrincipalUrl"
+      [larguras]="animal().fotoPrincipalLarguras"
+      [fotoPadrao]="fotoPadrao"
+      sizes="(min-width: 1024px) 270px, (min-width: 768px) 33vw, 50vw"
       [alt]="'Foto de ' + animal().nome"
-      loading="lazy"
+      [attr.loading]="prioridade() === 'adiada' ? 'lazy' : null"
+      [attr.fetchpriority]="prioridade() === 'alta' ? 'high' : null"
     />
     @if (animal().status; as status) {
       <div class="animal-card__status">

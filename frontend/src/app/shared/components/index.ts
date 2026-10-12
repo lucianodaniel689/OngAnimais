@@ -10,3 +10,8 @@ export * from './confirm-dialog/confirm-dialog.component';
 export * from './upload-imagens/upload-imagens.component';
 export * from './stat-tile/stat-tile.component';
 export * from './loading/loading.component';
+export * from './selo/selo.component';
+export * from './avatar-iniciais/avatar-iniciais.component';
+export * from './foto-responsiva/foto-responsiva.directive';
+export * from './mascara-telefone/mascara-telefone.directive';
+export * from './logo-ong/logo-ong.component';

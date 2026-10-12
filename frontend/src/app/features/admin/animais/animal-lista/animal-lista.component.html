@@ -1,8 +1,11 @@
-<div class="animal-lista">
-  <header class="animal-lista__cabecalho">
+<div class="pagina">
+  <header class="pagina-cabecalho">
     <div>
       <h1>Animais cadastrados</h1>
-      <p>Clique no nome para abrir a ficha completa, ou edite os dados do cadastro.</p>
+      <p class="instrucao-toque">
+        <mat-icon>touch_app</mat-icon>
+        Toque em um animal da lista para ver e editar a ficha completa.
+      </p>
     </div>
     <a mat-flat-button color="primary" routerLink="/admin/animais/novo">
       <mat-icon>add</mat-icon>
@@ -10,12 +13,12 @@
     </a>
   </header>
 
-  <mat-card appearance="outlined" class="animal-lista__card">
+  <mat-card appearance="outlined" class="card-conteudo">
     @if (mobile()) {
       <button
         mat-stroked-button
         type="button"
-        class="animal-lista__filtros-toggle"
+        class="filtros-toggle"
         [attr.aria-expanded]="filtrosAbertos()"
         (click)="filtrosAbertos.set(!filtrosAbertos())"
       >
@@ -25,7 +28,7 @@
     }
 
     @if (!mobile() || filtrosAbertos()) {
-    <form [formGroup]="filtros" class="animal-lista__filtros">
+    <form [formGroup]="filtros" class="filtros animal-lista__filtros">
       <mat-form-field appearance="outline">
         <mat-label>Buscar por nome</mat-label>
         <mat-icon matPrefix>search</mat-icon>
@@ -68,13 +71,13 @@
     </form>
     }
 
-    <div class="animal-lista__tabela-wrapper">
+    <div class="tabela-wrapper">
       @if (carregando()) {
         <app-loading />
       } @else if (erro()) {
-        <p class="animal-lista__erro" role="alert">{{ erro() }}</p>
+        <p class="mensagem-erro" role="alert">{{ erro() }}</p>
       } @else if (semResultados()) {
-        <p class="animal-lista__vazio">Nenhum animal encontrado com esses filtros.</p>
+        <p class="estado-vazio">Nenhum animal encontrado com esses filtros.</p>
       } @else {
         <table
           mat-table
@@ -83,15 +86,17 @@
           [matSortActive]="ordenarPor()"
           [matSortDirection]="descendente() ? 'desc' : 'asc'"
           (matSortChange)="aoOrdenar($event)"
-          class="animal-lista__tabela"
+          class="animal-lista__tabela tabela-clicavel"
         >
           <ng-container matColumnDef="foto">
             <th mat-header-cell *matHeaderCellDef aria-label="Foto"></th>
             <td mat-cell *matCellDef="let a">
-              @if (urlFoto(a.fotoPrincipalUrl)) {
+              @if (a.fotoPrincipalUrl) {
                 <img
                   class="animal-lista__miniatura"
-                  [src]="urlFoto(a.fotoPrincipalUrl)"
+                  [appFoto]="a.fotoPrincipalUrl"
+            [larguras]="a.fotoPrincipalLarguras"
+            sizes="48px"
                   [alt]="'Foto de ' + a.nome"
                   loading="lazy"
                 />
@@ -110,6 +115,7 @@
                 class="animal-lista__link-ficha"
                 [routerLink]="['/admin/animais', a.id]"
                 matTooltip="Abrir ficha completa"
+                (click)="$event.stopPropagation()"
               >
                 {{ a.nome }}
               </a>
@@ -123,6 +129,7 @@
                     ' candidatura' + (a.candidaturasPendentes > 1 ? 's' : '') +
                     ' de adoção pendente' + (a.candidaturasPendentes > 1 ? 's' : '')
                   "
+                  (click)="$event.stopPropagation()"
                 >
                   <mat-icon>volunteer_activism</mat-icon>
                   {{ a.candidaturasPendentes }}
@@ -173,31 +180,12 @@
             </td>
           </ng-container>
 
-          <ng-container matColumnDef="acoes" stickyEnd>
-            <th mat-header-cell *matHeaderCellDef aria-label="Ações"></th>
-            <td mat-cell *matCellDef="let a">
-              <a
-                mat-icon-button
-                [routerLink]="['/admin/animais', a.id]"
-                aria-label="Ficha completa"
-                matTooltip="Ficha completa"
-              >
-                <mat-icon>badge</mat-icon>
-              </a>
-              <a
-                mat-icon-button
-                [routerLink]="['/admin/animais', a.id]"
-                [queryParams]="{ editar: 1 }"
-                aria-label="Editar"
-                matTooltip="Editar"
-              >
-                <mat-icon>edit</mat-icon>
-              </a>
-            </td>
-          </ng-container>
-
           <tr mat-header-row *matHeaderRowDef="colunas()"></tr>
-          <tr mat-row *matRowDef="let row; columns: colunas()"></tr>
+          <tr
+            mat-row
+            *matRowDef="let row; columns: colunas()"
+            (click)="abrirFicha(row.id)"
+          ></tr>
         </table>
       }
     </div>

@@ -1,17 +1,17 @@
-<div class="adocao-form">
-  <header class="adocao-form__cabecalho">
+<div class="pagina pagina--estreita">
+  <header class="pagina-cabecalho pagina-cabecalho--voltar">
     <a mat-icon-button [routerLink]="linkVoltar()" [queryParams]="queryParamsVoltar()" aria-label="Voltar">
       <mat-icon>arrow_back</mat-icon>
     </a>
     <h1>Nova solicitação de adoção</h1>
   </header>
 
-  <mat-card appearance="outlined" class="adocao-form__card">
+  <mat-card appearance="outlined" class="card-conteudo card-conteudo--form">
     @if (carregandoOpcoes()) {
       <app-loading [tamanho]="36" />
     } @else {
       @if (erro(); as msg) {
-        <p class="adocao-form__erro" role="alert">{{ msg }}</p>
+        <p class="mensagem-erro" role="alert">{{ msg }}</p>
       }
 
       @if (animaisDisponiveis().length === 0) {
@@ -19,7 +19,7 @@
           Não há animais disponíveis para adoção no momento.
         </p>
       } @else {
-        <form [formGroup]="form" (ngSubmit)="enviar()" class="adocao-form__form">
+        <form [formGroup]="form" (ngSubmit)="enviar()" class="form-coluna">
           <mat-form-field appearance="outline">
             <mat-label>Animal</mat-label>
             <mat-select formControlName="animalId">
@@ -52,9 +52,11 @@
 
           <mat-form-field appearance="outline">
             <mat-label>Telefone</mat-label>
-            <input matInput formControlName="telefone" placeholder="(11) 91234-5678" maxlength="20" />
+            <input matInput formControlName="telefone" appTelefone placeholder="(11) 91234-5678" maxlength="20" />
             @if (form.controls.telefone.hasError('required')) {
               <mat-error>Informe o telefone.</mat-error>
+            } @else if (form.controls.telefone.hasError('telefone')) {
+              <mat-error>Informe o telefone completo, com DDD.</mat-error>
             }
           </mat-form-field>
 
@@ -68,7 +70,7 @@
             ></textarea>
           </mat-form-field>
 
-          <div class="adocao-form__acoes">
+          <div class="form-acoes">
             <a mat-stroked-button [routerLink]="linkVoltar()" [queryParams]="queryParamsVoltar()" type="button">Cancelar</a>
             <button mat-flat-button color="primary" type="submit" [disabled]="carregando()">
               @if (carregando()) {

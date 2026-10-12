@@ -16,7 +16,7 @@ import {
   UploadImagensComponent,
 } from '@app/shared/components';
 import { mensagemErro } from '@app/core/http/error.interceptor';
-import { urlMidia } from '@app/core/http/media-url.util';
+import { FotoResponsivaDirective } from '@app/shared/components/foto-responsiva/foto-responsiva.directive';
 
 /**
  * Galeria de fotos de um animal, embutida na aba Fotos da ficha
@@ -29,6 +29,7 @@ import { urlMidia } from '@app/core/http/media-url.util';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    FotoResponsivaDirective,
     MatButtonModule,
     MatIconModule,
     MatChipsModule,
@@ -51,7 +52,6 @@ export class AnimalFotosComponent {
   readonly carregando = signal(true);
   readonly progresso = signal<{ atual: number; total: number } | null>(null);
 
-  readonly urlFoto = urlMidia;
 
   constructor() {
     effect(() => this.carregar(this.animalId()));

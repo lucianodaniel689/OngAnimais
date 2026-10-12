@@ -150,6 +150,14 @@ h3 { font-size: var(--texto-lg); }
   transform: translateY(0);
 }
 
+// Spinner de "salvando..." dentro de um botão (`<mat-progress-spinner diameter="20">` no
+// lugar do texto): centralizado e na cor do texto do botão — senão sai na cor primária
+// do tema e some sobre o botão primário. Vale para todo botão; não repita no componente.
+.mat-mdc-button-base mat-progress-spinner {
+  margin-inline: auto;
+  --mdc-circular-progress-active-indicator-color: currentColor;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hover-elevar,
   .mat-mdc-button-base {
@@ -173,6 +181,33 @@ h3 { font-size: var(--texto-lg); }
   --mdc-filled-button-label-text-color: #fff;
   --mat-filled-button-state-layer-color: #fff;
   --mat-filled-button-ripple-color: rgb(255 255 255 / 0.12);
+}
+
+// --- Botão de chamada principal (CTA) ---------------------------------------
+// A ação mais importante de uma página pública (hoje: "Quero adotar" na home). Framboesa
+// (--cor-secundaria, a cor reservada pro destaque), mais alto e com texto maior que um botão
+// comum. Aplique num `mat-flat-button`; no máximo UM por tela — se tudo é destaque, nada é.
+.botao-cta {
+  --mdc-filled-button-container-color: var(--cor-secundaria);
+  --mdc-filled-button-label-text-color: var(--cor-texto-inverso);
+  --mdc-filled-button-container-height: 56px;
+  --mdc-filled-button-label-text-size: var(--texto-lg);
+  --mdc-filled-button-label-text-weight: var(--peso-bold);
+  --mat-filled-button-horizontal-padding: var(--esp-6);
+  --mat-filled-button-state-layer-color: var(--cor-texto-inverso);
+  --mat-filled-button-ripple-color: rgb(255 255 255 / 0.16);
+  --mat-filled-button-icon-spacing: var(--esp-2);
+  box-shadow: var(--sombra-md);
+}
+
+.botao-cta:hover {
+  --mdc-filled-button-container-color: var(--cor-secundaria-escura);
+}
+
+.botao-cta mat-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 1.5rem;
 }
 
 // --- Assinatura: etiqueta de canil ------------------------------------------

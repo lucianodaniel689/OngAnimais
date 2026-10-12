@@ -27,7 +27,8 @@ CREATE TABLE IF NOT EXISTS auditoria (
 
     CONSTRAINT fk_auditoria_usuario FOREIGN KEY (usuario_id)
         REFERENCES usuarios(id) ON DELETE SET NULL,
-    CONSTRAINT chk_auditoria_categoria CHECK (categoria IN ('Seguranca', 'Adocao', 'Animal', 'Usuario'))
+    -- 'Configuracao' entrou com o script 011 (que também atualiza este CHECK em banco existente).
+    CONSTRAINT chk_auditoria_categoria CHECK (categoria IN ('Seguranca', 'Adocao', 'Animal', 'Usuario', 'Configuracao'))
 );
 
 -- Índices para os filtros da tela de auditoria (categoria, funcionário, período)

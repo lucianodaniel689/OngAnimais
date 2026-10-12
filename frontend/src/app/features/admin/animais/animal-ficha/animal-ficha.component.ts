@@ -29,6 +29,7 @@ import {
   AdocaoService,
   AnimalRespostaDto,
   AnimalService,
+  AnimalVinculosDto,
   EspecieAnimal,
   PorteAnimal,
   SexoAnimal,
@@ -48,10 +49,11 @@ import {
   STATUS_ANIMAL,
 } from '@app/core/models';
 import { mensagemErro } from '@app/core/http/error.interceptor';
-import { urlMidia } from '@app/core/http/media-url.util';
+import { FotoResponsivaDirective } from '@app/shared/components/foto-responsiva/foto-responsiva.directive';
 import {
   ConfirmDialogComponent,
   ConfirmDialogData,
+  ConfirmDialogItem,
   LoadingComponent,
   StatusAdocaoBadgeComponent,
   StatusAnimalBadgeComponent,
@@ -62,7 +64,6 @@ import {
   AdocaoStatusDialogComponent,
   AdocaoStatusDialogResultado,
 } from '../../adocoes/adocao-status-dialog/adocao-status-dialog.component';
-import { AdotanteHistoricoDialogComponent } from '../../adocoes/adotante-historico-dialog/adotante-historico-dialog.component';
 
 /** Abas da ficha, na ordem em que aparecem. O nome é persistido no query param `?aba=`. */
 const ABAS = ['resumo', 'fotos', 'vacinas', 'candidaturas'] as const;
@@ -84,6 +85,7 @@ const ABAS = ['resumo', 'fotos', 'vacinas', 'candidaturas'] as const;
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    FotoResponsivaDirective,
     DatePipe,
     RouterLink,
     ReactiveFormsModule,
@@ -146,7 +148,6 @@ export class AnimalFichaComponent {
   readonly rotuloSexo = ROTULO_SEXO;
   readonly rotuloPorte = ROTULO_PORTE;
   readonly rotuloStatus = ROTULO_STATUS_ANIMAL;
-  readonly urlFoto = urlMidia;
   /** Botão "Registrar candidatura" só aparece para animal disponível (regra do backend). */
   readonly statusDisponivel = StatusAnimal.Disponivel;
 
@@ -331,23 +332,83 @@ export class AnimalFichaComponent {
       });
   }
 
-  /** Abre o diálogo de confirmação antes de excluir — só disponível no modo de edição. */
+  /**
+   * Antes de excluir, consulta o que está vinculado ao animal (adoções, vacinas, fotos).
+   * Sem vínculos, abre a confirmação simples; com vínculos, abre a mesma modal listando o que
+   * será apagado junto — só depois de confirmar a exclusão é feita com `excluirVinculos`.
+   * Só disponível no modo de edição.
+   */
   confirmarExclusao(): void {
+    this.excluindo.set(true);
+    this.erroForm.set(null);
+
+    this.animalService.animalObterVinculos({ id: this.animalId() }).subscribe({
+      next: (r) => {
+        this.excluindo.set(false);
+        this.abrirConfirmacaoExclusao(r.dados ?? {});
+      },
+      error: (err) => {
+        this.excluindo.set(false);
+        this.erroForm.set(mensagemErro(err, 'Não foi possível verificar os vínculos do animal.'));
+      },
+    });
+  }
+
+  private abrirConfirmacaoExclusao(vinculos: AnimalVinculosDto): void {
+    const nome = this.form.controls.nome.value;
+    const itens = this.itensVinculos(vinculos);
+    const temVinculos = itens.length > 0;
+
+    const data: ConfirmDialogData = temVinculos
+      ? {
+          titulo: 'Excluir animal e vínculos',
+          mensagem: `"${nome}" possui registros vinculados. Ao confirmar, tudo isto será excluído junto com o animal:`,
+          itens,
+          rodape: 'Essa ação não pode ser desfeita.',
+          textoConfirmar: 'Excluir tudo',
+          perigoso: true,
+        }
+      : {
+          titulo: 'Excluir animal',
+          mensagem: `Tem certeza que deseja excluir "${nome}"? Essa ação não pode ser desfeita.`,
+          textoConfirmar: 'Excluir',
+          perigoso: true,
+        };
+
     const ref = this.dialog.open(ConfirmDialogComponent, {
-      data: {
-        titulo: 'Excluir animal',
-        mensagem: `Tem certeza que deseja excluir "${this.form.controls.nome.value}"? Essa ação não pode ser desfeita.`,
-        textoConfirmar: 'Excluir',
-        perigoso: true,
-      } satisfies ConfirmDialogData,
-      width: 'min(400px, 92vw)',
+      data: data satisfies ConfirmDialogData,
+      width: temVinculos ? 'min(460px, 92vw)' : 'min(400px, 92vw)',
     });
 
     ref.afterClosed().subscribe((confirmado) => {
       if (confirmado) {
-        this.excluir();
+        this.excluir(temVinculos);
       }
     });
+  }
+
+  /** Linhas da modal de exclusão: só os tipos de vínculo que o animal realmente tem. */
+  private itensVinculos(v: AnimalVinculosDto): ConfirmDialogItem[] {
+    const itens: ConfirmDialogItem[] = [];
+    if (v.adocoes) {
+      itens.push({
+        icone: 'volunteer_activism',
+        texto: `${v.adocoes} ${v.adocoes === 1 ? 'adoção (candidatura)' : 'adoções (candidaturas)'} — o histórico será perdido`,
+      });
+    }
+    if (v.vacinas) {
+      itens.push({
+        icone: 'vaccines',
+        texto: `${v.vacinas} ${v.vacinas === 1 ? 'vacina registrada' : 'vacinas registradas'}`,
+      });
+    }
+    if (v.fotos) {
+      itens.push({
+        icone: 'photo_library',
+        texto: `${v.fotos} ${v.fotos === 1 ? 'foto (o arquivo também é apagado)' : 'fotos (os arquivos também são apagados)'}`,
+      });
+    }
+    return itens;
   }
 
   /** Dose de reforço já vencida (antes de hoje) — destaque em vermelho. */
@@ -365,19 +426,6 @@ export class AnimalFichaComponent {
   }
 
   /** Mesmo fluxo de alterar status da lista de adoções, recarregando a ficha ao final. */
-  /** Abre o histórico de candidaturas do adotante — apoio à decisão de aprovar. */
-  abrirHistoricoAdotante(adocao: AdocaoRespostaDto): void {
-    this.dialog.open(AdotanteHistoricoDialogComponent, {
-      data: {
-        adotanteId: adocao.adotanteId!,
-        nome: adocao.nomeAdotante ?? '',
-        email: adocao.emailAdotante,
-        telefone: adocao.telefoneAdotante,
-      },
-      width: 'min(480px, 92vw)',
-    });
-  }
-
   alterarStatus(adocao: AdocaoRespostaDto): void {
     const ref = this.dialog.open(AdocaoStatusDialogComponent, {
       data: { adocao },
@@ -408,10 +456,10 @@ export class AnimalFichaComponent {
     });
   }
 
-  private excluir(): void {
+  private excluir(excluirVinculos: boolean): void {
     this.excluindo.set(true);
     this.erroForm.set(null);
-    this.animalService.animalExcluir({ id: this.animalId() }).subscribe({
+    this.animalService.animalExcluir({ id: this.animalId(), excluirVinculos }).subscribe({
       next: () => {
         this.snackbar.open('Animal excluído com sucesso.', 'Fechar', { duration: 4000 });
         this.router.navigateByUrl('/admin/animais');
@@ -426,11 +474,16 @@ export class AnimalFichaComponent {
   private carregar(id: number): void {
     this.carregando.set(true);
     this.erro.set(null);
+    // Mensagem do backend: "Animal não encontrado." (404) ou a genérica de erro interno (500).
+    let erroAnimal = 'Não foi possível carregar os dados do animal.';
 
     forkJoin({
       animal: this.animalService.animalObterPorId({ id }).pipe(
         map((r) => r.dados ?? null),
-        catchError(() => of(null)),
+        catchError((err) => {
+          erroAnimal = mensagemErro(err, erroAnimal);
+          return of(null);
+        }),
       ),
       vacinas: this.vacinaService.vacinaListarPorAnimal({ animalId: id }).pipe(
         map((r) => r.dados ?? []),
@@ -450,7 +503,7 @@ export class AnimalFichaComponent {
     }).subscribe(({ animal, vacinas, candidaturas }) => {
       this.carregando.set(false);
       if (!animal) {
-        this.erro.set('Não foi possível carregar os dados do animal.');
+        this.erro.set(erroAnimal);
         return;
       }
       this.animal.set(animal);

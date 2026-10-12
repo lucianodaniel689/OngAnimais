@@ -115,18 +115,43 @@ namespace OngAnimais.Controllers
         }
 
         /// <summary>
-        /// Exclui um animal do sistema.
+        /// Lista o que está vinculado a um animal (adoções, vacinas e fotos) — ou seja, o que
+        /// também seria apagado ao excluí-lo com confirmação.
+        /// </summary>
+        /// <param name="id">ID do animal.</param>
+        /// <returns>Contagem dos registros vinculados.</returns>
+        /// <response code="200">Vínculos retornados com sucesso.</response>
+        /// <response code="404">Animal não encontrado.</response>
+        [HttpGet("{id}/vinculos")]
+        [ProducesResponseType(typeof(ApiResponse<AnimalVinculosDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> ObterVinculos(int id)
+        {
+            var vinculos = await _modulo.ObterVinculosAsync(id);
+
+            if (vinculos is null)
+                return NotFound(ApiResponse<object>.Erro("Animal não encontrado."));
+
+            return Ok(ApiResponse<AnimalVinculosDto>.Ok(vinculos, "Vínculos obtidos com sucesso."));
+        }
+
+        /// <summary>
+        /// Exclui um animal do sistema. Com adoções, vacinas ou fotos vinculadas, só exclui se
+        /// <c>excluirVinculos=true</c> (confirmação explícita) — nesse caso apaga também esses registros.
         /// </summary>
         /// <param name="id">ID do animal a ser excluído.</param>
+        /// <param name="excluirVinculos">Confirma a exclusão dos registros vinculados (adoções, vacinas e fotos).</param>
         /// <returns>Confirmação da exclusão.</returns>
         /// <response code="200">Animal excluído com sucesso.</response>
+        /// <response code="400">Há registros vinculados e a exclusão deles não foi confirmada.</response>
         /// <response code="404">Animal não encontrado.</response>
         [HttpDelete("{id}")]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Excluir(int id)
+        public async Task<IActionResult> Excluir(int id, [FromQuery] bool excluirVinculos = false)
         {
-            var excluido = await _modulo.ExcluirAsync(id);
+            var excluido = await _modulo.ExcluirAsync(id, excluirVinculos);
 
             if (!excluido)
                 return NotFound(ApiResponse<object>.Erro("Animal não encontrado."));

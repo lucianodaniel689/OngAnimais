@@ -35,10 +35,15 @@ const ROTULO_ACAO: Record<string, string> = {
   FuncionarioAtualizado: 'Funcionário atualizado',
   FuncionarioExcluido: 'Funcionário excluído',
   SenhaAlterada: 'Senha alterada',
+  SenhaResetada: 'Senha resetada por admin',
   LoginSucesso: 'Login realizado',
   LoginFalhou: 'Login falhou',
   LoginContaInativa: 'Login em conta inativa',
   RateLimitLoginExcedido: 'Limite de tentativas de login excedido',
+  ConfiguracaoAtualizada: 'Configurações alteradas',
+  LogoAtualizado: 'Logo enviado',
+  LogoRemovido: 'Logo removido',
+  AcessoAdminNegado: 'Acesso de admin negado (perfil revalidado)',
 };
 
 /**

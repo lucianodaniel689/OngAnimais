@@ -27,6 +27,14 @@ export interface AdocaoRespostaDto {
      */
     nomeAnimal?: string | null;
     /**
+     * URL da foto principal do animal (ou a mais recente, se nenhuma marcada como  principal) — mesma regra de `AnimalRespostaDto.FotoPrincipalUrl`. Nulo se o  animal não tiver foto.
+     */
+    fotoAnimalUrl?: string | null;
+    /**
+     * Larguras (px) disponíveis da foto do animal — ver OngAnimais.DTOs.FotoRespostaDto.Larguras.  `null` sem foto.
+     */
+    fotoAnimalLarguras?: Array<number> | null;
+    /**
      * Identificador do adotante solicitante.
      */
     adotanteId?: number;

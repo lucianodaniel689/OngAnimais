@@ -5,9 +5,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { AnimalRespostaDto } from '@app/core/api';
 import { urlMidia } from '@app/core/http/media-url.util';
+import { ConfiguracaoOngService } from '@app/core/config/configuracao-ong.service';
 import { AnimalDetalheConteudoComponent } from '@app/features/animais/animal-detalhe-conteudo/animal-detalhe-conteudo.component';
 
-const TITULO_PADRAO = 'OngAnimais — Detalhes do animal';
 const DESCRICAO_PADRAO = 'Conheça os animais disponíveis pra adoção e as outras formas de ajudar.';
 const IMAGEM_OG_PADRAO = 'https://placehold.co/1200x630/e2a33b/2a2018?text=OngAnimais';
 
@@ -31,6 +31,7 @@ const IMAGEM_OG_PADRAO = 'https://placehold.co/1200x630/e2a33b/2a2018?text=OngAn
 export class AnimalDetalheComponent {
   private title = inject(Title);
   private meta = inject(Meta);
+  private nomeOng = inject(ConfiguracaoOngService).nomeOng;
 
   readonly id = input.required<string>();
   readonly animalId = computed(() => Number(this.id()));
@@ -45,9 +46,10 @@ export class AnimalDetalheComponent {
       return;
     }
 
-    const titulo = `${animal.nome} — Adote | OngAnimais`;
+    const titulo = `${animal.nome} — Adote | ${this.nomeOng()}`;
     const descricao =
-      animal.descricao?.slice(0, 160) || `${animal.nome} está disponível para adoção na OngAnimais.`;
+      animal.descricao?.slice(0, 160) ||
+      `${animal.nome} está disponível para adoção na ${this.nomeOng()}.`;
     const imagem = this.urlAbsoluta(urlMidia(animal.fotoPrincipalUrl));
 
     this.title.setTitle(titulo);
@@ -58,9 +60,10 @@ export class AnimalDetalheComponent {
   }
 
   private restaurarMetaPadrao(): void {
-    this.title.setTitle(TITULO_PADRAO);
+    const tituloPadrao = `${this.nomeOng()} — Detalhes do animal`;
+    this.title.setTitle(tituloPadrao);
     this.meta.updateTag({ name: 'description', content: DESCRICAO_PADRAO });
-    this.meta.updateTag({ property: 'og:title', content: TITULO_PADRAO });
+    this.meta.updateTag({ property: 'og:title', content: tituloPadrao });
     this.meta.updateTag({ property: 'og:description', content: DESCRICAO_PADRAO });
     this.meta.updateTag({ property: 'og:image', content: IMAGEM_OG_PADRAO });
   }

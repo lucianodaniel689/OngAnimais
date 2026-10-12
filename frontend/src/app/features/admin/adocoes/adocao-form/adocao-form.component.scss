@@ -1,57 +1,9 @@
-.adocao-form {
-  max-width: 640px;
-  margin-inline: auto;
-}
+// Estrutura (página, cabeçalho, card, erro, campos, ações) vem das classes globais de
+// `styles/_padroes.scss`. Aqui fica só o que é deste formulário.
 
-.adocao-form__cabecalho {
-  display: flex;
-  align-items: center;
-  gap: var(--esp-2);
-  margin-bottom: var(--esp-4);
-}
-
-.adocao-form__cabecalho h1 {
-  margin: 0;
-  font-size: var(--texto-xl);
-}
-
-.adocao-form__card {
-  padding: var(--esp-5);
-}
-
-.adocao-form__erro {
-  margin: 0 0 var(--esp-4);
-  padding: var(--esp-2) var(--esp-3);
-  border-radius: var(--raio-sm);
-  background-color: var(--cor-perigo-bg);
-  color: var(--cor-perigo);
-  font-size: var(--texto-sm);
-}
-
+// Aviso dentro do card quando não há animal disponível — mais compacto que `.estado-vazio`.
 .adocao-form__vazio {
   padding: var(--esp-4) 0;
   color: var(--cor-texto-suave);
   text-align: center;
-}
-
-.adocao-form__form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--esp-2);
-}
-
-.adocao-form__form mat-form-field {
-  width: 100%;
-}
-
-.adocao-form__acoes {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--esp-3);
-  margin-top: var(--esp-3);
-}
-
-.adocao-form__acoes mat-progress-spinner {
-  margin-inline: auto;
-  --mdc-circular-progress-active-indicator-color: currentColor;
 }

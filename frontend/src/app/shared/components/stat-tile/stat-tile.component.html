@@ -10,7 +10,10 @@
   <mat-icon class="stat-tile__icone">{{ icone() }}</mat-icon>
   <div class="stat-tile__conteudo">
     <span class="stat-tile__titulo">{{ titulo() }}</span>
-    @if (carregando()) {
+    @if (erro()) {
+      <span class="stat-tile__valor stat-tile__valor--erro" aria-hidden="true">—</span>
+      <span class="stat-tile__erro">Não foi possível carregar</span>
+    } @else if (carregando()) {
       <mat-progress-spinner mode="indeterminate" diameter="24" />
     } @else {
       <span class="stat-tile__valor">{{ valor() }}</span>

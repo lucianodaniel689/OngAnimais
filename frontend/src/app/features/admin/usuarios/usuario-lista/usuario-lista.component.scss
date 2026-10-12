@@ -1,97 +1,10 @@
-.usuario-lista {
-  max-width: 1000px;
-  margin-inline: auto;
-}
-
-.usuario-lista__cabecalho {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--esp-3);
-  margin-bottom: var(--esp-4);
-}
-
-.usuario-lista__cabecalho h1 {
-  margin: 0 0 var(--esp-1);
-  font-size: var(--texto-xl);
-}
-
-.usuario-lista__cabecalho p {
-  margin: 0;
-  color: var(--cor-texto-suave);
-}
-
-.usuario-lista__card {
-  padding: var(--esp-4);
-}
-
-.usuario-lista__filtros {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--esp-3);
-  margin-bottom: var(--esp-3);
-}
-
-.usuario-lista__filtros mat-form-field:first-child {
-  flex: 1 1 260px;
-}
-
-// No celular os campos ocupam a linha toda; a largura fixa é só para desktop.
-.usuario-lista__filtros mat-form-field {
-  width: 100%;
-}
-
-@media (min-width: 720px) {
-  .usuario-lista__filtros mat-form-field {
-    width: 220px;
-  }
-}
-
-.usuario-lista__filtros-toggle {
-  width: 100%;
-  margin-bottom: var(--esp-3);
-}
-
-.usuario-lista__tabela-wrapper {
-  overflow-x: auto;
-}
-
-.usuario-lista__tabela {
-  width: 100%;
-}
-
-// Coluna de ações fixa à direita (stickyEnd): precisa de fundo opaco para
-// não deixar o conteúdo aparecer por baixo durante o scroll lateral.
-.usuario-lista__tabela .mat-mdc-table-sticky {
-  background-color: var(--cor-superficie);
-}
-
-.usuario-lista__tabela .mat-column-acoes {
-  white-space: nowrap;
-  width: 1%;
-}
+// Estrutura da página (cabeçalho, card, filtros, tabela clicável, erro, vazio) vem das
+// classes globais de `styles/_padroes.scss`. Aqui fica só o que é desta lista.
 
 .usuario-lista__voce {
   margin-left: var(--esp-1);
   color: var(--cor-texto-suave);
   font-size: var(--texto-xs);
-}
-
-
-.usuario-lista__erro {
-  padding: var(--esp-3);
-  border-radius: var(--raio-sm);
-  background-color: var(--cor-perigo-bg);
-  color: var(--cor-perigo);
-  font-size: var(--texto-sm);
-}
-
-.usuario-lista__vazio {
-  padding: var(--esp-6) 0;
-  text-align: center;
-  color: var(--cor-texto-suave);
 }
 
 .usuario-lista__ativo {

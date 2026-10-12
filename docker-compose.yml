@@ -1,8 +1,11 @@
 # =============================================================
-# Docker Compose — Backend OngAnimais (API + PostgreSQL)
+# Docker Compose — Backend OngAnimais (API + PostgreSQL + telemetria)
 # Uso:
 #   docker compose up --build
 # A API sobe em http://localhost:8080 (Swagger em /swagger).
+# Painel de telemetria (Aspire Dashboard) em http://localhost:18888.
+# Só o painel, para usar com `dotnet run` local:
+#   docker compose up -d aspire-dashboard
 # =============================================================
 
 services:
@@ -26,6 +29,14 @@ services:
       - ./OngAnimais/Scripts/004_criar_tabela_adocoes.sql:/docker-entrypoint-initdb.d/004_criar_tabela_adocoes.sql:ro
       - ./OngAnimais/Scripts/005_criar_tabela_vacinas.sql:/docker-entrypoint-initdb.d/005_criar_tabela_vacinas.sql:ro
       - ./OngAnimais/Scripts/006_criar_tabela_fotos.sql:/docker-entrypoint-initdb.d/006_criar_tabela_fotos.sql:ro
+      # Incrementais (idempotentes) — sem eles um banco novo nasceria sem perfil de usuário,
+      # saúde do animal, auditoria e larguras das fotos. Banco já existente: rode-os à mão.
+      - ./OngAnimais/Scripts/007_alterar_usuarios_perfil.sql:/docker-entrypoint-initdb.d/007_alterar_usuarios_perfil.sql:ro
+      - ./OngAnimais/Scripts/008_alterar_animais_saude.sql:/docker-entrypoint-initdb.d/008_alterar_animais_saude.sql:ro
+      - ./OngAnimais/Scripts/009_criar_tabela_auditoria.sql:/docker-entrypoint-initdb.d/009_criar_tabela_auditoria.sql:ro
+      - ./OngAnimais/Scripts/010_alterar_fotos_larguras.sql:/docker-entrypoint-initdb.d/010_alterar_fotos_larguras.sql:ro
+      - ./OngAnimais/Scripts/011_criar_tabela_configuracoes_ong.sql:/docker-entrypoint-initdb.d/011_criar_tabela_configuracoes_ong.sql:ro
+      - ./OngAnimais/Scripts/012_alterar_configuracoes_ong_aparencia.sql:/docker-entrypoint-initdb.d/012_alterar_configuracoes_ong_aparencia.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-onganimais_dev}"]
       interval: 5s
@@ -48,11 +59,31 @@ services:
       # Aponta a connection string para o serviço 'db' (sobrescreve o appsettings).
       ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=${POSTGRES_DB:-onganimais_dev};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}"
       SeedDatabase: "true"
+      # Telemetria (OpenTelemetry/OTLP gRPC) → painel do serviço 'aspire-dashboard'.
+      # Em produção, aponte para o provedor real (ex.: Grafana Cloud) e defina
+      # OTEL_EXPORTER_OTLP_PROTOCOL/OTEL_EXPORTER_OTLP_HEADERS conforme o provedor.
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://aspire-dashboard:18889}
     ports:
       - "${API_PORT:-8080}:8080"
     volumes:
       # Persiste as fotos enviadas por upload entre rebuilds do container.
       - onganimais_uploads:/app/wwwroot/uploads
+    restart: unless-stopped
+
+  # Painel de telemetria para DESENVOLVIMENTO: traces, métricas e logs estruturados da API.
+  # Guarda tudo em memória (some ao reiniciar o container) — não é solução de produção.
+  aspire-dashboard:
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:13.6
+    container_name: onganimais-telemetria
+    environment:
+      # Sem login no painel e no receptor OTLP — aceitável só em dev local (portas em 127.0.0.1).
+      DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: "true"
+    ports:
+      # Interface web.
+      - "127.0.0.1:18888:18888"
+      # Receptor OTLP gRPC na porta padrão 4317 do host — é o que o appsettings.Development.json
+      # usa quando a API roda com `dotnet run` fora do Docker.
+      - "127.0.0.1:4317:18889"
     restart: unless-stopped
 
 volumes:

@@ -1,0 +1,23 @@
+// Sem min-width: o diálogo abre com `min(420px, 92vw)` (ver UsuarioListaComponent)
+// e um mínimo fixo estouraria em celulares estreitos.
+.usuario-reset-senha-dialog__conteudo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.usuario-reset-senha-dialog__conteudo mat-form-field {
+  width: 100%;
+}
+
+.usuario-reset-senha-dialog__resumo {
+  margin: 0 0 var(--esp-2);
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+}
+
+.usuario-reset-senha-dialog__erro {
+  margin: 0;
+  color: var(--cor-perigo);
+  font-size: var(--texto-sm);
+}

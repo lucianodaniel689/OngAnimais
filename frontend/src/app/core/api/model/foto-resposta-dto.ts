@@ -22,9 +22,13 @@ export interface FotoRespostaDto {
      */
     animalId?: number;
     /**
-     * URL/caminho da imagem.
+     * URL/caminho da imagem — a maior largura gerada.
      */
     url?: string | null;
+    /**
+     * Larguras (px) disponíveis, crescente: cada uma é o arquivo `{guid}-{largura}.webp`  ao lado de OngAnimais.DTOs.FotoRespostaDto.Url. O front monta o `srcset` com elas. Vazio = só existe  OngAnimais.DTOs.FotoRespostaDto.Url (foto ainda não convertida).
+     */
+    larguras?: Array<number> | null;
     /**
      * Descrição/legenda da foto.
      */

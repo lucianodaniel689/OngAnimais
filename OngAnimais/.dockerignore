@@ -8,3 +8,6 @@
 Dockerfile
 .dockerignore
 **/appsettings.*.local.json
+# Fotos enviadas no desenvolvimento local: não vão para dentro da imagem (em produção, uploads
+# vivem no volume onganimais_uploads — ver docker-compose.yml).
+wwwroot/uploads/

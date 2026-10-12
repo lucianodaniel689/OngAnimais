@@ -16,6 +16,9 @@ namespace OngAnimais.Enums
         Animal,
 
         /// <summary>Eventos de contas de funcionários: criação, alteração, exclusão e senha.</summary>
-        Usuario
+        Usuario,
+
+        /// <summary>Alterações nas configurações da ONG (painel de customização).</summary>
+        Configuracao
     }
 }

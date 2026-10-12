@@ -1,5 +1,7 @@
 using OngAnimais.Common;
+using Npgsql;
 using OngAnimais.Common.Exceptions;
+using System.Diagnostics;
 using System.Net;
 using System.Text.Json;
 
@@ -50,16 +52,30 @@ namespace OngAnimais.Middleware
         private async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             // Mapeia o tipo da exceção para o status HTTP e a mensagem exibida ao cliente.
+            // UnauthorizedAccessException (falha de permissão de arquivo do .NET) cai de propósito
+            // no 500 genérico — login inválido usa CredenciaisInvalidasException.
             var (statusCode, mensagem) = exception switch
             {
                 RegraDeNegocioException => (HttpStatusCode.BadRequest, exception.Message),
-                UnauthorizedAccessException => (HttpStatusCode.Unauthorized, exception.Message),
+                CredenciaisInvalidasException => (HttpStatusCode.Unauthorized, exception.Message),
+                // Perfil revalidado no banco e recusado: mesma resposta do OnForbidden do JWT
+                // (404, não 403) — a mensagem da exceção é o motivo técnico, só vai para o log.
+                AcessoNegadoException => (HttpStatusCode.NotFound, "Recurso não encontrado."),
+                // Violação de UNIQUE que escapou da checagem prévia do módulo (ex.: dois cadastros
+                // simultâneos com o mesmo email) — é conflito de dados, não erro de servidor.
+                PostgresException { SqlState: PostgresErrorCodes.UniqueViolation } =>
+                    (HttpStatusCode.BadRequest, "Já existe um registro com esses dados."),
                 _ => (HttpStatusCode.InternalServerError, "Ocorreu um erro interno no servidor.")
             };
 
-            // Erros de negócio (400/401) são esperados → Warning. Erros inesperados → Error.
+            // Erros de negócio (400/401/404) são esperados → Warning. Erros inesperados → Error.
             if (statusCode == HttpStatusCode.InternalServerError)
+            {
                 _logger.LogError(exception, "Erro não tratado em {Path}: {Message}", context.Request.Path, exception.Message);
+                // Telemetria: a exceção é engolida aqui, então a instrumentação do ASP.NET Core só
+                // veria o status 500 — registra o tipo/stack na span da requisição (no-op sem OTel).
+                Activity.Current?.AddException(exception);
+            }
             else
                 _logger.LogWarning("Requisição rejeitada ({StatusCode}) em {Path}: {Message}",
                     (int)statusCode, context.Request.Path, exception.Message);

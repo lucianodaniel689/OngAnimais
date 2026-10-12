@@ -29,6 +29,18 @@ namespace OngAnimais.Modulos
         };
 
         /// <summary>
+        /// Foto de capa do animal da adoção (principal, senão a mais recente) com URL e larguras —
+        /// mesma regra de <c>AnimalModulo</c>; LATERAL traz as duas colunas da mesma linha.
+        /// </summary>
+        private const string JoinFotoAnimal = @"
+                LEFT JOIN LATERAL (
+                    SELECT f.url, f.larguras FROM fotos f
+                    WHERE f.animal_id = an.id
+                    ORDER BY f.principal DESC, f.created_at DESC
+                    LIMIT 1
+                ) fp ON TRUE";
+
+        /// <summary>
         /// Transições de status permitidas (status atual → novos status possíveis).
         /// 'Recusada' e 'Cancelada' são finais; 'Concluida' só pode ser cancelada
         /// (representa a devolução do animal).
@@ -193,6 +205,7 @@ namespace OngAnimais.Modulos
 
                 SELECT
                     a.id, a.animal_id, an.nome AS nome_animal,
+                    fp.url AS foto_animal_url, fp.larguras AS foto_animal_larguras,
                     a.adotante_id, ad.nome AS nome_adotante, ad.email AS email_adotante, ad.telefone AS telefone_adotante,
                     a.status, a.data_solicitacao, a.data_conclusao, a.observacoes,
                     EXISTS (
@@ -202,6 +215,7 @@ namespace OngAnimais.Modulos
                 FROM adocoes a
                 INNER JOIN animais    an ON an.id = a.animal_id
                 INNER JOIN adotantes  ad ON ad.id = a.adotante_id
+                {JoinFotoAnimal}
                 {where}
                 ORDER BY {coluna} {direcao}
                 LIMIT @TamanhoPagina OFFSET @Offset;";
@@ -225,6 +239,7 @@ namespace OngAnimais.Modulos
             const string sql = @"
                 SELECT
                     a.id, a.animal_id, an.nome AS nome_animal,
+                    fp.url AS foto_animal_url, fp.larguras AS foto_animal_larguras,
                     a.adotante_id, ad.nome AS nome_adotante, ad.email AS email_adotante, ad.telefone AS telefone_adotante,
                     a.status, a.data_solicitacao, a.data_conclusao, a.observacoes,
                     EXISTS (
@@ -234,6 +249,7 @@ namespace OngAnimais.Modulos
                 FROM adocoes a
                 INNER JOIN animais    an ON an.id = a.animal_id
                 INNER JOIN adotantes  ad ON ad.id = a.adotante_id
+                " + JoinFotoAnimal + @"
                 WHERE a.id = @Id";
 
             return await connection.QueryFirstOrDefaultAsync<AdocaoRespostaDto>(sql, new { Id = id });
@@ -417,6 +433,7 @@ namespace OngAnimais.Modulos
             const string sql = @"
                 SELECT
                     a.id, a.animal_id, an.nome AS nome_animal,
+                    fp.url AS foto_animal_url, fp.larguras AS foto_animal_larguras,
                     a.adotante_id, ad.nome AS nome_adotante, ad.email AS email_adotante, ad.telefone AS telefone_adotante,
                     a.status, a.data_solicitacao, a.data_conclusao, a.observacoes,
                     EXISTS (
@@ -426,6 +443,7 @@ namespace OngAnimais.Modulos
                 FROM adocoes a
                 INNER JOIN animais    an ON an.id = a.animal_id
                 INNER JOIN adotantes  ad ON ad.id = a.adotante_id
+                " + JoinFotoAnimal + @"
                 WHERE a.id = @Id";
 
             return await connection.QueryFirstAsync<AdocaoRespostaDto>(sql, new { adocao.Id });

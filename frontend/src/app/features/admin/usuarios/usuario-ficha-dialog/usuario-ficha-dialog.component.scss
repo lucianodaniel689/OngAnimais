@@ -1,0 +1,149 @@
+.usuario-ficha__topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: var(--esp-2);
+}
+
+.usuario-ficha__topo [mat-dialog-title] {
+  flex: 1;
+}
+
+.usuario-ficha__conteudo {
+  // Espaço para o "furo" da etiqueta (::before em top: -6px) não ser cortado
+  // pelo overflow do mat-dialog-content.
+  padding-top: var(--esp-3) !important;
+}
+
+.usuario-ficha__cartao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  padding: var(--esp-5) var(--esp-4) var(--esp-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-md);
+  background-color: var(--cor-superficie);
+}
+
+// Dentro do modal a etiqueta é estática — o "levantar no hover" é para cartões clicáveis.
+.usuario-ficha__cartao.etiqueta:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.usuario-ficha__identidade {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  min-width: 0;
+}
+
+.usuario-ficha__nome-bloco {
+  min-width: 0;
+}
+
+.usuario-ficha__nome {
+  margin: 0;
+  font-size: var(--texto-lg);
+  overflow-wrap: anywhere;
+}
+
+.usuario-ficha__voce {
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-normal);
+}
+
+.usuario-ficha__email {
+  margin: var(--esp-1) 0 0;
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+  overflow-wrap: anywhere;
+}
+
+.usuario-ficha__selos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+}
+
+
+.usuario-ficha__detalhes {
+  display: grid;
+  gap: var(--esp-3);
+  margin: 0;
+}
+
+.usuario-ficha__detalhes dt {
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-xs);
+}
+
+.usuario-ficha__detalhes dd {
+  margin: 0;
+}
+
+.usuario-ficha__dica {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--esp-2);
+  margin: var(--esp-3) 0 0;
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+}
+
+.usuario-ficha__dica mat-icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+}
+
+// --- Modo edição: os campos ocupam o lugar do cartão de identidade ---------
+.usuario-ficha__cartao--form {
+  gap: var(--esp-2);
+}
+
+.usuario-ficha__cartao--form mat-form-field {
+  width: 100%;
+}
+
+.usuario-ficha__checkbox {
+  display: flex;
+  flex-direction: column;
+}
+
+.usuario-ficha__hint {
+  padding-left: var(--esp-6);
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-xs);
+}
+
+// Mobile-first: botões empilhados ocupando a largura (ação principal no topo, via
+// column-reverse); lado a lado a partir de 480px.
+.usuario-ficha__acoes {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: stretch;
+  gap: var(--esp-2);
+}
+
+.usuario-ficha__acoes button {
+  margin: 0 !important;
+}
+
+@media (min-width: 480px) {
+  .usuario-ficha__acoes {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+
+  // Excluir fica isolado à esquerda, longe de Cancelar/Salvar.
+  .usuario-ficha__acoes .usuario-ficha__excluir {
+    margin-right: auto !important;
+  }
+
+  .usuario-ficha__detalhes {
+    grid-template-columns: 1fr 1fr;
+  }
+}

@@ -28,7 +28,7 @@ namespace OngAnimais.Models
         public string? UsuarioNome { get; set; }
 
         /// <summary>
-        /// Categoria do evento (Seguranca, Adocao, Animal, Usuario).
+        /// Categoria do evento (Seguranca, Adocao, Animal, Usuario, Configuracao).
         /// </summary>
         public CategoriaAuditoria Categoria { get; set; }
 

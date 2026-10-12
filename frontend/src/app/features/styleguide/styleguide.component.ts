@@ -10,6 +10,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog } from '@angular/material/dialog';
 import { inject } from '@angular/core';
 import {
@@ -24,16 +25,25 @@ import { ESPECIES } from '@app/core/models';
 import {
   AnimalCardComponent,
   ArquivoRejeitado,
+  AvatarIniciaisComponent,
+  FotoResponsivaDirective,
   CarrosselComponent,
   CarrosselSlideDirective,
   ConfirmDialogComponent,
   ConfirmDialogData,
   LoadingComponent,
+  LogoOngComponent,
+  MascaraTelefoneDirective,
+  SeloComponent,
   StatTileComponent,
   StatusAdocaoBadgeComponent,
   StatusAnimalBadgeComponent,
   UploadImagensComponent,
+  telefoneValidator,
 } from '@app/shared/components';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { MatRadioModule } from '@angular/material/radio';
+import { ORDEM_PALETAS, PALETAS } from '@app/core/config/paletas';
 
 interface AmostraCor {
   nome: string;
@@ -57,6 +67,7 @@ interface AmostraCor {
     MatSnackBarModule,
     MatTableModule,
     MatPaginatorModule,
+    MatProgressSpinnerModule,
     StatusAnimalBadgeComponent,
     StatusAdocaoBadgeComponent,
     AnimalCardComponent,
@@ -65,6 +76,13 @@ interface AmostraCor {
     UploadImagensComponent,
     StatTileComponent,
     LoadingComponent,
+    SeloComponent,
+    AvatarIniciaisComponent,
+    FotoResponsivaDirective,
+    MascaraTelefoneDirective,
+    ReactiveFormsModule,
+    MatRadioModule,
+    LogoOngComponent,
   ],
   templateUrl: './styleguide.component.html',
   styleUrl: './styleguide.component.scss',
@@ -72,6 +90,12 @@ interface AmostraCor {
 export class StyleguideComponent {
   private snackbar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
+
+  /** Paletas que a ONG pode escolher (catálogo — a em uso aparece nas amostras de cores). */
+  readonly paletas = ORDEM_PALETAS.map((valor) => ({ valor, ...PALETAS[valor] }));
+
+  /** Exemplo da máscara de telefone (`appTelefone` + `telefoneValidator`). */
+  readonly telefoneExemplo = new FormControl('', { nonNullable: true, validators: [telefoneValidator] });
 
   abrirSnackbar(): void {
     this.snackbar.open('Animal cadastrado com sucesso! 🐾', 'Fechar', { duration: 4000 });
@@ -101,6 +125,29 @@ export class StyleguideComponent {
       this.snackbar.open(confirmado ? 'Confirmado.' : 'Cancelado.', 'Fechar', { duration: 3000 });
     });
   }
+
+  abrirConfirmacaoComVinculos(): void {
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        titulo: 'Excluir animal e vínculos',
+        mensagem:
+          '"Thor" possui registros vinculados. Ao confirmar, tudo isto será excluído junto com o animal:',
+        itens: [
+          { icone: 'volunteer_activism', texto: '2 adoções (candidaturas) — o histórico será perdido' },
+          { icone: 'vaccines', texto: '1 vacina registrada' },
+          { icone: 'photo_library', texto: '3 fotos (os arquivos também são apagados)' },
+        ],
+        rodape: 'Essa ação não pode ser desfeita.',
+        textoConfirmar: 'Excluir tudo',
+        perigoso: true,
+      } satisfies ConfirmDialogData,
+      width: 'min(460px, 92vw)',
+    });
+    ref.afterClosed().subscribe((confirmado) => {
+      this.snackbar.open(confirmado ? 'Confirmado.' : 'Cancelado.', 'Fechar', { duration: 3000 });
+    });
+  }
+
   readonly cores: AmostraCor[] = [
     { nome: 'Primária', variavel: '--cor-primaria' },
     { nome: 'Primária escura', variavel: '--cor-primaria-escura' },

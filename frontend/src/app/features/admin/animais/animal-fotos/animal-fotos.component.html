@@ -22,7 +22,9 @@
     <div class="animal-fotos__grade">
       @for (foto of fotos(); track foto.id) {
         <div class="animal-fotos__item">
-          <img class="animal-fotos__imagem" [src]="urlFoto(foto.url)" [alt]="foto.descricao || 'Foto do animal'" />
+          <img class="animal-fotos__imagem" [appFoto]="foto.url"
+            [larguras]="foto.larguras"
+            sizes="(min-width: 960px) 240px, (min-width: 640px) 33vw, 50vw" [alt]="foto.descricao || 'Foto do animal'" />
 
           @if (foto.principal) {
             <mat-chip-set class="animal-fotos__chip">

@@ -36,7 +36,7 @@ namespace OngAnimais.Controllers
         /// <param name="filtro">Filtros, paginação e ordenação (via query string).</param>
         /// <returns>Página de registros de auditoria.</returns>
         /// <response code="200">Registros listados com sucesso.</response>
-        /// <response code="403">Usuário autenticado não é Admin.</response>
+        /// <response code="404">Usuário autenticado não é Admin (o 403 é respondido como 404 para não revelar o recurso).</response>
         [HttpGet]
         [ProducesResponseType(typeof(ApiResponse<ResultadoPaginado<AuditoriaRespostaDto>>), StatusCodes.Status200OK)]
         public async Task<IActionResult> Listar([FromQuery] AuditoriaFiltroDto filtro)

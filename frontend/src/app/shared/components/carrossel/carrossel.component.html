@@ -18,7 +18,9 @@
           [attr.aria-label]="$index + 1 + ' de ' + slides().length"
           [attr.aria-hidden]="$index !== indiceAtual()"
         >
-          <ng-container [ngTemplateOutlet]="slide.template" />
+          @if (deveRenderizar($index)) {
+            <ng-container [ngTemplateOutlet]="slide.template" />
+          }
         </div>
       }
     </div>

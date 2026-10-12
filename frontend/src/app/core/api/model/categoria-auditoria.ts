@@ -20,6 +20,8 @@ export enum CategoriaAuditoria {
 
     Animal = 'Animal',
 
-    Usuario = 'Usuario'
+    Usuario = 'Usuario',
+
+    Configuracao = 'Configuracao'
 }
 

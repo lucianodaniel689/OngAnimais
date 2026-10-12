@@ -1,17 +1,17 @@
-<div class="auditoria-lista">
-  <header class="auditoria-lista__cabecalho">
+<div class="pagina">
+  <header class="pagina-cabecalho">
     <div>
       <h1>Auditoria</h1>
       <p>Quem fez o quê e quando — adoções, contas e eventos de segurança.</p>
     </div>
   </header>
 
-  <mat-card appearance="outlined" class="auditoria-lista__card">
+  <mat-card appearance="outlined" class="card-conteudo">
     @if (mobile()) {
       <button
         mat-stroked-button
         type="button"
-        class="auditoria-lista__filtros-toggle"
+        class="filtros-toggle"
         [attr.aria-expanded]="filtrosAbertos()"
         (click)="filtrosAbertos.set(!filtrosAbertos())"
       >
@@ -21,8 +21,8 @@
     }
 
     @if (!mobile() || filtrosAbertos()) {
-    <form [formGroup]="filtros" class="auditoria-lista__filtros">
-      <mat-form-field appearance="outline">
+    <form [formGroup]="filtros" class="filtros auditoria-lista__filtros">
+      <mat-form-field appearance="outline" class="filtros__principal">
         <mat-label>Buscar por ação, funcionário ou detalhes</mat-label>
         <mat-icon matPrefix>search</mat-icon>
         <input matInput formControlName="busca" placeholder="Ex: aprovada" />
@@ -59,13 +59,13 @@
     </form>
     }
 
-    <div class="auditoria-lista__tabela-wrapper">
+    <div class="tabela-wrapper">
       @if (carregando()) {
         <app-loading />
       } @else if (erro()) {
-        <p class="auditoria-lista__erro" role="alert">{{ erro() }}</p>
+        <p class="mensagem-erro" role="alert">{{ erro() }}</p>
       } @else if (semResultados()) {
-        <p class="auditoria-lista__vazio">Nenhum evento encontrado com esses filtros.</p>
+        <p class="estado-vazio">Nenhum evento encontrado com esses filtros.</p>
       } @else {
         <table
           mat-table
@@ -74,7 +74,6 @@
           [matSortActive]="ordenarPor()"
           [matSortDirection]="descendente() ? 'desc' : 'asc'"
           (matSortChange)="aoOrdenar($event)"
-          class="auditoria-lista__tabela"
         >
           <ng-container matColumnDef="data">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>Data</th>

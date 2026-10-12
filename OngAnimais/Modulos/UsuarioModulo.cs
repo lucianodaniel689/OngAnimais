@@ -102,7 +102,7 @@ namespace OngAnimais.Modulos
                 await _auditoria.RegistrarSeguroAsync(
                     CategoriaAuditoria.Seguranca, AcoesAuditoria.LoginFalhou,
                     detalhes: $"Email: {dto.Email} (não cadastrado)");
-                throw new UnauthorizedAccessException("Email ou senha inválidos.");
+                throw new CredenciaisInvalidasException("Email ou senha inválidos.");
             }
 
             if (!usuario.Ativo)
@@ -111,7 +111,7 @@ namespace OngAnimais.Modulos
                     CategoriaAuditoria.Seguranca, AcoesAuditoria.LoginContaInativa,
                     detalhes: $"Email: {dto.Email}",
                     usuarioId: usuario.Id, usuarioNome: usuario.Nome);
-                throw new UnauthorizedAccessException("Usuário inativo. Entre em contato com o administrador.");
+                throw new CredenciaisInvalidasException("Usuário inativo. Entre em contato com o administrador.");
             }
 
             // Verificar senha
@@ -121,7 +121,7 @@ namespace OngAnimais.Modulos
                     CategoriaAuditoria.Seguranca, AcoesAuditoria.LoginFalhou,
                     detalhes: $"Email: {dto.Email} (senha incorreta)",
                     usuarioId: usuario.Id, usuarioNome: usuario.Nome);
-                throw new UnauthorizedAccessException("Email ou senha inválidos.");
+                throw new CredenciaisInvalidasException("Email ou senha inválidos.");
             }
 
             await _auditoria.RegistrarSeguroAsync(
@@ -326,6 +326,46 @@ namespace OngAnimais.Modulos
 
             await _auditoria.RegistrarSeguroAsync(
                 CategoriaAuditoria.Usuario, AcoesAuditoria.SenhaAlterada, id);
+
+            return true;
+        }
+
+        /// <summary>
+        /// Reseta a senha de um funcionário (operação administrativa, sem exigir a senha
+        /// atual — cenário de senha esquecida). A identidade de quem opera é garantida
+        /// pelo perfil Admin no controller; o evento fica registrado na auditoria.
+        /// </summary>
+        /// <param name="id">ID do funcionário que terá a senha resetada.</param>
+        /// <param name="idOperador">ID do admin autenticado que executa o reset.</param>
+        /// <param name="dto">Nova senha.</param>
+        /// <returns>True se a senha foi resetada, false se o usuário não foi encontrado.</returns>
+        /// <exception cref="RegraDeNegocioException">Se o operador tentar resetar a própria senha.</exception>
+        public async Task<bool> ResetarSenhaAsync(int id, int idOperador, UsuarioResetSenhaDto dto)
+        {
+            // Sem a senha atual, o reset da própria conta contornaria a confirmação de AlterarSenhaAsync
+            // (ex.: token de admin roubado) — a própria senha só muda pelo fluxo /me/senha.
+            if (id == idOperador)
+                throw new RegraDeNegocioException(
+                    "Não é possível resetar a própria senha. Use a troca de senha em \"Meu perfil\".");
+
+            using var connection = _dbFactory.CreateConnection();
+
+            var novoHash = BCrypt.Net.BCrypt.HashPassword(dto.NovaSenha);
+
+            // RETURNING identifica o alvo para a auditoria (quem operou vem do contexto)
+            const string sql = @"
+                UPDATE usuarios
+                SET senha_hash = @Hash, updated_at = NOW()
+                WHERE id = @Id
+                RETURNING nome, email";
+            var usuario = await connection.QueryFirstOrDefaultAsync<UsuarioModel>(sql, new { Hash = novoHash, Id = id });
+
+            if (usuario is null)
+                return false;
+
+            await _auditoria.RegistrarSeguroAsync(
+                CategoriaAuditoria.Usuario, AcoesAuditoria.SenhaResetada, id,
+                $"Senha resetada para o funcionário '{usuario.Nome}' ({usuario.Email})");
 
             return true;
         }

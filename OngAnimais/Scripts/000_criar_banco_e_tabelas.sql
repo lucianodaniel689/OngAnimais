@@ -40,6 +40,13 @@ WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'onganimais_dev')\gexe
 -- 5) Tabelas adicionadas em fases posteriores.
 \i 009_criar_tabela_auditoria.sql
 
+-- 6) Imagens responsivas: larguras geradas de cada foto (idempotente).
+\i 010_alterar_fotos_larguras.sql
+
+-- 7) Configurações da ONG (painel de customização — linha única, idempotente).
+\i 011_criar_tabela_configuracoes_ong.sql
+\i 012_alterar_configuracoes_ong_aparencia.sql
+
 \echo '============================================================='
 \echo 'Banco onganimais_dev e tabelas criados/atualizados com sucesso.'
 \echo '============================================================='

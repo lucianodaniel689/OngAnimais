@@ -24,6 +24,19 @@ namespace OngAnimais.DTOs
         public string NomeAnimal { get; set; } = string.Empty;
 
         /// <summary>
+        /// URL da foto principal do animal (ou a mais recente, se nenhuma marcada como
+        /// principal) — mesma regra de <c>AnimalRespostaDto.FotoPrincipalUrl</c>. Nulo se o
+        /// animal não tiver foto.
+        /// </summary>
+        public string? FotoAnimalUrl { get; set; }
+
+        /// <summary>
+        /// Larguras (px) disponíveis da foto do animal — ver <see cref="FotoRespostaDto.Larguras"/>.
+        /// <c>null</c> sem foto.
+        /// </summary>
+        public int[]? FotoAnimalLarguras { get; set; }
+
+        /// <summary>
         /// Identificador do adotante solicitante.
         /// </summary>
         public int AdotanteId { get; set; }

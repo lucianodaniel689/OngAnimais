@@ -2,39 +2,24 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Clipboard } from '@angular/cdk/clipboard';
 import { catchError, map, of } from 'rxjs';
-import { AnimalRespostaDto, AnimalService, EspecieAnimal, PorteAnimal, SexoAnimal } from '@app/core/api';
-import { ROTULO_ESPECIE, ROTULO_PORTE, ROTULO_SEXO } from '@app/core/models';
+import { AnimalRespostaDto, AnimalService } from '@app/core/api';
+import { ROTULO_ESPECIE, ROTULO_PORTE } from '@app/core/models';
 import {
-  AnimalCardComponent,
   CarrosselComponent,
   CarrosselSlideDirective,
+  FotoResponsivaDirective,
   LoadingComponent,
 } from '@app/shared/components';
-import { urlMidia } from '@app/core/http/media-url.util';
 import {
-  ENDERECO_ONG,
-  HORARIO_ONG,
-  INSTAGRAM_ONG,
-  INSTAGRAM_ONG_URL,
-  WHATSAPP_ONG_FORMATADO,
-  linkWhatsapp,
-} from '@app/core/config/ong.config';
-
-interface PassoAdocao {
-  icone: string;
-  titulo: string;
-  descricao: string;
-}
-
-interface FormaDeAjudar {
-  icone: string;
-  titulo: string;
-  descricao: string;
-  ancora: string;
-  rotuloAcao: string;
-}
+  AnimalDetalheDialogComponent,
+  AnimalDetalheDialogData,
+} from '@app/features/animais/animal-detalhe-dialog/animal-detalhe-dialog.component';
+import { urlMidia } from '@app/core/http/media-url.util';
+import { ConfiguracaoOngService } from '@app/core/config/configuracao-ong.service';
 
 interface ContatoItem {
   icone: string;
@@ -42,14 +27,11 @@ interface ContatoItem {
   href?: string;
 }
 
-/** Quantidade de cards exibidos na vitrine antes de "Mostrar mais". */
-const QUANTIDADE_INICIAL = 8;
-/** Quantidade de animais exibidos no carrossel de destaques do hero. */
-const QUANTIDADE_DESTAQUE = 6;
-
 /**
- * Homepage: hero com carrossel de animais em destaque, passo a passo, vitrine
- * de animais disponíveis, formas de ajudar além da adoção e contato.
+ * Homepage: hero com carrossel grande dos animais (foto de ponta a ponta + etiqueta de canil com
+ * o nome; clicar abre o detalhe em modal) e, logo abaixo, o CTA principal "Quero adotar"
+ * (`.botao-cta`, leva para `/adotar` com a lista completa e filtros); depois passo a passo,
+ * formas de ajudar além da adoção e contato.
  */
 @Component({
   selector: 'app-home',
@@ -59,174 +41,158 @@ const QUANTIDADE_DESTAQUE = 6;
     RouterLink,
     MatButtonModule,
     MatIconModule,
-    MatChipsModule,
     CarrosselComponent,
     CarrosselSlideDirective,
-    AnimalCardComponent,
     LoadingComponent,
+    FotoResponsivaDirective,
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
 export class HomeComponent {
   private animalService = inject(AnimalService);
+  private dialog = inject(MatDialog);
+  private configuracaoOng = inject(ConfiguracaoOngService);
+  private clipboard = inject(Clipboard);
+  private snackbar = inject(MatSnackBar);
 
-  readonly imagemPadrao = 'https://placehold.co/500x400/f7e4c1/b97d1f?text=OngAnimais';
+  /** Foto de reserva (animal sem foto, ou vitrine vazia) — no tamanho do hero. */
+  readonly imagemPadrao = 'https://placehold.co/1600x1000/f7e4c1/b97d1f?text=OngAnimais';
 
-  readonly passos: PassoAdocao[] = [
-    {
-      icone: 'search',
-      titulo: 'Conheça',
-      descricao: 'Navegue pelos animais disponíveis e veja fotos, idade e temperamento de cada um.',
-    },
-    {
-      icone: 'favorite',
-      titulo: 'Solicite',
-      descricao: 'Encontrou um match? Preencha o formulário com seus dados na página do animal.',
-    },
-    {
-      icone: 'home',
-      titulo: 'Leve para casa',
-      descricao: 'Nossa equipe entra em contato para combinar os próximos passos da adoção.',
-    },
-  ];
+  // Textos, passos, formas de ajudar, contato e doação vêm das configurações da ONG
+  // (editáveis em /admin/configuracoes) — ver ConfiguracaoOngService.
+  readonly configuracao = this.configuracaoOng.configuracao;
 
-  readonly formasDeAjudar: FormaDeAjudar[] = [
-    {
-      icone: 'pets',
-      titulo: 'Adote',
-      descricao: 'Já é possível agora: veja quem está disponível e comece pela página do animal.',
-      ancora: '#vitrine',
-      rotuloAcao: 'Ver animais disponíveis',
-    },
-    {
-      icone: 'volunteer_activism',
-      titulo: 'Apadrinhe',
-      descricao: 'Contribua mensalmente com ração e cuidados de um animal, mesmo sem levá-lo pra casa.',
-      ancora: '#contato',
-      rotuloAcao: 'Falar sobre apadrinhamento',
-    },
-    {
-      icone: 'groups',
-      titulo: 'Seja voluntário',
-      descricao: 'Passeios, banho e tosa, transporte ou apoio em feiras de adoção — toda ajuda conta.',
-      ancora: '#contato',
-      rotuloAcao: 'Quero ser voluntário',
-    },
-    {
-      icone: 'campaign',
-      titulo: 'Divulgue',
-      descricao: 'Compartilhe o perfil de um animal com quem você conhece — não custa nada e alcança longe.',
-      ancora: '#vitrine',
-      rotuloAcao: 'Escolher quem divulgar',
-    },
-  ];
+  readonly passos = computed(() => this.configuracao().passosAdocao ?? []);
 
-  // Dados de contato centralizados em `core/config/ong.config.ts` (placeholder — ver
-  // comentário lá) pra não divergir do botão de WhatsApp na página do animal.
-  readonly contato: ContatoItem[] = [
-    { icone: 'location_on', texto: ENDERECO_ONG },
-    { icone: 'schedule', texto: HORARIO_ONG },
-    { icone: 'chat', texto: WHATSAPP_ONG_FORMATADO, href: linkWhatsapp('Olá! Vim pelo site da OngAnimais.') },
-    { icone: 'photo_camera', texto: INSTAGRAM_ONG, href: INSTAGRAM_ONG_URL },
-  ];
+  /** Colunas da grade de passos no desktop: até 3 lado a lado; 4 vira 2×2 (sem sobrar 1 sozinho). */
+  readonly colunasPassos = computed(() => {
+    const quantidade = this.passos().length;
+    return quantidade === 4 ? 2 : Math.min(Math.max(quantidade, 1), 3);
+  });
+
+  /** Só os cards ativos (o serviço já filtra). */
+  readonly formasDeAjudar = computed(() => this.configuracao().formasAjudar ?? []);
+
+  /** Colunas da grade de cards no desktop: até 4 lado a lado; 5–6 em 3; 7–8 em 4. */
+  readonly colunasFormas = computed(() => {
+    const quantidade = this.formasDeAjudar().length;
+    if (quantidade <= 4) {
+      return Math.max(quantidade, 1);
+    }
+    return quantidade <= 6 ? 3 : 4;
+  });
+
+  /** Bloco de doação — só existe quando a ONG informou uma chave PIX. */
+  readonly doacao = computed(() => {
+    const { doacaoPixChave, doacaoTexto } = this.configuracao();
+    return doacaoPixChave ? { chave: doacaoPixChave, texto: doacaoTexto ?? null } : null;
+  });
+
+  /** A seção "Formas de ajudar" só aparece se houver algum card ativo ou doação. */
+  readonly temFormasDeAjudar = computed(() => this.formasDeAjudar().length > 0 || !!this.doacao());
+
+  /** Itens de contato que a ONG preencheu (os vazios não aparecem). */
+  readonly contato = computed<ContatoItem[]>(() => {
+    const config = this.configuracao();
+    const itens: (ContatoItem | null)[] = [
+      config.endereco ? { icone: 'location_on', texto: config.endereco } : null,
+      config.horarioAtendimento ? { icone: 'schedule', texto: config.horarioAtendimento } : null,
+      this.configuracaoOng.whatsappFormatado()
+        ? {
+            icone: 'chat',
+            texto: this.configuracaoOng.whatsappFormatado()!,
+            href: this.configuracaoOng.linkWhatsapp() ?? undefined,
+          }
+        : null,
+      config.emailContato
+        ? { icone: 'mail', texto: config.emailContato, href: `mailto:${config.emailContato}` }
+        : null,
+      this.configuracaoOng.instagram()
+        ? {
+            icone: 'photo_camera',
+            texto: this.configuracaoOng.instagram()!,
+            href: this.configuracaoOng.instagramUrl() ?? undefined,
+          }
+        : null,
+    ];
+    return itens.filter((item): item is ContatoItem => item !== null);
+  });
 
   readonly animais = signal<AnimalRespostaDto[]>([]);
   readonly carregando = signal(true);
-  readonly erro = signal<string | null>(null);
-
-  readonly especieSelecionada = signal<EspecieAnimal | null>(null);
-  readonly porteSelecionado = signal<PorteAnimal | null>(null);
-  readonly sexoSelecionado = signal<SexoAnimal | null>(null);
-  readonly mostrarTodos = signal(false);
 
   readonly rotuloEspecie = ROTULO_ESPECIE;
-  readonly rotuloPorte = ROTULO_PORTE;
-  readonly rotuloSexo = ROTULO_SEXO;
-  readonly urlFoto = urlMidia;
 
-  /** Primeiros animais disponíveis, usados no carrossel do hero. */
-  readonly animaisDestaque = computed(() => this.animais().slice(0, QUANTIDADE_DESTAQUE));
-
-  /** Espécies presentes na lista carregada, na ordem em que aparecem. */
-  readonly especiesDisponiveis = computed(() => {
-    const vistas = new Set<EspecieAnimal>();
-    for (const a of this.animais()) {
-      if (a.especie) {
-        vistas.add(a.especie);
-      }
-    }
-    return Array.from(vistas);
-  });
-
-  /** Portes presentes na lista carregada — o filtro só aparece quando há variedade. */
-  readonly portesDisponiveis = computed(() => {
-    const vistos = new Set<PorteAnimal>();
-    for (const a of this.animais()) {
-      if (a.porte) {
-        vistos.add(a.porte);
-      }
-    }
-    return Array.from(vistos);
-  });
-
-  /** Sexos presentes na lista carregada — o filtro só aparece quando há variedade. */
-  readonly sexosDisponiveis = computed(() => {
-    const vistos = new Set<SexoAnimal>();
-    for (const a of this.animais()) {
-      if (a.sexo) {
-        vistos.add(a.sexo);
-      }
-    }
-    return Array.from(vistos);
-  });
-
-  readonly animaisFiltrados = computed(() => {
-    const especie = this.especieSelecionada();
-    const porte = this.porteSelecionado();
-    const sexo = this.sexoSelecionado();
-    return this.animais().filter(
-      (a) =>
-        (!especie || a.especie === especie) &&
-        (!porte || a.porte === porte) &&
-        (!sexo || a.sexo === sexo),
-    );
-  });
-
-  readonly animaisExibidos = computed(() => {
-    const lista = this.animaisFiltrados();
-    return this.mostrarTodos() ? lista : lista.slice(0, QUANTIDADE_INICIAL);
-  });
-
-  readonly temMaisParaMostrar = computed(
-    () => !this.mostrarTodos() && this.animaisFiltrados().length > QUANTIDADE_INICIAL,
+  /** Primeiros animais disponíveis, usados no carrossel do hero (quantidade configurável). */
+  readonly animaisDestaque = computed(() =>
+    this.animais().slice(0, this.configuracao().quantidadeDestaque || 6),
   );
+
+  /**
+   * Índices dos slides cuja foto tem menos pixels do que a tela precisa (ex.: foto antiga de
+   * 800×600 num carrossel de ~1070px em monitor com escala de 150%). Esses slides mostram a foto
+   * inteira no tamanho natural sobre um fundo desfocado dela mesma, em vez de ampliá-la até
+   * borrar (só no desktop — ver `.hero__slide--resolucao-baixa` no SCSS).
+   */
+  readonly fotosResolucaoBaixa = signal<ReadonlySet<number>>(new Set());
+
+  /** Margem antes de considerar a foto pequena — ampliar até ~25% ainda fica nítido. */
+  private static readonly TOLERANCIA_AMPLIACAO = 0.8;
 
   constructor() {
     this.carregarDisponiveis();
   }
 
-  filtrarPorEspecie(especie: EspecieAnimal | null): void {
-    this.especieSelecionada.set(especie);
-    this.mostrarTodos.set(false);
+  /**
+   * Compara a resolução da foto com a área que ela ocupa na tela (em pixels físicos, ou seja,
+   * × devicePixelRatio). Se faltar resolução, marca o slide para o modo "foto inteira + fundo
+   * desfocado".
+   *
+   * Com `srcset`, o arquivo baixado pode ser de propósito menor que a maior versão (o navegador
+   * escolheu pelo tamanho da tela), então a referência é a **maior largura disponível** — só cai
+   * no `naturalWidth` quando não há escada (foto externa/antiga).
+   */
+  aoCarregarFoto(evento: Event, indice: number, larguras?: readonly number[] | null): void {
+    const img = evento.target as HTMLImageElement;
+    const resolucao = larguras?.at(-1) ?? img.naturalWidth;
+    const pixelsNecessarios = img.clientWidth * (window.devicePixelRatio || 1);
+    if (resolucao >= pixelsNecessarios * HomeComponent.TOLERANCIA_AMPLIACAO) {
+      return;
+    }
+    this.fotosResolucaoBaixa.update((atual) => new Set(atual).add(indice));
   }
 
-  filtrarPorPorte(porte: PorteAnimal | null): void {
-    this.porteSelecionado.set(porte);
-    this.mostrarTodos.set(false);
+  /** "Cachorro de porte médio, 2 anos" — frase natural para a etiqueta do slide. */
+  descricaoCurta(animal: AnimalRespostaDto): string {
+    const especie = animal.especie ? ROTULO_ESPECIE[animal.especie] : '';
+    const porte = animal.porte ? `de porte ${ROTULO_PORTE[animal.porte].toLowerCase()}` : '';
+    const base = [especie, porte].filter(Boolean).join(' ');
+    return animal.idadeAproximada ? `${base}, ${animal.idadeAproximada}` : base;
   }
 
-  filtrarPorSexo(sexo: SexoAnimal | null): void {
-    this.sexoSelecionado.set(sexo);
-    this.mostrarTodos.set(false);
+  /** Abre os detalhes do animal em destaque — mesmo modal usado pelos cards de `/adotar`. */
+  abrirDetalhe(animal: AnimalRespostaDto): void {
+    const animalId = animal.id;
+    if (!animalId) {
+      return;
+    }
+    this.dialog.open(AnimalDetalheDialogComponent, {
+      data: { animalId } satisfies AnimalDetalheDialogData,
+      maxWidth: '900px',
+      width: '90vw',
+      autoFocus: false,
+    });
   }
 
-  mostrarMais(): void {
-    this.mostrarTodos.set(true);
-  }
-
-  imagemDestaque(animal: AnimalRespostaDto): string {
-    return this.urlFoto(animal.fotoPrincipalUrl) ?? this.imagemPadrao;
+  /** Copia a chave PIX — no celular é o jeito prático de colar no app do banco. */
+  copiarPix(chave: string): void {
+    const copiou = this.clipboard.copy(chave);
+    this.snackbar.open(
+      copiou ? 'Chave PIX copiada!' : 'Não foi possível copiar — selecione a chave manualmente.',
+      'Fechar',
+      { duration: 4000 },
+    );
   }
 
   private carregarDisponiveis(): void {
@@ -235,10 +201,7 @@ export class HomeComponent {
       .animalListarDisponiveis()
       .pipe(
         map((r) => r.dados ?? []),
-        catchError(() => {
-          this.erro.set('Não foi possível carregar os animais agora.');
-          return of([] as AnimalRespostaDto[]);
-        }),
+        catchError(() => of([] as AnimalRespostaDto[])),
       )
       .subscribe((lista) => {
         this.animais.set(lista);

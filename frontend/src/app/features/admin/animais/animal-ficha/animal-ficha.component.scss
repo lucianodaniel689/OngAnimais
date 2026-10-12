@@ -15,15 +15,6 @@
   font-size: var(--texto-xl);
 }
 
-.animal-ficha__erro {
-  margin: 0;
-  padding: var(--esp-2) var(--esp-3);
-  border-radius: var(--raio-sm);
-  background-color: var(--cor-perigo-bg);
-  color: var(--cor-perigo);
-  font-size: var(--texto-sm);
-}
-
 // Cabeçalho de identidade: foto + dados + ações. Empilha no mobile.
 .animal-ficha__cabecalho {
   display: flex;
@@ -256,10 +247,6 @@
 
 // ─── Edição in-place (campos habilitam no próprio layout da ficha) ─────────
 
-.animal-ficha__erro--form {
-  margin-bottom: var(--esp-3);
-}
-
 // Campos do cabeçalho em edição: nome largo na primeira linha, demais menores.
 .animal-ficha__campos-identidade {
   display: grid;
@@ -292,14 +279,48 @@
   margin-inline: auto;
 }
 
-// Grid 1 coluna (mobile) → 2 colunas (desktop). Campos largos ocupam as 2.
-.animal-ficha__form {
+// Empilha as seções (Identificação → Saúde → Descrição) com separadores entre elas.
+.animal-ficha__form-criacao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+}
+
+.animal-ficha__intro {
+  margin: 0;
+  color: var(--cor-texto-suave);
+}
+
+.animal-ficha__secao-titulo {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  margin: 0 0 var(--esp-3);
+  color: var(--cor-primaria-escura);
+  font-size: var(--texto-md);
+  font-weight: var(--peso-semibold);
+}
+
+.animal-ficha__secao-titulo mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.animal-ficha__opcional {
+  color: var(--cor-texto-suave);
+  font-weight: 400;
+  font-size: var(--texto-sm);
+}
+
+// Grid 1 coluna (mobile) → 2 colunas (desktop) dentro de cada seção. Campos largos ocupam as 2.
+.animal-ficha__grade-campos {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--esp-2) var(--esp-4);
 }
 
-.animal-ficha__form mat-form-field {
+.animal-ficha__grade-campos mat-form-field {
   width: 100%;
 }
 
@@ -329,20 +350,7 @@
   color: var(--cor-primaria-escura);
 }
 
-.animal-ficha__form-acoes {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: var(--esp-3);
-  margin-top: var(--esp-3);
-}
-
-.animal-ficha__form-acoes mat-progress-spinner,
-.animal-ficha__acoes mat-progress-spinner {
-  margin-inline: auto;
-  --mdc-circular-progress-active-indicator-color: currentColor;
-}
-
+// Barra de ações do cadastro: `.form-acoes` (global) + ocupar a linha toda da grade abaixo.
 @media (min-width: 600px) {
   .animal-ficha__cabecalho {
     flex-direction: row;
@@ -354,7 +362,7 @@
     align-items: stretch;
   }
 
-  .animal-ficha__form {
+  .animal-ficha__grade-campos {
     grid-template-columns: 1fr 1fr;
   }
 

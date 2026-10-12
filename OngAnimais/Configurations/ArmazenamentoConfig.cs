@@ -19,7 +19,12 @@ namespace OngAnimais.Configurations
                 ?? new ArmazenamentoSettings();
 
             services.AddSingleton(settings);
+            services.AddSingleton<OtimizadorImagens>();
             services.AddSingleton<IArmazenamentoArquivos, ArmazenamentoArquivosLocal>();
+
+            // Converte uma vez as fotos antigas (sem miniatura) — idempotente, ver FotoModulo.
+            if (settings.OtimizarFotosAntigasAoIniciar)
+                services.AddHostedService<OtimizacaoFotosAntigasService>();
 
             return services;
         }

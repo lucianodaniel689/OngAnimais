@@ -31,7 +31,12 @@ import { CarrosselComponent } from '@app/shared/components/carrossel/carrossel.c
 import { CarrosselSlideDirective } from '@app/shared/components/carrossel/carrossel-slide.directive';
 import { mensagemErro } from '@app/core/http/error.interceptor';
 import { urlMidia } from '@app/core/http/media-url.util';
-import { linkWhatsapp as montarLinkWhatsapp } from '@app/core/config/ong.config';
+import { FotoResponsivaDirective } from '@app/shared/components/foto-responsiva/foto-responsiva.directive';
+import {
+  MascaraTelefoneDirective,
+  telefoneValidator,
+} from '@app/shared/components/mascara-telefone/mascara-telefone.directive';
+import { ConfiguracaoOngService } from '@app/core/config/configuracao-ong.service';
 
 const IMAGEM_PADRAO = 'https://placehold.co/800x600/f7e4c1/b97d1f?text=OngAnimais';
 /** Corte da observação dentro da mensagem de WhatsApp (não do valor salvo no banco) —
@@ -49,6 +54,8 @@ const OBSERVACOES_MAX_WHATSAPP = 200;
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    FotoResponsivaDirective,
+    MascaraTelefoneDirective,
     ReactiveFormsModule,
     MatCardModule,
     MatButtonModule,
@@ -69,6 +76,7 @@ export class AnimalDetalheConteudoComponent {
   private animalService = inject(AnimalService);
   private fotoService = inject(FotoService);
   private adocaoService = inject(AdocaoService);
+  private configuracao = inject(ConfiguracaoOngService);
 
   readonly animalId = input.required<number>();
   /** Emitido quando o animal termina de carregar (ou falha, com `null`). Só a página
@@ -108,10 +116,13 @@ export class AnimalDetalheConteudoComponent {
   readonly disponivel = computed(() => this.animal()?.status === StatusAnimal.Disponivel);
 
   /** Link de WhatsApp com o nome do animal já preenchido — alternativa mais rápida ao
-   *  formulário pra quem prefere contato direto. */
+   *  formulário pra quem prefere contato direto. `null` se a ONG não configurou WhatsApp
+   *  (o botão some). */
   readonly linkWhatsapp = computed(() => {
     const nome = this.animal()?.nome ?? 'um animal';
-    return montarLinkWhatsapp(`Olá! Vi o(a) ${nome} no site da OngAnimais e tenho interesse em adotar.`);
+    return this.configuracao.linkWhatsapp(
+      `Olá! Vi o(a) ${nome} no site da ${this.configuracao.nomeOng()} e tenho interesse em adotar.`,
+    );
   });
 
   /** Link de WhatsApp oferecido depois que a solicitação já foi salva no banco — reforça
@@ -131,13 +142,14 @@ export class AnimalDetalheConteudoComponent {
         ? `${dados.observacoes.slice(0, OBSERVACOES_MAX_WHATSAPP)}…`
         : dados.observacoes;
     const observacoes = dados.observacoes ? `\nObservação: ${observacoesCurtas}` : '';
-    return montarLinkWhatsapp(
-      `Olá! Acabei de enviar uma solicitação de adoção do(a) ${nomeAnimal} pelo site.\n` +
-        `Meu nome é ${dados.nome}, telefone ${dados.telefone}.${observacoes}`,
+    return (
+      this.configuracao.linkWhatsapp(
+        `Olá! Acabei de enviar uma solicitação de adoção do(a) ${nomeAnimal} pelo site.\n` +
+          `Meu nome é ${dados.nome}, telefone ${dados.telefone}.${observacoes}`,
+      ) ?? ''
     );
   });
 
-  readonly urlFoto = urlMidia;
   readonly imagemPadrao = IMAGEM_PADRAO;
 
   // Os 3 campos que o backend exige (`nomeAdotante`/`emailAdotante`/`telefoneAdotante`, todos
@@ -146,7 +158,7 @@ export class AnimalDetalheConteudoComponent {
   readonly form = this.fb.nonNullable.group({
     nome: ['', [Validators.required, Validators.maxLength(150)]],
     email: ['', [Validators.required, Validators.email, Validators.maxLength(255)]],
-    telefone: ['', [Validators.required, Validators.maxLength(20)]],
+    telefone: ['', [Validators.required, Validators.maxLength(20), telefoneValidator]],
     observacoes: ['', [Validators.maxLength(500)]],
   });
 

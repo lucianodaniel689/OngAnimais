@@ -1,3 +1,6 @@
+// Card, instrução, tabela clicável, erro e vazio da prévia de pendentes vêm das classes
+// globais de `styles/_padroes.scss`. Aqui fica só o layout próprio do dashboard.
+
 .dash__cabecalho {
   margin-bottom: var(--esp-5);
 }
@@ -15,86 +18,50 @@
 
 @media (min-width: 600px) {
   .dash__kpis {
-    grid-template-columns: repeat(2, 1fr);
+    // auto-fit em vez de um número fixo de colunas: a quantidade de tiles varia
+    // (Comum vê 2, Admin vê 3) e um valor fixo deixaria colunas vazias.
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   }
-}
-
-@media (min-width: 960px) {
-  .dash__kpis {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-.dash__pendentes {
-  padding: var(--esp-4);
 }
 
 .dash__pendentes-cabecalho {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: var(--esp-3);
   margin-bottom: var(--esp-3);
 }
 
 .dash__pendentes-cabecalho h2 {
-  margin: 0;
+  margin: 0 0 var(--esp-1);
   font-size: var(--texto-lg);
 }
 
-.dash__pendentes-vazio {
+.dash__pendentes-cabecalho p {
   margin: 0;
-  padding: var(--esp-5) 0;
-  text-align: center;
   color: var(--cor-texto-suave);
 }
 
-.dash__pendentes-lista {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--esp-1);
-}
-
-.dash__pendentes-item {
+// Célula "Animal / adotante": ícone + nome do animal com o adotante embaixo.
+.dash__pendente {
   display: flex;
   align-items: center;
   gap: var(--esp-3);
-  padding: var(--esp-2) var(--esp-1);
-  border-bottom: 1px solid var(--cor-borda);
-
-  &:last-child {
-    border-bottom: none;
-  }
 }
 
-.dash__pendentes-icone {
-  color: var(--cor-alerta);
+.dash__pendente-icone {
   flex-shrink: 0;
+  color: var(--cor-alerta);
 }
 
-.dash__pendentes-info {
+.dash__pendente-info {
   display: flex;
   flex-direction: column;
   min-width: 0;
-
-  span {
-    font-size: var(--texto-sm);
-    color: var(--cor-texto-suave);
-  }
 }
 
-// Nome do animal linka para a ficha (aba Candidaturas).
-.dash__pendentes-link {
-  color: inherit;
-  text-decoration: none;
-
-  &:hover,
-  &:focus-visible {
-    text-decoration: underline;
-    color: var(--cor-primaria-escura);
-  }
+.dash__pendente-info span {
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
 }

@@ -1,13 +1,22 @@
 import { Routes } from '@angular/router';
+import { provideNativeDateAdapter } from '@angular/material/core';
 import { adminGuard } from '@app/core/auth/admin.guard';
-import { authGuard } from '@app/core/auth/auth.guard';
+import { authGuard, loginGuard } from '@app/core/auth/auth.guard';
 
 export const routes: Routes = [
   {
     path: '',
     loadComponent: () =>
       import('@app/features/home/home.component').then((m) => m.HomeComponent),
-    title: 'OngAnimais — Adote um amigo',
+    title: 'Adote um amigo',
+  },
+  {
+    path: 'adotar',
+    loadComponent: () =>
+      import('@app/features/animais/animais-disponiveis/animais-disponiveis.component').then(
+        (m) => m.AnimaisDisponiveisComponent,
+      ),
+    title: 'Quero adotar',
   },
   {
     path: 'animais/:id',
@@ -15,29 +24,31 @@ export const routes: Routes = [
       import('@app/features/animais/animal-detalhe/animal-detalhe.component').then(
         (m) => m.AnimalDetalheComponent,
       ),
-    title: 'OngAnimais — Detalhes do animal',
-  },
-  {
-    path: 'quiz',
-    loadComponent: () =>
-      import('@app/features/quiz/quiz.component').then((m) => m.QuizComponent),
-    title: 'OngAnimais — Encontre seu match',
+    title: 'Detalhes do animal',
   },
   {
     path: 'styleguide',
+    // Só essa rota (fora do /admin) usa mat-datepicker no catálogo — escopado
+    // aqui em vez de global em app.config.ts pra não pesar no bundle inicial
+    // do site público, que nunca usa datepicker.
+    providers: [provideNativeDateAdapter()],
     loadComponent: () =>
       import('@app/features/styleguide/styleguide.component').then((m) => m.StyleguideComponent),
-    title: 'OngAnimais — Styleguide',
+    title: 'Styleguide',
   },
   {
     path: 'login',
+    canActivate: [loginGuard],
     loadComponent: () =>
       import('@app/features/auth/login/login.component').then((m) => m.LoginComponent),
-    title: 'OngAnimais — Entrar',
+    title: 'Entrar',
   },
   {
     path: 'admin',
     canActivate: [authGuard],
+    // Datepicker (Vacinas, Auditoria) só existe aqui dentro — escopado no
+    // /admin em vez de global, pra não pesar no bundle inicial do site público.
+    providers: [provideNativeDateAdapter()],
     loadComponent: () =>
       import('@app/features/admin/admin-layout/admin-layout.component').then(
         (m) => m.AdminLayoutComponent,
@@ -49,7 +60,7 @@ export const routes: Routes = [
           import('@app/features/admin/dashboard/dashboard.component').then(
             (m) => m.DashboardComponent,
           ),
-        title: 'OngAnimais — Painel',
+        title: 'Painel',
       },
       {
         path: 'animais',
@@ -57,7 +68,7 @@ export const routes: Routes = [
           import('@app/features/admin/animais/animal-lista/animal-lista.component').then(
             (m) => m.AnimalListaComponent,
           ),
-        title: 'OngAnimais — Animais cadastrados',
+        title: 'Animais cadastrados',
       },
       {
         // A ficha também é a tela de cadastro (modo criação, sem :id).
@@ -66,7 +77,7 @@ export const routes: Routes = [
           import('@app/features/admin/animais/animal-ficha/animal-ficha.component').then(
             (m) => m.AnimalFichaComponent,
           ),
-        title: 'OngAnimais — Cadastrar animal',
+        title: 'Cadastrar animal',
       },
       {
         // Precisa vir depois de 'animais/novo' — ':id' também casaria com "novo".
@@ -76,7 +87,7 @@ export const routes: Routes = [
           import('@app/features/admin/animais/animal-ficha/animal-ficha.component').then(
             (m) => m.AnimalFichaComponent,
           ),
-        title: 'OngAnimais — Ficha do animal',
+        title: 'Ficha do animal',
       },
       {
         path: 'adocoes',
@@ -84,7 +95,7 @@ export const routes: Routes = [
           import('@app/features/admin/adocoes/adocao-lista/adocao-lista.component').then(
             (m) => m.AdocaoListaComponent,
           ),
-        title: 'OngAnimais — Adoções',
+        title: 'Adoções',
       },
       {
         path: 'adocoes/nova',
@@ -92,15 +103,15 @@ export const routes: Routes = [
           import('@app/features/admin/adocoes/adocao-form/adocao-form.component').then(
             (m) => m.AdocaoFormComponent,
           ),
-        title: 'OngAnimais — Nova adoção',
+        title: 'Nova adoção',
       },
       {
-        path: 'vacinas',
+        path: 'adocoes/:id',
         loadComponent: () =>
-          import('@app/features/admin/vacinas/vacina-lista/vacina-lista.component').then(
-            (m) => m.VacinaListaComponent,
+          import('@app/features/admin/adocoes/adocao-ficha/adocao-ficha.component').then(
+            (m) => m.AdocaoFichaComponent,
           ),
-        title: 'OngAnimais — Vacinas',
+        title: 'Ficha da candidatura',
       },
       {
         path: 'vacinas/nova',
@@ -108,7 +119,7 @@ export const routes: Routes = [
           import('@app/features/admin/vacinas/vacina-form/vacina-form.component').then(
             (m) => m.VacinaFormComponent,
           ),
-        title: 'OngAnimais — Registrar vacina',
+        title: 'Registrar vacina',
       },
       {
         path: 'vacinas/:id/editar',
@@ -116,7 +127,7 @@ export const routes: Routes = [
           import('@app/features/admin/vacinas/vacina-form/vacina-form.component').then(
             (m) => m.VacinaFormComponent,
           ),
-        title: 'OngAnimais — Editar vacina',
+        title: 'Editar vacina',
       },
       {
         path: 'usuarios',
@@ -125,7 +136,7 @@ export const routes: Routes = [
           import('@app/features/admin/usuarios/usuario-lista/usuario-lista.component').then(
             (m) => m.UsuarioListaComponent,
           ),
-        title: 'OngAnimais — Funcionários',
+        title: 'Funcionários',
       },
       {
         path: 'usuarios/novo',
@@ -134,16 +145,7 @@ export const routes: Routes = [
           import('@app/features/admin/usuarios/usuario-form/usuario-form.component').then(
             (m) => m.UsuarioFormComponent,
           ),
-        title: 'OngAnimais — Cadastrar funcionário',
-      },
-      {
-        path: 'usuarios/:id/editar',
-        canActivate: [adminGuard],
-        loadComponent: () =>
-          import('@app/features/admin/usuarios/usuario-form/usuario-form.component').then(
-            (m) => m.UsuarioFormComponent,
-          ),
-        title: 'OngAnimais — Editar funcionário',
+        title: 'Cadastrar funcionário',
       },
       {
         path: 'auditoria',
@@ -152,18 +154,44 @@ export const routes: Routes = [
           import('@app/features/admin/auditoria/auditoria-lista/auditoria-lista.component').then(
             (m) => m.AuditoriaListaComponent,
           ),
-        title: 'OngAnimais — Auditoria',
+        title: 'Auditoria',
+      },
+      {
+        path: 'configuracoes',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('@app/features/admin/configuracoes/configuracoes.component').then(
+            (m) => m.ConfiguracoesComponent,
+          ),
+        title: 'Configurações',
       },
       {
         path: 'perfil',
         loadComponent: () =>
           import('@app/features/admin/perfil/perfil.component').then((m) => m.PerfilComponent),
-        title: 'OngAnimais — Meu perfil',
+        title: 'Meu perfil',
       },
     ],
   },
   {
+    // Destino dos guards (authGuard/adminGuard) quando falta acesso — renderizado com
+    // skipLocationChange, então a barra continua mostrando a URL que a pessoa digitou.
+    path: 'nao-encontrado',
+    loadComponent: () =>
+      import('@app/features/nao-encontrado/nao-encontrado.component').then(
+        (m) => m.NaoEncontradoComponent,
+      ),
+    title: 'Página não encontrada',
+  },
+  {
+    // URL desconhecida → mesma página 404 (antes redirecionava para a home). Precisa ser
+    // idêntica à resposta dos guards: se URLs inválidas fossem para a home e só /admin desse
+    // 404, a diferença denunciaria que a área restrita existe.
     path: '**',
-    redirectTo: '',
+    loadComponent: () =>
+      import('@app/features/nao-encontrado/nao-encontrado.component').then(
+        (m) => m.NaoEncontradoComponent,
+      ),
+    title: 'Página não encontrada',
   },
 ];

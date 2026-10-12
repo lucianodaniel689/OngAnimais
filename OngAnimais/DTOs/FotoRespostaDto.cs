@@ -16,9 +16,16 @@ namespace OngAnimais.DTOs
         public int AnimalId { get; set; }
 
         /// <summary>
-        /// URL/caminho da imagem.
+        /// URL/caminho da imagem — a maior largura gerada.
         /// </summary>
         public string Url { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Larguras (px) disponíveis, crescente: cada uma é o arquivo <c>{guid}-{largura}.webp</c>
+        /// ao lado de <see cref="Url"/>. O front monta o <c>srcset</c> com elas. Vazio = só existe
+        /// <see cref="Url"/> (foto ainda não convertida).
+        /// </summary>
+        public int[] Larguras { get; set; } = [];
 
         /// <summary>
         /// Descrição/legenda da foto.

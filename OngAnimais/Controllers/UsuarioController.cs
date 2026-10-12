@@ -39,7 +39,7 @@ namespace OngAnimais.Controllers
         /// <returns>Dados do usuário criado.</returns>
         /// <response code="201">Usuário registrado com sucesso.</response>
         /// <response code="400">Dados inválidos ou email já cadastrado.</response>
-        /// <response code="403">Usuário autenticado não é Admin.</response>
+        /// <response code="404">Usuário autenticado não é Admin (o 403 é respondido como 404 para não revelar o recurso).</response>
         [HttpPost("registrar")]
         [Authorize(Roles = nameof(PerfilUsuario.Admin))]
         [ProducesResponseType(typeof(ApiResponse<UsuarioRespostaDto>), StatusCodes.Status201Created)]
@@ -76,7 +76,7 @@ namespace OngAnimais.Controllers
         /// <param name="filtro">Filtros, paginação e ordenação (via query string).</param>
         /// <returns>Página de usuários.</returns>
         /// <response code="200">Lista de usuários retornada com sucesso.</response>
-        /// <response code="403">Usuário autenticado não é Admin.</response>
+        /// <response code="404">Usuário autenticado não é Admin (o 403 é respondido como 404 para não revelar o recurso).</response>
         [HttpGet]
         [Authorize(Roles = nameof(PerfilUsuario.Admin))]
         [ProducesResponseType(typeof(ApiResponse<ResultadoPaginado<UsuarioRespostaDto>>), StatusCodes.Status200OK)]
@@ -92,8 +92,7 @@ namespace OngAnimais.Controllers
         /// <param name="id">ID do usuário.</param>
         /// <returns>Dados do usuário.</returns>
         /// <response code="200">Usuário encontrado.</response>
-        /// <response code="403">Usuário autenticado não é Admin.</response>
-        /// <response code="404">Usuário não encontrado.</response>
+        /// <response code="404">Usuário não encontrado (ou usuário autenticado não é Admin — o 403 é respondido como 404).</response>
         [HttpGet("{id}")]
         [Authorize(Roles = nameof(PerfilUsuario.Admin))]
         [ProducesResponseType(typeof(ApiResponse<UsuarioRespostaDto>), StatusCodes.Status200OK)]
@@ -117,8 +116,7 @@ namespace OngAnimais.Controllers
         /// <returns>Dados atualizados do usuário.</returns>
         /// <response code="200">Usuário atualizado com sucesso.</response>
         /// <response code="400">Email já em uso por outro usuário.</response>
-        /// <response code="403">Usuário autenticado não é Admin.</response>
-        /// <response code="404">Usuário não encontrado.</response>
+        /// <response code="404">Usuário não encontrado (ou usuário autenticado não é Admin — o 403 é respondido como 404).</response>
         [HttpPut("{id}")]
         [Authorize(Roles = nameof(PerfilUsuario.Admin))]
         [ProducesResponseType(typeof(ApiResponse<UsuarioRespostaDto>), StatusCodes.Status200OK)]
@@ -205,13 +203,39 @@ namespace OngAnimais.Controllers
         }
 
         /// <summary>
+        /// Reseta a senha de um funcionário (uso administrativo — para quem esqueceu a
+        /// própria senha e não consegue logar). Não exige a senha atual; a operação
+        /// fica registrada na auditoria. Não vale para a própria conta do admin —
+        /// essa troca passa por <c>PUT /api/usuario/me/senha</c>, que exige a senha atual.
+        /// </summary>
+        /// <param name="id">ID do funcionário que terá a senha resetada.</param>
+        /// <param name="dto">Nova senha.</param>
+        /// <returns>Confirmação do reset.</returns>
+        /// <response code="200">Senha resetada com sucesso.</response>
+        /// <response code="400">Dados inválidos ou tentativa de resetar a própria senha.</response>
+        /// <response code="404">Usuário não encontrado (ou usuário autenticado não é Admin — o 403 é respondido como 404).</response>
+        [HttpPut("{id}/senha")]
+        [Authorize(Roles = nameof(PerfilUsuario.Admin))]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> ResetarSenha(int id, [FromBody] UsuarioResetSenhaDto dto)
+        {
+            var resetada = await _modulo.ResetarSenhaAsync(id, ObterIdUsuarioAutenticado(), dto);
+
+            if (!resetada)
+                return NotFound(ApiResponse<object>.Erro("Usuário não encontrado."));
+
+            return Ok(ApiResponse<object>.Ok(true, "Senha resetada com sucesso."));
+        }
+
+        /// <summary>
         /// Exclui um usuário do sistema.
         /// </summary>
         /// <param name="id">ID do usuário a ser excluído.</param>
         /// <returns>Confirmação da exclusão.</returns>
         /// <response code="200">Usuário excluído com sucesso.</response>
-        /// <response code="403">Usuário autenticado não é Admin.</response>
-        /// <response code="404">Usuário não encontrado.</response>
+        /// <response code="404">Usuário não encontrado (ou usuário autenticado não é Admin — o 403 é respondido como 404).</response>
         [HttpDelete("{id}")]
         [Authorize(Roles = nameof(PerfilUsuario.Admin))]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]

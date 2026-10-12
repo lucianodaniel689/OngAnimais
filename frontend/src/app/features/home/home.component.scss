@@ -1,122 +1,214 @@
-// --- Hero --------------------------------------------------------------------
+// --- Hero: vitrine (carrossel grande) ------------------------------------------
+// A foto do animal é o hero. No celular a vitrine vai de borda a borda (sem padding do
+// .container, sem arredondamento) e é quadrada, com teto de 62vh — assim o botão "Quero adotar"
+// ainda aparece sem rolar. No desktop volta para dentro do container, alta e arredondada.
 .hero {
-  padding-block: var(--esp-6) var(--esp-5);
+  padding-bottom: var(--esp-6);
 }
 
-.hero__grade {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--esp-6);
-  align-items: center;
-}
-
-.hero__texto h1 {
-  font-family: var(--fonte-display);
-  font-size: var(--texto-3xl);
-  font-weight: var(--peso-semibold);
-  line-height: 1.1;
-}
-
-.hero__subtitulo {
-  margin-top: var(--esp-3);
-  color: var(--cor-texto-suave);
-  font-size: var(--texto-lg);
-  max-width: 46ch;
-}
-
-.hero__acoes {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--esp-3);
-  margin-top: var(--esp-4);
-}
-
-// --- Selos (prova social) -----------------------------------------------------
-.hero__tira {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--esp-4);
-  margin-top: var(--esp-6);
-}
-
-.hero__selo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  width: 96px;
-  height: 96px;
-  flex-shrink: 0;
-  border-radius: var(--raio-full);
-  border: 2px dashed var(--cor-primaria);
-  color: var(--cor-primaria-escura);
-  text-align: center;
-}
-
-.hero__selo--secundario {
-  border-color: var(--cor-secundaria);
-  color: var(--cor-secundaria-escura);
-}
-
-.hero__selo-numero {
-  font-family: var(--fonte-display);
-  font-size: var(--texto-2xl);
-  font-weight: var(--peso-semibold);
-  line-height: 1;
-}
-
-.hero__selo-rotulo {
-  font-size: 0.65rem;
-  line-height: 1.25;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-// --- Carrossel de destaques ----------------------------------------------------
-.hero__midia {
-  min-height: 220px;
+.hero__vitrine {
+  padding-inline: 0;
+  --carrossel-raio: 0;
 }
 
 .hero__slide {
   position: relative;
-  padding-bottom: var(--esp-5);
+  display: block;
+  cursor: pointer;
 }
 
-.hero__slide-imagem {
+.hero__slide--vazio {
+  cursor: default;
+}
+
+.hero__slide:focus-visible {
+  outline: 3px solid var(--cor-primaria);
+  outline-offset: -3px;
+}
+
+.hero__foto,
+.hero__placeholder {
+  display: block;
   width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-  border-radius: var(--raio-lg);
-  box-shadow: var(--sombra-md);
+  aspect-ratio: 1 / 1;
+  max-height: 62vh;
+  background-color: var(--cor-superficie-alt);
 }
 
-.hero__slide-legenda {
+.hero__foto {
+  object-fit: cover;
+  // Rosto do animal costuma estar no terço de cima — corta mais embaixo que em cima.
+  object-position: center 35%;
+}
+
+.hero__placeholder {
+  display: grid;
+  place-items: center;
+}
+
+// Fundo desfocado do modo "resolução baixa" — só existe no desktop (ver media query abaixo);
+// no celular a área é pequena e a foto em `cover` ainda fica boa.
+.hero__fundo {
+  display: none;
+}
+
+// A etiqueta de canil "pendurada" na foto: nome grande + descrição + convite. Opaca (papel),
+// então dispensa gradiente escurecendo a foto. Canto esquerdo; os indicadores do carrossel
+// (variante destaque) ficam no direito.
+.hero__etiqueta {
   position: absolute;
-  left: var(--esp-4);
-  bottom: 0;
+  left: var(--esp-3);
+  bottom: var(--esp-3);
   display: flex;
   flex-direction: column;
   gap: 2px;
-  max-width: calc(100% - var(--esp-6));
-  padding: var(--esp-2) var(--esp-3);
-  background-color: var(--cor-superficie);
+  // No celular, deixa espaço à direita para a pílula dos indicadores (6 pontos ≈ 130px).
+  max-width: calc(100% - 170px);
+  padding: var(--esp-4) var(--esp-4) var(--esp-3);
+  border: 1px solid var(--cor-borda);
   border-radius: var(--raio-md);
+  background-color: var(--cor-superficie);
   box-shadow: var(--sombra-md);
+}
+
+// Passar o mouse em qualquer ponto da foto levanta a etiqueta (o slide inteiro é o clique).
+.hero__slide:hover .hero__etiqueta,
+.hero__slide:focus-visible .hero__etiqueta {
+  transform: translateY(-4px);
+  box-shadow: var(--sombra-lg);
+}
+
+.hero__nome {
+  font-family: var(--fonte-display);
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-semibold);
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.hero__descricao {
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+  text-wrap: balance; // "6 / meses" sozinho na linha de baixo fica estranho
+}
+
+.hero__conhecer {
+  margin-top: var(--esp-2);
+  color: var(--cor-primaria-escura);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-semibold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__slide:hover .hero__etiqueta,
+  .hero__slide:focus-visible .hero__etiqueta {
+    transform: none;
+  }
+}
+
+// --- Hero: chamada (título + CTA) ----------------------------------------------
+.hero__chamada {
+  display: grid;
+  gap: var(--esp-4);
+  padding-top: var(--esp-5);
+}
+
+.hero__texto h1 {
+  margin: 0;
+  font-family: var(--fonte-display);
+  font-size: clamp(1.875rem, 5vw, 2.75rem);
+  font-weight: var(--peso-semibold);
+  line-height: 1.1;
+  text-wrap: balance; // evita uma palavra sozinha na última linha
+}
+
+.hero__subtitulo {
+  margin: var(--esp-2) 0 0;
+  max-width: 52ch;
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-md);
+  text-wrap: pretty;
+}
+
+// Celular: CTA na largura toda, alvo de toque grande.
+.hero__acoes {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--esp-2);
+}
+
+.hero__contagem {
+  margin: 0;
+  text-align: center;
+  color: var(--cor-texto-suave);
   font-size: var(--texto-sm);
 }
 
-.hero__slide-legenda span {
-  color: var(--cor-texto-suave);
-  font-size: var(--texto-xs);
-}
-
 @media (min-width: 768px) {
-  .hero__grade {
-    grid-template-columns: 1.1fr 1fr;
+  .hero__vitrine {
+    padding-inline: var(--esp-5);
+    padding-top: var(--esp-4);
+    --carrossel-raio: var(--raio-lg);
   }
-  .hero__texto h1 {
-    font-size: 2.75rem;
+
+  .hero__foto,
+  .hero__placeholder {
+    aspect-ratio: auto;
+    height: clamp(420px, 68vh, 680px);
+    max-height: none;
+  }
+
+  // Foto com menos resolução que a tela pede: inteira e sem ampliar além do natural, sobre um
+  // fundo da própria foto desfocado e esmaecido no kraft — em vez de esticada até borrar.
+  .hero__slide--resolucao-baixa {
+    overflow: hidden;
+    background-color: var(--cor-superficie-alt);
+  }
+
+  .hero__slide--resolucao-baixa .hero__foto {
+    position: relative;
+    object-fit: contain;
+    background-color: transparent;
+  }
+
+  .hero__fundo {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: blur(28px) saturate(0.9);
+    opacity: 0.55;
+    transform: scale(1.15); // esconde a borda clara que o blur cria nas laterais
+  }
+
+  .hero__etiqueta {
+    left: var(--esp-5);
+    bottom: var(--esp-5);
+    max-width: 380px;
+    padding: var(--esp-5) var(--esp-5) var(--esp-4);
+  }
+
+  .hero__nome {
+    font-size: var(--texto-3xl);
+  }
+
+  .hero__chamada {
+    grid-template-columns: 1.4fr 1fr;
+    align-items: center;
+    gap: var(--esp-6);
+  }
+
+  .hero__subtitulo {
+    font-size: var(--texto-lg);
+  }
+
+  .hero__cta {
+    width: 100%;
   }
 }
 
@@ -184,124 +276,11 @@
   margin-inline: auto;
 }
 
-// --- Vitrine ----------------------------------------------------------------
-.vitrine {
-  margin-top: var(--esp-7);
-  scroll-margin-top: calc(var(--altura-header) + var(--esp-3));
-}
-
-.vitrine__cabecalho {
-  text-align: center;
-  margin-bottom: var(--esp-4);
-}
-
-.vitrine__cabecalho p {
-  color: var(--cor-texto-suave);
-}
-
-.vitrine__quiz-link {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--esp-1);
-  margin-top: var(--esp-2);
-  color: var(--cor-primaria-escura);
-  font-weight: var(--peso-medio);
-  font-size: var(--texto-sm);
-}
-
-.vitrine__quiz-link mat-icon {
-  font-size: 1.1rem;
-  width: 1.1rem;
-  height: 1.1rem;
-}
-
-.vitrine__filtros-grupos {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--esp-3);
-  margin-bottom: var(--esp-5);
-}
-
-.vitrine__filtro-grupo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--esp-1);
-}
-
-.vitrine__filtro-rotulo {
-  font-size: var(--texto-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--cor-texto-suave);
-}
-
-.vitrine__filtros {
-  display: flex;
-  justify-content: center;
-
-  ::ng-deep .mdc-evolution-chip-set__chips {
-    justify-content: center;
-  }
-
-  ::ng-deep .mat-mdc-chip {
-    cursor: pointer;
-  }
-}
-
-// Em telas maiores os grupos de filtro ficam lado a lado.
-@media (min-width: 768px) {
-  .vitrine__filtros-grupos {
-    flex-direction: row;
-    justify-content: center;
-    align-items: flex-start;
-    gap: var(--esp-6);
-  }
-}
-
-.vitrine__estado {
-  display: flex;
-  justify-content: center;
-  padding: var(--esp-6);
-  color: var(--cor-texto-suave);
-}
-
-.vitrine__estado--erro {
-  color: var(--cor-perigo);
-}
-
-.vitrine__grade {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--esp-4);
-}
-
-.vitrine__mais {
-  display: flex;
-  justify-content: center;
-  margin-top: var(--esp-5);
-}
-
-// Mobile-first: 1 coluna → 2 → 3 → 4 conforme a largura cresce.
-@media (min-width: 480px) {
-  .vitrine__grade {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
+// A quantidade de passos é configurável (1–6): o componente passa o nº de colunas em
+// `--passos-colunas` (4 passos → 2×2, 5–6 → 3 colunas) para não sobrar buraco na grade.
 @media (min-width: 768px) {
   .passos__grade {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  .vitrine__grade {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (min-width: 1024px) {
-  .vitrine__grade {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(var(--passos-colunas, 3), 1fr);
   }
 }
 
@@ -385,9 +364,68 @@
   }
 }
 
+// Quantidade de cards configurável (até 8): `--formas-colunas` vem do componente (3 cards →
+// 3 colunas, 5–6 → 3, 7–8 → 4) para a linha não ficar com buraco no fim.
 @media (min-width: 1024px) {
   .ajudar__grade {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(var(--formas-colunas, 4), 1fr);
+  }
+}
+
+// Doação (só aparece com chave PIX configurada): faixa larga abaixo dos cards — no celular
+// empilha ícone/texto/PIX; a partir de 768px fica em linha.
+.ajudar__doacao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  margin-top: var(--esp-5);
+  padding: var(--esp-5) var(--esp-4) var(--esp-4);
+  background-color: var(--cor-superficie);
+  border-radius: var(--raio-md);
+  box-shadow: var(--sombra-sm);
+}
+
+.ajudar__doacao-texto {
+  flex: 1 1 auto;
+}
+
+.ajudar__doacao-texto h3 {
+  margin: 0;
+}
+
+.ajudar__doacao-texto p {
+  margin: var(--esp-1) 0 0;
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-sm);
+  white-space: pre-line; // quebras de linha digitadas no painel (ex.: dados bancários)
+}
+
+.ajudar__pix {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--esp-1);
+}
+
+.ajudar__pix-rotulo {
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}
+
+.ajudar__pix-chave {
+  font-weight: var(--peso-medio);
+  overflow-wrap: anywhere; // chave aleatória do PIX é uma palavra longa sem espaços
+}
+
+@media (min-width: 768px) {
+  .ajudar__doacao {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--esp-5);
+  }
+
+  .ajudar__pix {
+    flex: 0 1 320px;
   }
 }
 

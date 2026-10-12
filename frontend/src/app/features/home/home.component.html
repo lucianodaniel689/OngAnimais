@@ -1,66 +1,87 @@
-<!-- HERO -->
+<!-- HERO: a vitrine é o próprio hero — foto grande de cada animal com a etiqueta de canil
+     "pendurada" nela; o CTA principal vem logo abaixo, sem disputar espaço com a foto. -->
 <section class="hero">
-  <div class="container hero__grade">
-    <div class="hero__texto">
-      <h1>Adote um amigo para a vida toda</h1>
-      <p class="hero__subtitulo">
-        Cada animal da nossa vitrine já foi resgatado, está com a saúde em dia e esperando por um
-        lar. Conheça, converse com a nossa equipe e leve um novo companheiro pra casa.
-      </p>
-
-      <div class="hero__acoes">
-        <a mat-flat-button color="primary" href="#vitrine">
-          <mat-icon>pets</mat-icon>
-          Ver animais disponíveis
-        </a>
-        <a mat-stroked-button color="primary" href="#ajudar">Outras formas de ajudar</a>
+  <div class="container hero__vitrine">
+    @if (carregando()) {
+      <div class="hero__placeholder">
+        <app-loading [tamanho]="36" mensagem="Carregando os animais..." />
       </div>
-
-      @if (!carregando() && animais().length > 0) {
-        <div class="hero__tira">
-          <div class="hero__selo">
-            <span class="hero__selo-numero">{{ animais().length }}</span>
-            <span class="hero__selo-rotulo">
-              {{ animais().length === 1 ? 'animal esperando' : 'animais esperando' }}<br />
-              por um lar agora
-            </span>
-          </div>
-          @if (especiesDisponiveis().length > 1) {
-            <div class="hero__selo hero__selo--secundario">
-              <span class="hero__selo-numero">{{ especiesDisponiveis().length }}</span>
-              <span class="hero__selo-rotulo">espécies<br />diferentes à espera</span>
+    } @else if (animaisDestaque().length > 0) {
+      <app-carrossel [intervalo]="6000" variante="destaque" rotulo="Animais esperando adoção">
+        @for (animal of animaisDestaque(); track animal.id; let i = $index) {
+          <ng-template appCarrosselSlide>
+            <div
+              class="hero__slide"
+              [class.hero__slide--resolucao-baixa]="fotosResolucaoBaixa().has(i)"
+              role="button"
+              tabindex="0"
+              [attr.aria-label]="'Conheça ' + animal.nome"
+              (click)="abrirDetalhe(animal)"
+              (keydown.enter)="abrirDetalhe(animal)"
+              (keydown.space)="$event.preventDefault(); abrirDetalhe(animal)"
+            >
+              @if (fotosResolucaoBaixa().has(i)) {
+                <!-- Fundo desfocado atrás da foto exibida no tamanho natural (ver aoCarregarFoto).
+                     sizes pequeno de propósito: vai ficar borrado, então a versão de 480px basta. -->
+                <img
+                  class="hero__fundo"
+                  [appFoto]="animal.fotoPrincipalUrl"
+                  [larguras]="animal.fotoPrincipalLarguras"
+                  [fotoPadrao]="imagemPadrao"
+                  sizes="96px"
+                  alt=""
+                  aria-hidden="true"
+                />
+              }
+              <!-- sizes = largura real do slide: container de 1120px menos 2×24px de margem no
+                   desktop, tela inteira no celular. O navegador multiplica pela densidade da tela. -->
+              <img
+                class="hero__foto"
+                [appFoto]="animal.fotoPrincipalUrl"
+                [larguras]="animal.fotoPrincipalLarguras"
+                [fotoPadrao]="imagemPadrao"
+                sizes="(min-width: 1120px) 1072px, (min-width: 768px) calc(100vw - 48px), 100vw"
+                [alt]="'Foto de ' + animal.nome"
+                [attr.loading]="i === 0 ? null : 'lazy'"
+                [attr.fetchpriority]="i === 0 ? 'high' : null"
+                (load)="aoCarregarFoto($event, i, animal.fotoPrincipalLarguras)"
+              />
+              <div class="hero__etiqueta etiqueta">
+                <strong class="hero__nome">{{ animal.nome }}</strong>
+                <span class="hero__descricao">{{ descricaoCurta(animal) }}</span>
+                <span class="hero__conhecer">Conheça {{ animal.nome }}</span>
+              </div>
             </div>
-          }
-        </div>
-      }
+          </ng-template>
+        }
+      </app-carrossel>
+    } @else {
+      <!-- Sem animal disponível (ou API fora): o hero não some — fica a foto institucional. -->
+      <div class="hero__slide hero__slide--vazio">
+        <img class="hero__foto" [src]="imagemPadrao" alt="" />
+      </div>
+    }
+  </div>
+
+  <div class="container hero__chamada">
+    <div class="hero__texto">
+      <h1>{{ configuracao().heroTitulo }}</h1>
+      <p class="hero__subtitulo">{{ configuracao().heroSubtitulo }}</p>
     </div>
 
-    <div class="hero__midia">
-      @if (carregando()) {
-        <app-loading [tamanho]="36" mensagem="Carregando destaques..." />
-      } @else if (animaisDestaque().length > 0) {
-        <app-carrossel [intervalo]="5000" rotulo="Animais em destaque">
-          @for (animal of animaisDestaque(); track animal.id) {
-            <ng-template appCarrosselSlide>
-              <div class="hero__slide">
-                <img
-                  class="hero__slide-imagem"
-                  [src]="imagemDestaque(animal)"
-                  [alt]="'Foto de ' + animal.nome"
-                />
-                <div class="hero__slide-legenda">
-                  <strong>{{ animal.nome }}</strong>
-                  <span>
-                    {{ animal.especie ? rotuloEspecie[animal.especie] : '' }}
-                    @if (animal.porte) {
-                      · {{ animal.porte }}
-                    }
-                  </span>
-                </div>
-              </div>
-            </ng-template>
-          }
-        </app-carrossel>
+    <div class="hero__acoes">
+      <a mat-flat-button class="botao-cta hero__cta" routerLink="/adotar">
+        <mat-icon>pets</mat-icon>
+        Quero adotar
+      </a>
+      @if (!carregando() && animais().length > 0) {
+        <p class="hero__contagem">
+          Hoje são {{ animais().length }}
+          {{ animais().length === 1 ? 'animal esperando' : 'animais esperando' }} por um lar.
+        </p>
+      }
+      @if (temFormasDeAjudar()) {
+        <a mat-button color="primary" href="#ajudar">Outras formas de ajudar</a>
       }
     </div>
   </div>
@@ -71,11 +92,11 @@
   <div class="container">
     <header class="passos__cabecalho">
       <h2>Como adotar</h2>
-      <p>Em três passos simples você pode mudar a vida de um animal.</p>
+      <p>Em poucos passos você pode mudar a vida de um animal.</p>
     </header>
 
-    <div class="passos__grade">
-      @for (passo of passos; track passo.titulo; let i = $index) {
+    <div class="passos__grade" [style.--passos-colunas]="colunasPassos()">
+      @for (passo of passos(); track $index; let i = $index) {
         <div class="passos__item">
           <div class="passos__numero">{{ i + 1 }}</div>
           <mat-icon class="passos__icone">{{ passo.icone }}</mat-icon>
@@ -87,124 +108,8 @@
   </div>
 </section>
 
-<!-- VITRINE: animais disponíveis -->
-<section class="vitrine" id="vitrine">
-  <div class="container">
-    <header class="vitrine__cabecalho">
-      <h2>Disponíveis para adoção</h2>
-      <p>Conheça quem está pronto para ganhar um novo lar.</p>
-      <a routerLink="/quiz" class="vitrine__quiz-link">
-        Não sabe por onde começar? Descubra seu match
-        <mat-icon aria-hidden="true">arrow_forward</mat-icon>
-      </a>
-    </header>
-
-    @if (carregando()) {
-      <app-loading [tamanho]="44" mensagem="Carregando animais..." />
-    } @else if (erro()) {
-      <p class="vitrine__estado vitrine__estado--erro">{{ erro() }}</p>
-    } @else if (animais().length === 0) {
-      <p class="vitrine__estado">
-        Nenhum animal disponível no momento. Volte em breve! 🐾
-      </p>
-    } @else {
-      <div class="vitrine__filtros-grupos">
-        @if (especiesDisponiveis().length > 1) {
-          <div class="vitrine__filtro-grupo">
-            <span class="vitrine__filtro-rotulo">Espécie</span>
-            <mat-chip-set class="vitrine__filtros" aria-label="Filtrar por espécie">
-              <mat-chip
-                [highlighted]="especieSelecionada() === null"
-                color="primary"
-                (click)="filtrarPorEspecie(null)"
-              >
-                Todos
-              </mat-chip>
-              @for (especie of especiesDisponiveis(); track especie) {
-                <mat-chip
-                  [highlighted]="especieSelecionada() === especie"
-                  color="primary"
-                  (click)="filtrarPorEspecie(especie)"
-                >
-                  {{ rotuloEspecie[especie] }}
-                </mat-chip>
-              }
-            </mat-chip-set>
-          </div>
-        }
-
-        @if (portesDisponiveis().length > 1) {
-          <div class="vitrine__filtro-grupo">
-            <span class="vitrine__filtro-rotulo">Porte</span>
-            <mat-chip-set class="vitrine__filtros" aria-label="Filtrar por porte">
-              <mat-chip
-                [highlighted]="porteSelecionado() === null"
-                color="primary"
-                (click)="filtrarPorPorte(null)"
-              >
-                Todos
-              </mat-chip>
-              @for (porte of portesDisponiveis(); track porte) {
-                <mat-chip
-                  [highlighted]="porteSelecionado() === porte"
-                  color="primary"
-                  (click)="filtrarPorPorte(porte)"
-                >
-                  {{ rotuloPorte[porte] }}
-                </mat-chip>
-              }
-            </mat-chip-set>
-          </div>
-        }
-
-        @if (sexosDisponiveis().length > 1) {
-          <div class="vitrine__filtro-grupo">
-            <span class="vitrine__filtro-rotulo">Sexo</span>
-            <mat-chip-set class="vitrine__filtros" aria-label="Filtrar por sexo">
-              <mat-chip
-                [highlighted]="sexoSelecionado() === null"
-                color="primary"
-                (click)="filtrarPorSexo(null)"
-              >
-                Todos
-              </mat-chip>
-              @for (sexo of sexosDisponiveis(); track sexo) {
-                <mat-chip
-                  [highlighted]="sexoSelecionado() === sexo"
-                  color="primary"
-                  (click)="filtrarPorSexo(sexo)"
-                >
-                  {{ rotuloSexo[sexo] }}
-                </mat-chip>
-              }
-            </mat-chip-set>
-          </div>
-        }
-      </div>
-
-      @if (animaisFiltrados().length === 0) {
-        <p class="vitrine__estado">Nenhum animal encontrado com esse filtro.</p>
-      } @else {
-        <div class="vitrine__grade">
-          @for (animal of animaisExibidos(); track animal.id) {
-            <app-animal-card [animal]="animal" [foto]="urlFoto(animal.fotoPrincipalUrl)" />
-          }
-        </div>
-
-        @if (temMaisParaMostrar()) {
-          <div class="vitrine__mais">
-            <button mat-stroked-button color="primary" (click)="mostrarMais()">
-              Mostrar mais animais
-              <mat-icon>expand_more</mat-icon>
-            </button>
-          </div>
-        }
-      }
-    }
-  </div>
-</section>
-
-<!-- FORMAS DE AJUDAR -->
+<!-- FORMAS DE AJUDAR (cards e doação vêm das configurações; a seção some se não houver nada) -->
+@if (temFormasDeAjudar()) {
 <section class="ajudar" id="ajudar">
   <div class="container">
     <header class="ajudar__cabecalho">
@@ -212,39 +117,73 @@
       <p>Adotar é só uma das maneiras de mudar a vida de um animal. Escolha a sua.</p>
     </header>
 
-    <div class="ajudar__grade">
-      @for (forma of formasDeAjudar; track forma.titulo) {
+    <div class="ajudar__grade" [style.--formas-colunas]="colunasFormas()">
+      @for (forma of formasDeAjudar(); track $index) {
         <div class="ajudar__item etiqueta">
           <mat-icon class="ajudar__icone">{{ forma.icone }}</mat-icon>
           <h3>{{ forma.titulo }}</h3>
           <p>{{ forma.descricao }}</p>
-          <a [href]="forma.ancora" class="ajudar__link">
-            {{ forma.rotuloAcao }}
-            <mat-icon aria-hidden="true">arrow_forward</mat-icon>
-          </a>
+          @if (forma.rota) {
+            <a [routerLink]="forma.rota" class="ajudar__link">
+              {{ forma.rotuloAcao }}
+              <mat-icon aria-hidden="true">arrow_forward</mat-icon>
+            </a>
+          } @else {
+            <a [href]="forma.ancora" class="ajudar__link">
+              {{ forma.rotuloAcao }}
+              <mat-icon aria-hidden="true">arrow_forward</mat-icon>
+            </a>
+          }
         </div>
       }
     </div>
+
+    @if (doacao(); as d) {
+      <div class="ajudar__doacao etiqueta" id="doacao">
+        <mat-icon class="ajudar__icone" aria-hidden="true">savings</mat-icon>
+        <div class="ajudar__doacao-texto">
+          <h3>Doe</h3>
+          @if (d.texto) {
+            <p>{{ d.texto }}</p>
+          }
+        </div>
+        <div class="ajudar__pix">
+          <span class="ajudar__pix-rotulo">Chave PIX</span>
+          <span class="ajudar__pix-chave">{{ d.chave }}</span>
+          <button mat-stroked-button color="primary" type="button" (click)="copiarPix(d.chave)">
+            <mat-icon>content_copy</mat-icon>
+            Copiar chave PIX
+          </button>
+        </div>
+      </div>
+    }
   </div>
 </section>
+}
 
-<!-- CONTATO -->
+<!-- CONTATO (itens e texto vêm das configurações; a seção some se a ONG não informou nada) -->
+@if (contato().length > 0 || configuracao().textoContato) {
 <section class="contato" id="contato">
   <div class="container contato__grade">
     <div class="contato__texto">
       <h2>Venha nos conhecer</h2>
-      <p>
-        Atendemos com hora marcada — chame no WhatsApp antes de aparecer, assim garantimos alguém
-        disponível pra te receber.
-      </p>
+      @if (configuracao().textoContato; as texto) {
+        <p>{{ texto }}</p>
+      }
     </div>
 
     <ul class="contato__lista">
-      @for (item of contato; track item.texto) {
+      @for (item of contato(); track item.icone) {
         <li>
           <mat-icon aria-hidden="true">{{ item.icone }}</mat-icon>
           @if (item.href) {
-            <a [href]="item.href" target="_blank" rel="noopener">{{ item.texto }}</a>
+            <!-- Nova aba só para sites externos (WhatsApp/Instagram); mailto abre o app de email. -->
+            <a
+              [href]="item.href"
+              [attr.target]="item.href.startsWith('http') ? '_blank' : null"
+              rel="noopener"
+              >{{ item.texto }}</a
+            >
           } @else {
             <span>{{ item.texto }}</span>
           }
@@ -253,3 +192,4 @@
     </ul>
   </div>
 </section>
+}

@@ -83,7 +83,7 @@ namespace OngAnimais.Data.Seed
                     Status = StatusAnimal.Disponivel, Castrado = false, Vermifugado = false
                 },
                 // Animais extras variados (porte/sexo/idade/espécie) para alimentar os
-                // filtros da vitrine e o quiz de compatibilidade do site público.
+                // filtros da vitrine do site público.
                 new
                 {
                     Nome = "Amora", Especie = EspecieAnimal.Cachorro, Sexo = SexoAnimal.Femea,

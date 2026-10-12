@@ -48,7 +48,27 @@ namespace OngAnimais.Common.Auditoria
         /// <summary>Funcionário trocou a própria senha.</summary>
         public const string SenhaAlterada = "SenhaAlterada";
 
+        /// <summary>Admin resetou a senha de outro funcionário (sem a senha atual).</summary>
+        public const string SenhaResetada = "SenhaResetada";
+
+        // --- Configuração da ONG ---
+
+        /// <summary>Configurações da ONG alteradas pelo painel (detalhes lista os campos alterados).</summary>
+        public const string ConfiguracaoAtualizada = "ConfiguracaoAtualizada";
+
+        /// <summary>Logo da ONG enviado ou trocado (favicon e ícone de atalho gerados a partir dele).</summary>
+        public const string LogoAtualizado = "LogoAtualizado";
+
+        /// <summary>Logo da ONG removido (site volta ao símbolo e favicon padrão).</summary>
+        public const string LogoRemovido = "LogoRemovido";
+
         // --- Segurança ---
+
+        /// <summary>
+        /// Operação de Admin recusada na revalidação do perfil no banco (o JWT ainda dizia Admin,
+        /// mas a conta foi rebaixada, desativada ou excluída depois do login).
+        /// </summary>
+        public const string AcessoAdminNegado = "AcessoAdminNegado";
 
         /// <summary>Login realizado com sucesso.</summary>
         public const string LoginSucesso = "LoginSucesso";

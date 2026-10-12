@@ -1,8 +1,11 @@
-<div class="adocao-lista">
-  <header class="adocao-lista__cabecalho">
+<div class="pagina pagina--larga">
+  <header class="pagina-cabecalho">
     <div>
       <h1>Solicitações de adoção</h1>
-      <p>Aprove, recuse, conclua ou cancele solicitações de adoção.</p>
+      <p class="instrucao-toque">
+        <mat-icon>touch_app</mat-icon>
+        Toque em uma candidatura para abrir a ficha completa.
+      </p>
     </div>
     <a mat-flat-button color="primary" routerLink="/admin/adocoes/nova">
       <mat-icon>add</mat-icon>
@@ -10,12 +13,12 @@
     </a>
   </header>
 
-  <mat-card appearance="outlined" class="adocao-lista__card">
+  <mat-card appearance="outlined" class="card-conteudo">
     @if (mobile()) {
       <button
         mat-stroked-button
         type="button"
-        class="adocao-lista__filtros-toggle"
+        class="filtros-toggle"
         [attr.aria-expanded]="filtrosAbertos()"
         (click)="filtrosAbertos.set(!filtrosAbertos())"
       >
@@ -25,7 +28,7 @@
     }
 
     @if (!mobile() || filtrosAbertos()) {
-    <form [formGroup]="filtros" class="adocao-lista__filtros">
+    <form [formGroup]="filtros" class="filtros">
       <mat-form-field appearance="outline">
         <mat-label>Status</mat-label>
         <mat-select formControlName="status">
@@ -43,13 +46,13 @@
     </form>
     }
 
-    <div class="adocao-lista__tabela-wrapper">
+    <div class="tabela-wrapper">
       @if (carregando()) {
         <app-loading />
       } @else if (erro()) {
-        <p class="adocao-lista__erro" role="alert">{{ erro() }}</p>
+        <p class="mensagem-erro" role="alert">{{ erro() }}</p>
       } @else if (semResultados()) {
-        <p class="adocao-lista__vazio">Nenhuma solicitação encontrada com esses filtros.</p>
+        <p class="estado-vazio">Nenhuma solicitação encontrada com esses filtros.</p>
       } @else {
         <table
           mat-table
@@ -58,8 +61,28 @@
           [matSortActive]="ordenarPor()"
           [matSortDirection]="descendente() ? 'desc' : 'asc'"
           (matSortChange)="aoOrdenar($event)"
-          class="adocao-lista__tabela"
+          class="adocao-lista__tabela tabela-clicavel"
         >
+          <ng-container matColumnDef="foto">
+            <th mat-header-cell *matHeaderCellDef aria-label="Foto"></th>
+            <td mat-cell *matCellDef="let a">
+              @if (a.fotoAnimalUrl) {
+                <img
+                  class="adocao-lista__miniatura"
+                  [appFoto]="a.fotoAnimalUrl"
+            [larguras]="a.fotoAnimalLarguras"
+            sizes="48px"
+                  [alt]="'Foto de ' + a.nomeAnimal"
+                  loading="lazy"
+                />
+              } @else {
+                <div class="adocao-lista__miniatura adocao-lista__miniatura--vazia" aria-hidden="true">
+                  <mat-icon>pets</mat-icon>
+                </div>
+              }
+            </td>
+          </ng-container>
+
           <ng-container matColumnDef="nomeAnimal">
             <th mat-header-cell *matHeaderCellDef>Animal</th>
             <td mat-cell *matCellDef="let a">
@@ -68,6 +91,7 @@
                 [routerLink]="['/admin/animais', a.animalId]"
                 [queryParams]="{ aba: 'candidaturas' }"
                 matTooltip="Abrir ficha do animal"
+                (click)="$event.stopPropagation()"
               >
                 {{ a.nomeAnimal }}
               </a>
@@ -77,14 +101,15 @@
           <ng-container matColumnDef="nomeAdotante">
             <th mat-header-cell *matHeaderCellDef>Adotante</th>
             <td mat-cell *matCellDef="let a" [matTooltip]="a.emailAdotante + ' · ' + a.telefoneAdotante">
-              <button
-                type="button"
-                class="adocao-lista__link-adotante"
-                (click)="abrirHistorico(a)"
-                matTooltip="Ver histórico do adotante"
+              <a
+                class="adocao-lista__link-ficha"
+                [routerLink]="['/admin/adocoes', a.id]"
+                [queryParams]="{ aba: 'adotante' }"
+                matTooltip="Ver dados do adotante"
+                (click)="$event.stopPropagation()"
               >
                 {{ a.nomeAdotante }}
-              </button>
+              </a>
             </td>
           </ng-container>
 
@@ -116,22 +141,12 @@
             </td>
           </ng-container>
 
-          <ng-container matColumnDef="acoes" stickyEnd>
-            <th mat-header-cell *matHeaderCellDef aria-label="Ações"></th>
-            <td mat-cell *matCellDef="let a">
-              <button
-                mat-icon-button
-                (click)="alterarStatus(a)"
-                aria-label="Alterar status"
-                matTooltip="Alterar status"
-              >
-                <mat-icon>sync_alt</mat-icon>
-              </button>
-            </td>
-          </ng-container>
-
           <tr mat-header-row *matHeaderRowDef="colunas()"></tr>
-          <tr mat-row *matRowDef="let row; columns: colunas()"></tr>
+          <tr
+            mat-row
+            *matRowDef="let row; columns: colunas()"
+            (click)="abrirFicha(row.id)"
+          ></tr>
         </table>
       }
     </div>

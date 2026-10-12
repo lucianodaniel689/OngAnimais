@@ -9,99 +9,142 @@
   @if (carregando()) {
     <app-loading />
   } @else if (erro()) {
-    <p class="animal-ficha__erro" role="alert">{{ erro() }}</p>
+    <p class="mensagem-erro" role="alert">{{ erro() }}</p>
   } @else if (criando()) {
     <!-- Criação: só o formulário — as abas precisam de um animal salvo. -->
     <mat-card appearance="outlined" class="animal-ficha__card animal-ficha__card--form">
       @if (erroForm(); as msg) {
-        <p class="animal-ficha__erro" role="alert">{{ msg }}</p>
+        <p class="mensagem-erro" role="alert">{{ msg }}</p>
       }
 
-      <form [formGroup]="form" (ngSubmit)="enviar()" class="animal-ficha__form">
-        <mat-form-field appearance="outline" class="animal-ficha__span-2">
-          <mat-label>Nome</mat-label>
-          <input matInput formControlName="nome" maxlength="150" />
-          @if (form.controls.nome.hasError('required')) {
-            <mat-error>Informe o nome.</mat-error>
-          } @else if (form.controls.nome.hasError('maxlength')) {
-            <mat-error>Máximo de 150 caracteres.</mat-error>
-          }
-        </mat-form-field>
+      <form [formGroup]="form" (ngSubmit)="enviar()" class="animal-ficha__form-criacao">
+        <p class="animal-ficha__intro">
+          Preencha os dados básicos abaixo — leva menos de um minuto. Fotos, vacinas e outros
+          detalhes você adiciona depois, direto na ficha do animal.
+        </p>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Espécie</mat-label>
-          <mat-select formControlName="especie">
-            @for (e of especies; track e) {
-              <mat-option [value]="e">{{ rotuloEspecie[e] }}</mat-option>
-            }
-          </mat-select>
-          @if (form.controls.especie.hasError('required')) {
-            <mat-error>Selecione a espécie.</mat-error>
-          }
-        </mat-form-field>
+        <section class="animal-ficha__secao">
+          <h3 class="animal-ficha__secao-titulo">
+            <mat-icon>badge</mat-icon>
+            1. Quem é o animal
+          </h3>
+          <div class="animal-ficha__grade-campos">
+            <mat-form-field appearance="outline" class="animal-ficha__span-2">
+              <mat-label>Nome</mat-label>
+              <input matInput formControlName="nome" maxlength="150" placeholder="Ex: Thor" />
+              @if (form.controls.nome.hasError('required')) {
+                <mat-error>Informe o nome.</mat-error>
+              } @else if (form.controls.nome.hasError('maxlength')) {
+                <mat-error>Máximo de 150 caracteres.</mat-error>
+              }
+            </mat-form-field>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Sexo</mat-label>
-          <mat-select formControlName="sexo">
-            @for (s of sexos; track s) {
-              <mat-option [value]="s">{{ rotuloSexo[s] }}</mat-option>
-            }
-          </mat-select>
-          @if (form.controls.sexo.hasError('required')) {
-            <mat-error>Selecione o sexo.</mat-error>
-          }
-        </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Espécie</mat-label>
+              <mat-select formControlName="especie">
+                @for (e of especies; track e) {
+                  <mat-option [value]="e">{{ rotuloEspecie[e] }}</mat-option>
+                }
+              </mat-select>
+              @if (form.controls.especie.hasError('required')) {
+                <mat-error>Selecione a espécie.</mat-error>
+              }
+            </mat-form-field>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Porte</mat-label>
-          <mat-select formControlName="porte">
-            @for (p of portes; track p) {
-              <mat-option [value]="p">{{ rotuloPorte[p] }}</mat-option>
-            }
-          </mat-select>
-          @if (form.controls.porte.hasError('required')) {
-            <mat-error>Selecione o porte.</mat-error>
-          }
-        </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Sexo</mat-label>
+              <mat-select formControlName="sexo">
+                @for (s of sexos; track s) {
+                  <mat-option [value]="s">{{ rotuloSexo[s] }}</mat-option>
+                }
+              </mat-select>
+              @if (form.controls.sexo.hasError('required')) {
+                <mat-error>Selecione o sexo.</mat-error>
+              }
+            </mat-form-field>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Idade aproximada</mat-label>
-          <input matInput formControlName="idadeAproximada" placeholder="Ex: 2 anos" maxlength="50" />
-          @if (form.controls.idadeAproximada.hasError('maxlength')) {
-            <mat-error>Máximo de 50 caracteres.</mat-error>
-          }
-        </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Porte</mat-label>
+              <mat-select formControlName="porte">
+                @for (p of portes; track p) {
+                  <mat-option [value]="p">{{ rotuloPorte[p] }}</mat-option>
+                }
+              </mat-select>
+              @if (form.controls.porte.hasError('required')) {
+                <mat-error>Selecione o porte.</mat-error>
+              }
+            </mat-form-field>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Status</mat-label>
-          <mat-select formControlName="status">
-            @for (st of statusOpcoes; track st) {
-              <mat-option [value]="st">{{ rotuloStatus[st] }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Idade aproximada</mat-label>
+              <input
+                matInput
+                formControlName="idadeAproximada"
+                placeholder="Ex: 2 anos"
+                maxlength="50"
+              />
+              <mat-hint>Não precisa ser exato — deixe em branco se não souber.</mat-hint>
+              @if (form.controls.idadeAproximada.hasError('maxlength')) {
+                <mat-error>Máximo de 50 caracteres.</mat-error>
+              }
+            </mat-form-field>
+          </div>
+        </section>
 
-        <mat-form-field appearance="outline" class="animal-ficha__span-2">
-          <mat-label>Descrição</mat-label>
-          <textarea
-            matInput
-            formControlName="descricao"
-            rows="4"
-            placeholder="Temperamento, cuidados, histórico..."
-          ></textarea>
-        </mat-form-field>
+        <hr class="etiqueta__separador" />
 
-        <div class="animal-ficha__span-2 animal-ficha__saude">
-          <mat-checkbox formControlName="castrado">Castrado</mat-checkbox>
-          <mat-checkbox formControlName="vermifugado">Vermifugado</mat-checkbox>
-        </div>
+        <section class="animal-ficha__secao">
+          <h3 class="animal-ficha__secao-titulo">
+            <mat-icon>favorite</mat-icon>
+            2. Saúde e situação
+          </h3>
+          <div class="animal-ficha__grade-campos">
+            <mat-form-field appearance="outline" class="animal-ficha__span-2">
+              <mat-label>Status</mat-label>
+              <mat-select formControlName="status">
+                @for (st of statusOpcoes; track st) {
+                  <mat-option [value]="st">{{ rotuloStatus[st] }}</mat-option>
+                }
+              </mat-select>
+              <mat-hint>
+                "Disponível" é o normal para um cadastro novo — só mude se ele já estiver
+                reservado ou em tratamento.
+              </mat-hint>
+            </mat-form-field>
 
-        <p class="animal-ficha__dica animal-ficha__span-2">
+            <div class="animal-ficha__span-2 animal-ficha__saude">
+              <mat-checkbox formControlName="castrado">Castrado</mat-checkbox>
+              <mat-checkbox formControlName="vermifugado">Vermifugado</mat-checkbox>
+            </div>
+          </div>
+        </section>
+
+        <hr class="etiqueta__separador" />
+
+        <section class="animal-ficha__secao">
+          <h3 class="animal-ficha__secao-titulo">
+            <mat-icon>notes</mat-icon>
+            3. Descrição
+            <span class="animal-ficha__opcional">(opcional)</span>
+          </h3>
+          <mat-form-field appearance="outline" class="animal-ficha__campo-descricao">
+            <mat-label>Descrição</mat-label>
+            <textarea
+              matInput
+              formControlName="descricao"
+              rows="4"
+              placeholder="Temperamento, cuidados, histórico..."
+            ></textarea>
+            <mat-hint>Aparece na página pública do animal — ajuda quem pensa em adotar.</mat-hint>
+          </mat-form-field>
+        </section>
+
+        <p class="animal-ficha__dica">
           <mat-icon>photo_camera</mat-icon>
           As fotos são adicionadas logo depois de salvar, aqui mesmo na ficha.
         </p>
 
-        <div class="animal-ficha__form-acoes">
+        <div class="form-acoes animal-ficha__form-acoes">
           <a mat-stroked-button routerLink="/admin/animais" type="button">Cancelar</a>
           <button
             mat-flat-button
@@ -123,15 +166,17 @@
     <!-- Leitura e edição in-place: os campos habilitam no próprio layout da ficha. -->
     <form [formGroup]="form" (ngSubmit)="enviar()">
       @if (editando() && erroForm(); as msg) {
-        <p class="animal-ficha__erro animal-ficha__erro--form" role="alert">{{ msg }}</p>
+        <p class="mensagem-erro" role="alert">{{ msg }}</p>
       }
 
       <!-- Cabeçalho de identidade: sempre visível, fora das abas. -->
       <mat-card appearance="outlined" class="animal-ficha__cabecalho etiqueta">
-        @if (urlFoto(a.fotoPrincipalUrl)) {
+        @if (a.fotoPrincipalUrl) {
           <img
             class="animal-ficha__foto"
-            [src]="urlFoto(a.fotoPrincipalUrl)"
+            [appFoto]="a.fotoPrincipalUrl"
+            [larguras]="a.fotoPrincipalLarguras"
+            sizes="96px"
             [alt]="'Foto de ' + a.nome"
           />
         } @else {
@@ -494,14 +539,14 @@
                       <th mat-header-cell *matHeaderCellDef>Adotante</th>
                       <td mat-cell *matCellDef="let c">
                         <div class="animal-ficha__adotante">
-                          <button
-                            type="button"
+                          <a
                             class="animal-ficha__link-adotante"
-                            (click)="abrirHistoricoAdotante(c)"
-                            matTooltip="Ver histórico do adotante"
+                            [routerLink]="['/admin/adocoes', c.id]"
+                            [queryParams]="{ origem: 'ficha', aba: 'adotante' }"
+                            matTooltip="Ver ficha da candidatura"
                           >
                             {{ c.nomeAdotante }}
-                          </button>
+                          </a>
                           @if (!mobile()) {
                             <span>{{ c.emailAdotante }} · {{ c.telefoneAdotante }}</span>
                           }

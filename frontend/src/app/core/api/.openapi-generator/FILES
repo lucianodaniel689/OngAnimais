@@ -9,6 +9,8 @@ api/animal.serviceInterface.ts
 api/api.ts
 api/auditoria.service.ts
 api/auditoria.serviceInterface.ts
+api/configuracao.service.ts
+api/configuracao.serviceInterface.ts
 api/foto.service.ts
 api/foto.serviceInterface.ts
 api/usuario.service.ts
@@ -25,8 +27,12 @@ model/adocao-update-dto.ts
 model/animal-create-dto.ts
 model/animal-resposta-dto.ts
 model/animal-update-dto.ts
+model/animal-vinculos-dto.ts
 model/api-response-of-adocao-resposta-dto.ts
 model/api-response-of-animal-resposta-dto.ts
+model/api-response-of-animal-vinculos-dto.ts
+model/api-response-of-configuracao-ong-publica-dto.ts
+model/api-response-of-configuracao-ong-resposta-dto.ts
 model/api-response-of-foto-resposta-dto.ts
 model/api-response-of-i-enumerable-of-animal-resposta-dto.ts
 model/api-response-of-i-enumerable-of-foto-resposta-dto.ts
@@ -42,10 +48,16 @@ model/api-response-of-usuario-resposta-dto.ts
 model/api-response-of-vacina-resposta-dto.ts
 model/auditoria-resposta-dto.ts
 model/categoria-auditoria.ts
+model/configuracao-ong-publica-dto.ts
+model/configuracao-ong-resposta-dto.ts
+model/configuracao-ong-update-dto.ts
 model/especie-animal.ts
+model/forma-ajudar-dto.ts
 model/foto-resposta-dto.ts
 model/foto-update-dto.ts
 model/models.ts
+model/paleta-cores.ts
+model/passo-adocao-dto.ts
 model/perfil-usuario.ts
 model/porte-animal.ts
 model/resultado-paginado-of-adocao-resposta-dto.ts
@@ -60,6 +72,7 @@ model/status-animal.ts
 model/usuario-login-dto.ts
 model/usuario-me-update-dto.ts
 model/usuario-registro-dto.ts
+model/usuario-reset-senha-dto.ts
 model/usuario-resposta-dto.ts
 model/usuario-senha-dto.ts
 model/usuario-update-dto.ts

@@ -29,6 +29,8 @@ import { UsuarioMeUpdateDto } from '../model/usuario-me-update-dto';
 // @ts-ignore
 import { UsuarioRegistroDto } from '../model/usuario-registro-dto';
 // @ts-ignore
+import { UsuarioResetSenhaDto } from '../model/usuario-reset-senha-dto';
+// @ts-ignore
 import { UsuarioSenhaDto } from '../model/usuario-senha-dto';
 // @ts-ignore
 import { UsuarioUpdateDto } from '../model/usuario-update-dto';
@@ -46,7 +48,8 @@ import {
     UsuarioListarRequestParams,
     UsuarioLoginRequestParams,
     UsuarioObterPorIdRequestParams,
-    UsuarioRegistrarRequestParams
+    UsuarioRegistrarRequestParams,
+    UsuarioResetarSenhaRequestParams
 } from './usuario.serviceInterface';
 
 
@@ -645,6 +648,78 @@ export class UsuarioService extends BaseService implements UsuarioServiceInterfa
             {
                 context: localVarHttpContext,
                 body: usuarioRegistroDto,
+                responseType: <any>responseType_,
+                withCredentials: this.configuration.withCredentials,
+                headers: localVarHeaders,
+                observe: observe,
+                transferCache: localVarTransferCache,
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Reseta a senha de um funcionário (uso administrativo — para quem esqueceu a  própria senha e não consegue logar). Não exige a senha atual; a operação  fica registrada na auditoria. Não vale para a própria conta do admin —  essa troca passa por &#x60;PUT /api/usuario/me/senha&#x60;, que exige a senha atual.
+     * @param requestParameters
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public usuarioResetarSenha(requestParameters: UsuarioResetarSenhaRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/plain' | 'application/json' | 'text/json', context?: HttpContext, transferCache?: boolean}): Observable<ApiResponseOfObject>;
+    public usuarioResetarSenha(requestParameters: UsuarioResetarSenhaRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/plain' | 'application/json' | 'text/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ApiResponseOfObject>>;
+    public usuarioResetarSenha(requestParameters: UsuarioResetarSenhaRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/plain' | 'application/json' | 'text/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ApiResponseOfObject>>;
+    public usuarioResetarSenha(requestParameters: UsuarioResetarSenhaRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'text/plain' | 'application/json' | 'text/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        const id = requestParameters?.id;
+        if (id === null || id === undefined) {
+            throw new Error('Required parameter id was null or undefined when calling usuarioResetarSenha.');
+        }
+        const usuarioResetSenhaDto = requestParameters?.usuarioResetSenhaDto;
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (Bearer) required
+        localVarHeaders = this.configuration.addCredentialToHeaders('Bearer', 'Authorization', localVarHeaders, 'Bearer ');
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'text/plain',
+            'application/json',
+            'text/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json',
+            'text/json',
+            'application/*+json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+        }
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/usuario/${this.configuration.encodeParam({name: "id", value: id, in: "path", style: "simple", explode: false, dataType: "number", dataFormat: "int32"})}/senha`;
+        return this.httpClient.request<ApiResponseOfObject>('put', `${this.configuration.basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                body: usuarioResetSenhaDto,
                 responseType: <any>responseType_,
                 withCredentials: this.configuration.withCredentials,
                 headers: localVarHeaders,

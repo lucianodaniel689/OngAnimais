@@ -18,7 +18,7 @@ const EXTENSOES_PADRAO = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
  * ```html
  * <app-upload-imagens
  *   [multiplo]="true"
- *   [tamanhoMaximoMb]="5"
+ *   [tamanhoMaximoMb]="15"
  *   (arquivosSelecionados)="aoSelecionar($event)"
  *   (arquivosRejeitados)="aoRejeitar($event)"
  * />
@@ -35,8 +35,11 @@ const EXTENSOES_PADRAO = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
 export class UploadImagensComponent {
   /** Permite selecionar mais de um arquivo por vez. */
   readonly multiplo = input<boolean>(true);
-  /** Tamanho máximo por arquivo, em MB. */
-  readonly tamanhoMaximoMb = input<number>(5);
+  /**
+   * Tamanho máximo por arquivo, em MB — o da foto **original** (câmera de celular: 3–8MB). Igual
+   * ao `Armazenamento:TamanhoMaximoMb` do backend, que reduz a foto ao salvar.
+   */
+  readonly tamanhoMaximoMb = input<number>(15);
   /** Extensões aceitas (com o ponto, ex.: ['.jpg', '.png']). */
   readonly extensoesAceitas = input<string[]>(EXTENSOES_PADRAO);
   /** Texto de apoio exibido na dropzone. */

@@ -1,20 +1,20 @@
-<div class="perfil">
+<div class="pagina pagina--estreita perfil">
   <header class="perfil__cabecalho">
     <h1>Meu perfil</h1>
     <p>Atualize seus dados pessoais ou troque sua senha.</p>
   </header>
 
-  <mat-card appearance="outlined" class="perfil__card">
+  <mat-card appearance="outlined" class="card-conteudo card-conteudo--form perfil__card">
     <h2>Dados pessoais</h2>
 
     @if (carregandoDados()) {
       <app-loading [tamanho]="36" />
     } @else {
       @if (erroDados(); as msg) {
-        <p class="perfil__erro" role="alert">{{ msg }}</p>
+        <p class="mensagem-erro" role="alert">{{ msg }}</p>
       }
 
-      <form [formGroup]="formDados" (ngSubmit)="salvarDados()" class="perfil__form">
+      <form [formGroup]="formDados" (ngSubmit)="salvarDados()" class="form-coluna">
         <mat-form-field appearance="outline">
           <mat-label>Nome</mat-label>
           <input matInput formControlName="nome" maxlength="150" />
@@ -35,7 +35,7 @@
           }
         </mat-form-field>
 
-        <div class="perfil__acoes">
+        <div class="form-acoes">
           <button mat-flat-button color="primary" type="submit" [disabled]="salvandoDados()">
             @if (salvandoDados()) {
               <mat-progress-spinner mode="indeterminate" diameter="20" />
@@ -48,18 +48,18 @@
     }
   </mat-card>
 
-  <mat-card appearance="outlined" class="perfil__card">
+  <mat-card appearance="outlined" class="card-conteudo card-conteudo--form perfil__card">
     <h2>Alterar senha</h2>
 
     @if (erroSenha(); as msg) {
-      <p class="perfil__erro" role="alert">{{ msg }}</p>
+      <p class="mensagem-erro" role="alert">{{ msg }}</p>
     }
 
     <form
       [formGroup]="formSenha"
       #formSenhaDirective="ngForm"
       (ngSubmit)="alterarSenha()"
-      class="perfil__form"
+      class="form-coluna"
     >
       <mat-form-field appearance="outline">
         <mat-label>Senha atual</mat-label>
@@ -89,7 +89,7 @@
         }
       </mat-form-field>
 
-      <div class="perfil__acoes">
+      <div class="form-acoes">
         <button mat-flat-button color="primary" type="submit" [disabled]="alterandoSenha()">
           @if (alterandoSenha()) {
             <mat-progress-spinner mode="indeterminate" diameter="20" />

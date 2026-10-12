@@ -20,7 +20,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AdocaoService, AnimalRespostaDto, AnimalService } from '@app/core/api';
 import { mensagemErro } from '@app/core/http/error.interceptor';
-import { LoadingComponent } from '@app/shared/components';
+import {
+  LoadingComponent,
+  MascaraTelefoneDirective,
+  telefoneValidator,
+} from '@app/shared/components';
 
 /**
  * Formulário para o funcionário registrar manualmente uma solicitação de
@@ -41,6 +45,7 @@ import { LoadingComponent } from '@app/shared/components';
     MatIconModule,
     MatProgressSpinnerModule,
     LoadingComponent,
+    MascaraTelefoneDirective,
   ],
   templateUrl: './adocao-form.component.html',
   styleUrl: './adocao-form.component.scss',
@@ -79,7 +84,7 @@ export class AdocaoFormComponent {
     animalId: [null as number | null, Validators.required],
     nome: ['', [Validators.required, Validators.maxLength(150)]],
     email: ['', [Validators.required, Validators.email, Validators.maxLength(255)]],
-    telefone: ['', [Validators.required, Validators.maxLength(20)]],
+    telefone: ['', [Validators.required, Validators.maxLength(20), telefoneValidator]],
     observacoes: [''],
   });
 
